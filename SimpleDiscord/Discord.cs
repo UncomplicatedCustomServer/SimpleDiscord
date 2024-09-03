@@ -116,6 +116,11 @@ namespace SimpleDiscord
                 Handler.Invoke(ev.GatewayMessage.EventName, ev);
             }
 
+            if(ev is MessageCreate messages)
+            {
+                Console.WriteLine($"{messages.Data.Content} è stato inviato {messages.Data.Id}");
+            }
+
             if (ev is Hello hello)
             {
                 Console.WriteLine($"\nHELLO!\nDDL: {hello.Data.HeartbeatInterval}\n");
@@ -145,6 +150,7 @@ namespace SimpleDiscord
                                 "SimpleDiscord"
                             }
                         }, (int)intents)));
+                    Console.Write((int)intents);
                     _areadyAuthed = true;
                     connectionStatus = ConnectionStatus.Connecting;
                 }
