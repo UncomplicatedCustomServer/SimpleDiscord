@@ -90,6 +90,7 @@
     <Compile Include="Gateway\Events\InvalidSession.cs" />
     <Compile Include="Gateway\Events\LocalizedData\GuildCreatedMember.cs" />
     <Compile Include="Gateway\Events\LocalizedData\HelloDataMember.cs" />
+    <Compile Include="Gateway\Events\InteractionCreate.cs" />
     <Compile Include="Gateway\Events\MessageCreate.cs" />
     <Compile Include="Gateway\Events\Ready.cs" />
     <Compile Include="Gateway\Gateway.cs" />
