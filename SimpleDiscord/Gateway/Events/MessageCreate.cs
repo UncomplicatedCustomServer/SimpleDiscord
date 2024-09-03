@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using SimpleDiscord.Components;
 using SimpleDiscord.Gateway.Events.Attributes;
 using SimpleDiscord.Gateway.Messages;

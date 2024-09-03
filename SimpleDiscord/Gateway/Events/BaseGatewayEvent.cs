@@ -12,7 +12,7 @@ namespace SimpleDiscord.Gateway.Events
     {
         public static int OpCode { get; } = -1;
 
-        private static readonly List<EventIntents> _events = [];
+        private static readonly List<Type> _events = [typeof(Hello), typeof(HeartbeatAck), typeof(Ready), typeof(InvalidSession), typeof(GuildCreate), typeof(MessageCreate)];
 
         public int InternalOpCode { get; }
 
