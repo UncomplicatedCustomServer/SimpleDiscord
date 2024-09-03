@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace SimpleDiscord.Gateway.Events
+﻿namespace SimpleDiscord.Gateway.Events
 {
     internal interface IGatewayEvent
     {

@@ -1,4 +1,4 @@
-﻿using SimpleDiscord.Events.Attribute;
+﻿using SimpleDiscord.Events.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -41,8 +41,11 @@ namespace SimpleDiscord.Events
         {
             if (List.TryGetValue(name, out HashSet<KeyValuePair<object, MethodInfo>> list))
                 foreach (KeyValuePair<object, MethodInfo> method in list)
-                    if (method.Value.GetGenericArguments().Length > 0)
-                        method.Value.Invoke(method.Key, [args]);
+                    if (method.Value.GetParameters().Length > 0)
+                    {
+                        if (method.Value.GetParameters()[0].ParameterType == args.GetType())
+                            method.Value.Invoke(method.Key, [args]);
+                    }
                     else
                         method.Value.Invoke(method.Key, []);
         }

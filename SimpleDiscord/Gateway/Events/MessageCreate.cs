@@ -1,18 +1,22 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using SimpleDiscord.Components;
-using SimpleDiscord.Gateway.Events.LocalizedData;
+using SimpleDiscord.Gateway.Events.Attributes;
 using SimpleDiscord.Gateway.Messages;
+using System;
 
 namespace SimpleDiscord.Gateway.Events
 {
-    internal class MessageCreate(DiscordGatewayMessage msg) : BaseGatewayEvent(msg)
+    [InternalEvent("MESSAGE_CREATE")]
+    public class MessageCreate(DiscordGatewayMessage msg) : BaseGatewayEvent(msg)
     {
-        public new static int OpCode => 0;
+        public SocketMessage Data { get; internal set; }
 
-        public static string Event => "MESSAGE_CREATE";
+        public Message Message { get; internal set; }
 
-        public SocketMessage Data { get; private set; }
-
-        public override void Init() => Data = JsonConvert.DeserializeObject<SocketMessage>(RawData);
+        public override void Init()
+        {
+            Data = JsonConvert.DeserializeObject<SocketMessage>(RawData);
+            Message = new(Data);
+        }
     }
 }
