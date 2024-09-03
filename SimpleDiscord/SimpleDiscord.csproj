@@ -112,6 +112,9 @@
     <Compile Include="Gateway\Messages\DiscordGatewayMessage.cs" />
     <Compile Include="Gateway\Messages\DiscordRawGatewayMessage.cs" />
     <Compile Include="Gateway\Messages\Predefined\Identify.cs" />
+    <Compile Include="Logger\Log.cs" />
+    <Compile Include="Logger\LogEntry.cs" />
+    <Compile Include="Logger\LogLevel.cs" />
     <Compile Include="Networking\Endpoints.cs" />
     <Compile Include="Networking\Http.cs" />
     <Compile Include="Networking\ISyncableElement.cs" />
