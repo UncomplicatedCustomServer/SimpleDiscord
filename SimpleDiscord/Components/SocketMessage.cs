@@ -1,16 +1,21 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using Newtonsoft.Json;
+using SimpleDiscord.Components.Attributes;
+using SimpleDiscord.Networking;
+using System;
 
 namespace SimpleDiscord.Components
 {
 #nullable enable
-    public class SocketMessage
+    [EndpointInfo("/channels/{channel.id}/messages/{message.id}", "MESSAGE")]
+    public class SocketMessage : SyncableElement
     {
-        public static HashSet<SocketMessage> List { get; } = new();
-
         public long Id { get; }
 
+        [JsonProperty("channel_id")]
         public long ChannelId { get; }
+
+        [JsonProperty("guild_id")]
+        public long? GuildId { get; }
 
         public SocketUser Author { get; }
 
@@ -44,14 +49,17 @@ namespace SimpleDiscord.Components
 
         public MessageReference? MessageReference { get; }
 
-        public SocketPartialChannel[]? Threads { get; }
+        public SocketGuildThreadChannel[]? Threads { get; }
 
         public Poll? Poll { get; }
 
-        public SocketMessage(long id, long channelId, SocketUser author, string content, string timestamp, string editedTimestamp, bool tts, bool mentionEveryone, SocketUser[] mentions, Role[] mentionRoles, Attachment[] attachments, Embed[] embeds, Reaction[] reactions, bool pinned, long? webhookId, int type, int? flags, MessageReference? messageReference, SocketPartialChannel[]? threads, Poll? poll)
+        [JsonConstructor]
+        public SocketMessage(long id, long channelId, long? guildId, SocketUser author, string content, string timestamp, string editedTimestamp, bool tts, bool mentionEveryone, SocketUser[] mentions, Role[] mentionRoles, Attachment[] attachments, Embed[] embeds, Reaction[] reactions, bool pinned, long? webhookId, int type, int? flags, MessageReference? messageReference, SocketGuildThreadChannel[]? threads, Poll? poll)
         {
             Id = id;
+            Console.WriteLine($"\n\nCalled SocketMessage::...ctor, with {channelId} and {guildId}!\n\n");
             ChannelId = channelId;
+            GuildId = guildId;
             Author = author;
             Content = content;
             Timestamp = timestamp;
@@ -70,9 +78,31 @@ namespace SimpleDiscord.Components
             MessageReference = messageReference;
             Threads = threads;
             Poll = poll;
+        }
 
-            if (!List.Any(msg => msg.Id == Id))
-                List.Add(this);
+        public SocketMessage(SocketMessage instance)
+        {
+            Id = instance.Id;
+            ChannelId = instance.ChannelId;
+            GuildId = instance.GuildId;
+            Author = instance.Author;
+            Content = instance.Content;
+            Timestamp = instance.Timestamp;
+            EditedTimestamp = instance.EditedTimestamp;
+            Tts = instance.Tts;
+            MentionEveryone= instance.MentionEveryone;
+            Mentions = instance.Mentions;
+            MentionRoles = instance.MentionRoles;
+            Attachments = instance.Attachments;
+            Embeds = instance.Embeds;
+            Reactions = instance.Reactions;
+            Pinned = instance.Pinned;
+            WebhookId= instance.WebhookId;
+            Type = instance.Type;
+            Flags = instance.Flags;
+            MessageReference = instance.MessageReference;
+            Threads = instance.Threads;
+            Poll = instance.Poll;
         }
     }
 }

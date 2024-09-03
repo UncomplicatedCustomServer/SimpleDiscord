@@ -1,47 +1,58 @@
-﻿using SimpleDiscord.Gateway.Messages;
+﻿using SimpleDiscord.Gateway.Events.Attributes;
+using SimpleDiscord.Gateway.Events.LocalizedData;
+using SimpleDiscord.Gateway.Messages;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace SimpleDiscord.Gateway.Events
 {
-    internal class BaseGatewayEvent(DiscordGatewayMessage msg) : IGatewayEvent
+    public class BaseGatewayEvent : IGatewayEvent
     {
         public static int OpCode { get; } = -1;
 
-        private static readonly List<Type> _events = [typeof(Hello), typeof(HeartbeatAck), typeof(Ready), typeof(InvalidSession), typeof(GuildCreate)];
+        private static readonly List<EventIntents> _events = [];
 
-        public int InternalOpCode { get; } = msg.OpCode;
+        public int InternalOpCode { get; }
 
-        public string RawData { get; } = msg.Data?.ToString();
+        public string RawData { get; }
 
-        public DiscordGatewayMessage GatewayMessage { get; } = msg;
+        public DiscordGatewayMessage GatewayMessage { get; }
+
+        internal BaseGatewayEvent(DiscordGatewayMessage msg)
+        {
+            GatewayMessage = msg;
+            RawData = msg.Data?.ToString();
+            InternalOpCode = msg.OpCode;
+        }
 
         public virtual void Init() 
         { }
 
-        public static BaseGatewayEvent Parse(DiscordGatewayMessage message)
+        internal static void InitEvents()
         {
-            foreach (Type type in _events)
+            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
             {
-                if (message.OpCode != 0)
+                object[] attribs = type.GetCustomAttributes(typeof(InternalEvent), false);
+                if (attribs is not null && attribs.Length > 0)
                 {
-                    if ((int)type.GetProperty(nameof(OpCode), BindingFlags.Public | BindingFlags.Static)?.GetValue(null, null) == message.OpCode)
-                    {
-                        BaseGatewayEvent ev = (BaseGatewayEvent)Activator.CreateInstance(type, [message]);
-                        ev.Init();
-                        return ev;
-                    }
-                }
-                else if (message.OpCode is 0 && type.GetProperty("Event", BindingFlags.Public | BindingFlags.Static) is not null && (string)type.GetProperty("Event", BindingFlags.Public | BindingFlags.Static)?.GetValue(null, null) == message.EventName.ToUpper() && message.EventName != "")
-                {
-                    BaseGatewayEvent ev = (BaseGatewayEvent)Activator.CreateInstance(type, [message]);
-                    ev.Init();
-                    return ev;
+                    InternalEvent attribute = (InternalEvent)attribs[0];
+                    _events.Add(new(type, attribute.OpCode, attribute.Event));
                 }
             }
+        }
 
-            return null;
+        internal static BaseGatewayEvent Parse(DiscordGatewayMessage message)
+        {
+            EventIntents instance = _events.FirstOrDefault(x => x.OpCode == message.OpCode && x.Event == message.EventName);
+
+            if (instance is null)
+                return null;
+
+            BaseGatewayEvent ev = (BaseGatewayEvent)Activator.CreateInstance(instance.Type, [message]);
+            ev.Init();
+            return ev;
         }
     }
 }

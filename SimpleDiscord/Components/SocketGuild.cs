@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using Newtonsoft.Json;
+using SimpleDiscord.Components.Attributes;
 
 namespace SimpleDiscord.Components
 {
 #nullable enable
+    [EndpointInfo("/guilds/{guild.id}", "GUILD")]
     public class SocketGuild
     {
-        public static HashSet<SocketGuild> List { get; } = [];
-
         public long Id { get; }
 
         public string Name { get; }
@@ -64,6 +63,7 @@ namespace SimpleDiscord.Components
 
         public bool PremiumProgressBarEnable { get; }
 
+        [JsonConstructor]
         public SocketGuild(long id, string name, string? icon, string? splash, string? discoverySplash, long? afkChannelId, int afkTimeout, int verificationLevel, int defaultMessageNotifications, int explicitContentFilter, Role[] roles, Emoji[] emojis, string[] features, int mfaLevel, int premiumTier, string preferredLocale, long? applicationId, long? systemChannelId, int systemChannelFlags, long? rulesChannelId, int? maxPresence, int maxMembers, string? vanityUrlCode, string? description, string? banner, long? publicUpdatedChannelId, int nsfwLevel, bool premiumProgressBarEnable)
         {
             Id = id;
@@ -94,9 +94,38 @@ namespace SimpleDiscord.Components
             PublicUpdatedChannelId = publicUpdatedChannelId;
             NsfwLevel = nsfwLevel;
             PremiumProgressBarEnable = premiumProgressBarEnable;
+        }
 
-            if (!List.Any(guild => guild.Id == Id))
-                List.Add(this);
+        public SocketGuild(SocketGuild guild)
+        {
+            Id = guild.Id;
+            Name = guild.Name;
+            Icon = guild.Icon;
+            Splash = guild.Splash;
+            DiscoverySplash = guild.DiscoverySplash;
+            AfkChannelId = guild.AfkChannelId;
+            AfkTimeout = guild.AfkTimeout;
+            VerificationLevel = guild.VerificationLevel;
+            DefaultMessageNotifications = guild.VerificationLevel;
+            ExplicitContentFilter = guild.ExplicitContentFilter;
+            Roles = guild.Roles;
+            Emojis = guild.Emojis;
+            Features = guild.Features;
+            MfaLevel = guild.MfaLevel;
+            PremiumTier = guild.PremiumTier;
+            PreferredLocale = guild.PreferredLocale;
+            ApplicationId = guild.ApplicationId;
+            SystemChannelId = guild.SystemChannelId;
+            SystemChannelFlags = guild.SystemChannelFlags;
+            RulesChannelId = guild.RulesChannelId;
+            MaxPresence = guild.MaxPresence;
+            MaxMembers = guild.MaxMembers;
+            VanityUrlCode = guild.VanityUrlCode;
+            Description = guild.Description;
+            Banner = guild.Banner;
+            PublicUpdatedChannelId = guild.PublicUpdatedChannelId;
+            NsfwLevel = guild.NsfwLevel;
+            PremiumProgressBarEnable = guild.PremiumProgressBarEnable;
         }
     }
 }

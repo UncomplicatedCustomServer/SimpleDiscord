@@ -1,7 +1,0 @@
-﻿using SimpleDiscord.Components;
-
-namespace SimpleDiscord.Gateway.Events.LocalizedData
-{
-    public class GuildCreatedMember(string joinedAt, bool large, int memberCount, Member[] members, SocketGuildTextChannel[] channels, SocketGuildTextChannel[] threads, SocketPresence[] presences, SocketStageInstance[] stageInstances, SocketScheduledEvent[] guildScheduledEvents, long id, string name, string icon, string splash, string discoverySplash, long? afkChannelId, int afkTimeout, int verificationLevel, int defaultMessageNotifications, int explicitContentFilter, Role[] roles, Emoji[] emojis, string[] features, int mfaLevel, int premiumTier, string preferredLocale, long? applicationId, long? systemChannelId, int systemChannelFlags, long? rulesChannelId, int? maxPresence, int maxMembers, string vanityUrlCode, string description, string banner, long? publicUpdatedChannelId, int nsfwLevel, bool premiumProgressBarEnable) : Guild(joinedAt, large, memberCount, members, channels, threads, presences, stageInstances, guildScheduledEvents, id, name, icon, splash, discoverySplash, afkChannelId, afkTimeout, verificationLevel, defaultMessageNotifications, explicitContentFilter, roles, emojis, features, mfaLevel, premiumTier, preferredLocale, applicationId, systemChannelId, systemChannelFlags, rulesChannelId, maxPresence, maxMembers, vanityUrlCode, description, banner, publicUpdatedChannelId, nsfwLevel, premiumProgressBarEnable)
-    { }
-}
