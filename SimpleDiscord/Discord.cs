@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using SimpleDiscord.Components;
 using SimpleDiscord.Enums;
 using SimpleDiscord.Events;
 using SimpleDiscord.Gateway.Events;
@@ -10,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.WebSockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -70,7 +72,13 @@ namespace SimpleDiscord
 
             connectionStatus = ConnectionStatus.Connecting;
 
+            BaseGatewayEvent.LoadEvents();
             await MessageReceiver();
+        }
+
+        internal void Disconnect()
+        {
+            _ = webSocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None).ConfigureAwait(false);
         }
 
         internal async Task MessageReceiver()
@@ -117,9 +125,15 @@ namespace SimpleDiscord
                 Handler.Invoke(ev.GatewayMessage.EventName, ev);
             }
 
-            if(ev is MessageCreate messages)
+            if(ev is ChannelCreate messages)
             {
-                Console.WriteLine($"{messages.Data.Content} è stato inviato {messages.Data.Id}");
+                if(messages.Data is SocketGuildTextChannel evee)
+                {
+                    Console.WriteLine(evee.GuildId);
+                } else
+                {
+                    Console.WriteLine("Nope");
+                }
             }
 
             if (ev is Hello hello)
@@ -140,7 +154,9 @@ namespace SimpleDiscord
                         {
                             {
                                 "os",
-                                "linux"
+                                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "windows" :
+                                RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "linux" :
+                                RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx" : "Unknown"
                             },
                             {
                                 "browser",

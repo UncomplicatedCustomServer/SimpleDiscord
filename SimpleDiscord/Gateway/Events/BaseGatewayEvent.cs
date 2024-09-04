@@ -1,4 +1,4 @@
-﻿using SimpleDiscord.Gateway.Events.Attributes;
+using SimpleDiscord.Gateway.Events.Attributes;
 using SimpleDiscord.Gateway.Events.LocalizedData;
 using SimpleDiscord.Gateway.Messages;
 using System;

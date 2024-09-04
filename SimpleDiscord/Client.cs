@@ -55,6 +55,11 @@ namespace SimpleDiscord
             Handler.Invoke("READY", null);
         }
 
+        public void Disconnect()
+        {
+            _discordClient.Disconnect();
+        }
+      
 #nullable enable
         public Guild? GetGuild(long id) => Guild.List.FirstOrDefault(guild => guild.Id == id);
 #nullable disable
