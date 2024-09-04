@@ -72,7 +72,6 @@ namespace SimpleDiscord
 
             connectionStatus = ConnectionStatus.Connecting;
 
-            BaseGatewayEvent.LoadEvents();
             await MessageReceiver();
         }
 
@@ -122,12 +121,17 @@ namespace SimpleDiscord
             if (connectionStatus is ConnectionStatus.Connected or ConnectionStatus.Connecting && ev is not null && ev.GatewayMessage.EventName != null)
             {
                 Console.WriteLine($"\nInvoking event {ev.GatewayMessage.EventName} ({ev.GatewayMessage.OpCode}) -- found {ev.GetType().FullName}\n");
+                if (ev is IUserDeniableEvent deniableEvent && deniableEvent.CanShare)
+                    goto proceed;
+
                 Handler.Invoke(ev.GatewayMessage.EventName, ev);
             }
 
+            proceed:
+
             if(ev is ChannelCreate messages)
             {
-                if(messages.Data is SocketGuildTextChannel evee)
+                if(messages.Data is GuildTextChannel evee)
                 {
                     Console.WriteLine(evee.GuildId);
                 } else

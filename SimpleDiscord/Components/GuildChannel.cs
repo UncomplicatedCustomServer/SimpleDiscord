@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SimpleDiscord.Components.Attributes;
 using SimpleDiscord.Enums;
 using System;
@@ -70,6 +71,27 @@ namespace SimpleDiscord.Components
                 List.Insert(List.IndexOf(instance), this);
             else
                 List.Add(this);
+        }
+
+        public static GuildChannel? Caster(JObject obj)
+        {
+            SocketGuildChannel? channel = obj.ToObject<SocketGuildChannel>();
+
+            if (channel is null)
+                return null;
+
+#nullable disable
+
+            // Ora dal tipo deduciamo quale canale andiamo ad avere
+            GuildChannel realChannel = (ChannelType)channel.Type switch
+            {
+                ChannelType.GUILD_TEXT or ChannelType.GUILD_ANNOUNCEMENT => new GuildTextChannel(obj.ToObject<SocketGuildTextChannel>(), true),
+                ChannelType.GUILD_VOICE => new GuildVoiceChannel(obj.ToObject<SocketGuildVoiceChannel>(), true),
+                ChannelType.PRIVATE_THREAD or ChannelType.PUBLIC_THREAD => new GuildThreadChannel(obj.ToObject<SocketGuildThreadChannel>(), true),
+                _ => new GuildChannel(channel)
+            };
+            
+            return realChannel;
         }
     }
 }

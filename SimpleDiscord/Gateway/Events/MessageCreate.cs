@@ -2,7 +2,6 @@ using Newtonsoft.Json;
 using SimpleDiscord.Components;
 using SimpleDiscord.Gateway.Events.Attributes;
 using SimpleDiscord.Gateway.Messages;
-using System;
 
 namespace SimpleDiscord.Gateway.Events
 {

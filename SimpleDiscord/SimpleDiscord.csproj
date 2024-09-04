@@ -105,10 +105,10 @@
     <Compile Include="Gateway\Events\Hello.cs" />
     <Compile Include="Gateway\Events\IGatewayEvent.cs" />
     <Compile Include="Gateway\Events\InvalidSession.cs" />
+    <Compile Include="Gateway\Events\IUserDeniableEvent.cs" />
     <Compile Include="Gateway\Events\LocalizedData\EventIntents.cs" />
     <Compile Include="Gateway\Events\LocalizedData\HelloDataMember.cs" />
     <Compile Include="Gateway\Events\InteractionCreate.cs" />
-    <Compile Include="Gateway\Events\LocalizedData\MessageCreateMember.cs" />
     <Compile Include="Gateway\Events\MessageCreate.cs" />
     <Compile Include="Gateway\Events\Ready.cs" />
     <Compile Include="Gateway\Gateway.cs" />

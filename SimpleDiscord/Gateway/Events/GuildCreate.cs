@@ -38,16 +38,16 @@ namespace SimpleDiscord.Gateway.Events
                 switch ((ChannelType)parsedChannel.Type)
                 {
                     case ChannelType.GUILD_TEXT or ChannelType.GUILD_ANNOUNCEMENT:
-                        guild.SafeUpdateChannel(new GuildTextChannel(channel.ToObject<SocketGuildTextChannel>(), true));
+                        guild.SafeUpdateChannel(new GuildTextChannel(channel.ToObject<SocketGuildTextChannel>()));
                         break;
                     case ChannelType.GUILD_VOICE:
-                        guild.SafeUpdateChannel(new GuildVoiceChannel(channel.ToObject<SocketGuildVoiceChannel>(), true));
+                        guild.SafeUpdateChannel(new GuildVoiceChannel(channel.ToObject<SocketGuildVoiceChannel>()));
                         break;
                     case ChannelType.PRIVATE_THREAD or ChannelType.PUBLIC_THREAD:
-                        guild.SafeUpdateChannel(new GuildThreadChannel(channel.ToObject<SocketGuildThreadChannel>(), true));
+                        guild.SafeUpdateChannel(new GuildThreadChannel(channel.ToObject<SocketGuildThreadChannel>()));
                         break;
                     default:
-                        guild.SafeUpdateChannel(new(parsedChannel, true));
+                        guild.SafeUpdateChannel(new(parsedChannel));
                         break;
                 }
             }
@@ -56,7 +56,7 @@ namespace SimpleDiscord.Gateway.Events
                 foreach (JObject thread in localData["threads"].ToObject<List<JObject>>())
                 {
                     thread["guild_id"] = Data.Id;
-                    guild.SafeUpdateThread(new GuildThreadChannel(thread.ToObject<SocketGuildThreadChannel>(), true));
+                    guild.SafeUpdateThread(new GuildThreadChannel(thread.ToObject<SocketGuildThreadChannel>()));
                 }
         }
     }
