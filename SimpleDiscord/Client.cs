@@ -52,5 +52,10 @@ namespace SimpleDiscord
             await _discordClient.AuthAsync(token, intents);
             Handler.Invoke("READY", null);
         }
+
+        public void Disconnect()
+        {
+            _discordClient.Disconnect();
+        }
     }
 }

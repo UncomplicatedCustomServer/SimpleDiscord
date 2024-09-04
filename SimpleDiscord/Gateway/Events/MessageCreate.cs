@@ -11,8 +11,8 @@ namespace SimpleDiscord.Gateway.Events
 
         public static string Event => "MESSAGE_CREATE";
 
-        public SocketMessage Data { get; private set; }
+        public MessageCreateMember Data { get; private set; }
 
-        public override void Init() => Data = JsonConvert.DeserializeObject<SocketMessage>(RawData);
+        public override void Init() => Data = JsonConvert.DeserializeObject<MessageCreateMember>(RawData);
     }
 }

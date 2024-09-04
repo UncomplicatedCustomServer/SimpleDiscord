@@ -1,6 +1,7 @@
 ﻿using SimpleDiscord.Gateway.Messages;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace SimpleDiscord.Gateway.Events
@@ -9,7 +10,7 @@ namespace SimpleDiscord.Gateway.Events
     {
         public static int OpCode { get; } = -1;
 
-        private static readonly List<Type> _events = [typeof(Hello), typeof(HeartbeatAck), typeof(Ready), typeof(InvalidSession), typeof(GuildCreate), typeof(MessageCreate)];
+        private static List<Type> _events = [typeof(Hello), typeof(HeartbeatAck), typeof(Ready), typeof(InvalidSession), typeof(GuildCreate), typeof(MessageCreate)];
 
         public int InternalOpCode { get; } = msg.OpCode;
 
@@ -19,6 +20,16 @@ namespace SimpleDiscord.Gateway.Events
 
         public virtual void Init() 
         { }
+
+        public static void LoadEvents()
+        {
+            var eventTypes = Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(BaseGatewayEvent)))
+                .ToList();
+
+            _events = eventTypes;
+        }
 
         public static BaseGatewayEvent Parse(DiscordGatewayMessage message)
         {

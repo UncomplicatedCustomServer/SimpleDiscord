@@ -34,7 +34,7 @@ namespace TestAPP
 
         public async Task Connect()
         {
-            await DiscordClient.LoginAsync("token", Gateway.privilegedIntents);
+            await DiscordClient.LoginAsync("token", Gateway.all);
         }
     }
 }

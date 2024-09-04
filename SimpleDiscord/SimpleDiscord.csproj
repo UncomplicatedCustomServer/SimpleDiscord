@@ -83,6 +83,8 @@
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Gateway\CloseCodes\CloseCode.cs" />
     <Compile Include="Gateway\Events\BaseGatewayEvent.cs" />
+    <Compile Include="Gateway\Events\ChannelCreate.cs" />
+    <Compile Include="Gateway\Events\ChannelUpdate.cs" />
     <Compile Include="Gateway\Events\GuildCreate.cs" />
     <Compile Include="Gateway\Events\HeartbeatAck.cs" />
     <Compile Include="Gateway\Events\Hello.cs" />
@@ -91,6 +93,7 @@
     <Compile Include="Gateway\Events\LocalizedData\GuildCreatedMember.cs" />
     <Compile Include="Gateway\Events\LocalizedData\HelloDataMember.cs" />
     <Compile Include="Gateway\Events\InteractionCreate.cs" />
+    <Compile Include="Gateway\Events\LocalizedData\MessageCreateMember.cs" />
     <Compile Include="Gateway\Events\MessageCreate.cs" />
     <Compile Include="Gateway\Events\Ready.cs" />
     <Compile Include="Gateway\Gateway.cs" />
