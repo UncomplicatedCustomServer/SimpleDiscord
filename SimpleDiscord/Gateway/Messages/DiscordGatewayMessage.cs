@@ -4,7 +4,7 @@ namespace SimpleDiscord.Gateway.Messages
 {
 #nullable enable
 
-    internal class DiscordGatewayMessage(DiscordRawGatewayMessage raw)
+    public class DiscordGatewayMessage(DiscordRawGatewayMessage raw)
     {
         public int OpCode { get; } = raw.Op;
 

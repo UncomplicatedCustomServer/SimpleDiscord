@@ -1,11 +1,9 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using SimpleDiscord.Components;
 using System;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,6 +15,17 @@ namespace SimpleDiscord.Networking
 
         public const string Endpoint = "https://discord.com/api";
 
+        public async Task<string> SendGenericGetRequest(string url)
+        {
+            HttpResponseMessage answer = await HttpClient.GetAsync($"{Endpoint}{url}");
+            if (answer.StatusCode != HttpStatusCode.OK)
+                throw new HttpRequestException($"Invalid answer: {answer.StatusCode} - {answer.ReasonPhrase}");
+
+            return await answer.Content.ReadAsStringAsync();
+        }
+
+        public async Task<SocketMessage> SendMessage(GuildTextChannel channel, SocketSendMessage message) => await SendMessage(new SocketGuildTextChannel(channel), message);
+
         public async Task<SocketMessage> SendMessage(SocketGuildTextChannel channel, SocketSendMessage message)
         {
             if (channel.Type is 4 or 14)
@@ -24,9 +33,7 @@ namespace SimpleDiscord.Networking
 
             Console.WriteLine($"\n\n{EncodeJson(message)} MAGIC\n\n{Endpoint}/channels/{channel.Id}/messages\n");
 
-            HttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bot {Client.Instance.Token}");
             HttpResponseMessage answer = await HttpClient.PostAsync($"{Endpoint}/channels/{channel.Id}/messages", new StringContent(EncodeJson(message), Encoding.UTF8, "application/json"));
-            string a = await answer.Content.ReadAsStringAsync();
             if (answer.StatusCode != HttpStatusCode.OK)
                 throw new HttpRequestException($"Invalid answer: {answer.StatusCode} - {answer.ReasonPhrase}");
 

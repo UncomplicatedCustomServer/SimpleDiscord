@@ -1,40 +1,50 @@
-﻿using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace SimpleDiscord.Components
 {
 #nullable enable
-    public class SocketGuildTextChannel(long id, int type, long guildId, int? position, Overwrite[] permissionOverwrites, string name, string topic, bool? nsfw, long? lastMessageId, int? rateLimitPerUser, long? parentId, int? messageCount, int memberCount, string permissions, int? flags, int? totalMessageSent) : SocketGenericChannel(id, type)
+    public class SocketGuildTextChannel : SocketGuildChannel
     {
-        public long GuildId { get; } = guildId;
+        public string? Topic { get; }
 
-        public int? Position { get; } = position;
+        public bool? Nsfw { get; }
 
-        public Overwrite[] PermissionOverwrites { get; } = permissionOverwrites;
+        public long? LastMessageId { get; }
 
-        public string? Name { get; } = name;
+        public int? RateLimitPerUser { get; }
 
-        public string? Topic { get; } = topic;
+        public int? TotalMessageSent { get; }
 
-        public bool? Nsfw { get; } = nsfw;
+        [JsonConstructor]
+        public SocketGuildTextChannel(long id, int type, long guildId, int? position, Overwrite[] permissionOverwrites, string name, string? topic, bool? nsfw, long? lastMessageId, int? rateLimitPerUser, long? parentId, string permissions, int? flags, int? totalMessageSent) : base(id, type, guildId, position, permissionOverwrites, name, parentId, permissions, flags)
+        {
+            Topic = topic;
+            Nsfw = nsfw;
+            LastMessageId = lastMessageId;
+            RateLimitPerUser = rateLimitPerUser;
+            TotalMessageSent = totalMessageSent;
+        }
 
-        public long? LastMessageId { get; } = lastMessageId;
+        public SocketGuildTextChannel(GuildTextChannel channel) : base(channel)
+        {
+            Topic = channel.Topic;
+            Nsfw = channel.Nsfw;
+            LastMessageId = channel.LastMessageId;
+            RateLimitPerUser = channel.RateLimitPerUser;
+            TotalMessageSent = channel.TotalMessageSent;
+        }
 
-        public int? RateLimitPerUser { get; } = rateLimitPerUser;
+        public SocketGuildTextChannel(SocketGuildChannel baseChannel, string? topic, bool? nsfw, long? lastMessageId, int? rateLimitPerUser, int? totalMessageSent) : base(baseChannel)
+        {
+            Topic = topic;
+            Nsfw = nsfw;
+            LastMessageId = lastMessageId;
+            RateLimitPerUser = rateLimitPerUser;
+            TotalMessageSent = totalMessageSent;
+        }
 
-        public long? ParentId { get; } = parentId;
-
-        public int? MessageCount { get; } = messageCount;
-
-        public int MemberCount { get; } = memberCount;
-
-        public string? Permissions { get; } = permissions;
-
-        public int? Flags { get; } = flags;
-
-        public int? TotalMessageSent { get; } = totalMessageSent;
-
-        public async Task<SocketMessage> SendMessage(string content) => await Client.Instance.RestHttp.SendMessage(this, new(content));
-
-        public async Task<SocketMessage> SendMessage(SocketSendMessage msg) => await Client.Instance.RestHttp.SendMessage(this, msg);
+        public SocketGuildTextChannel(SocketGuildTextChannel baseChannel) : this(baseChannel, baseChannel.Topic, baseChannel.Nsfw, baseChannel.LastMessageId, baseChannel.RateLimitPerUser, baseChannel.TotalMessageSent)
+        { }
     }
 }

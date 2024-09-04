@@ -1,24 +1,28 @@
-﻿using SimpleDiscord.Gateway.Events.LocalizedData;
+﻿using SimpleDiscord.Components.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 
 namespace SimpleDiscord.Components
 {
+#nullable enable
+    [SocketInstance(typeof(SocketGuild))]
     public class Guild : SocketGuild
     {
-        public new static HashSet<Guild> List { get; } = [];
+        public static readonly List<Guild> List = [];
 
-        public string JoinedAt { get; }
+        public DateTimeOffset JoinedAt { get; }
 
         public bool Large { get; }
 
         public int MemberCount { get; }
 
-        public Member[] Members { get; }
+        public SocketMember[] Members { get; }
 
-        public SocketGuildTextChannel[] Channels { get; }
+        public List<GuildChannel> Channels { get; }
 
-        public SocketGuildTextChannel[] Threads { get; }
+        public List<GuildThreadChannel> Threads { get; }
 
         public SocketPresence[] Presences { get; }
 
@@ -26,32 +30,73 @@ namespace SimpleDiscord.Components
 
         public SocketScheduledEvent[] GuildScheduledEvents { get; }
 
-        public Guild(string joinedAt, bool large, int memberCount, Member[] members, SocketGuildTextChannel[] channels, SocketGuildTextChannel[] threads, SocketPresence[] presences, SocketStageInstance[] stageInstances, SocketScheduledEvent[] guildScheduledEvents, long id, string name, string icon, string splash, string discoverySplash, long? afkChannelId, int afkTimeout, int verificationLevel, int defaultMessageNotifications, int explicitContentFilter, Role[] roles, Emoji[] emojis, string[] features, int mfaLevel, int premiumTier, string preferredLocale, long? applicationId, long? systemChannelId, int systemChannelFlags, long? rulesChannelId, int? maxPresence, int maxMembers, string vanityUrlCode, string description, string banner, long? publicUpdatedChannelId, int nsfwLevel, bool premiumProgressBarEnable) : base(id, name, icon, splash, discoverySplash, afkChannelId, afkTimeout, verificationLevel, defaultMessageNotifications, explicitContentFilter, roles, emojis, features, mfaLevel, premiumTier, preferredLocale, applicationId, systemChannelId, systemChannelFlags, rulesChannelId, maxPresence, maxMembers, vanityUrlCode, description, banner, publicUpdatedChannelId, nsfwLevel, premiumProgressBarEnable)
+        public Guild(DateTimeOffset joinedAt, bool large, int memberCount, SocketMember[] members, GuildChannel[] channels, GuildThreadChannel[] threads, SocketPresence[] presences, SocketStageInstance[] stageInstances, SocketScheduledEvent[] guildScheduledEvents, SocketGuild guild) : base(guild)
         {
             JoinedAt = joinedAt;
             Large = large;
             MemberCount = memberCount;
             Members = members;
-            Channels = channels;
-            Threads = threads;
+            Channels = [.. channels];
+            Threads = [.. threads];
             Presences = presences;
             StageInstances = stageInstances;
             GuildScheduledEvents = guildScheduledEvents;
 
-            if (!List.Any(guild => guild.Id == id))
+            Guild instance = List.FirstOrDefault(c => c.Id == Id);
+            if (instance is not null)
+                List.Insert(List.IndexOf(instance), this);
+            else
                 List.Add(this);
         }
 
-        public Guild(long id, string name, string icon, string splash, string discoverySplash, long? afkChannelId, int afkTimeout, int verificationLevel, int defaultMessageNotifications, int explicitContentFilter, Role[] roles, Emoji[] emojis, string[] features, int mfaLevel, int premiumTier, string preferredLocale, long? applicationId, long? systemChannelId, int systemChannelFlags, long? rulesChannelId, int? maxPresence, int maxMembers, string vanityUrlCode, string description, string banner, long? publicUpdatedChannelId, int nsfwLevel, bool premiumProgressBarEnable) : base(id, name, icon, splash, discoverySplash, afkChannelId, afkTimeout, verificationLevel, defaultMessageNotifications, explicitContentFilter, roles, emojis, features, mfaLevel, premiumTier, preferredLocale, applicationId, systemChannelId, systemChannelFlags, rulesChannelId, maxPresence, maxMembers, vanityUrlCode, description, banner, publicUpdatedChannelId, nsfwLevel, premiumProgressBarEnable)
+        public Guild(AnonymousGuild anonymous) : base(anonymous)
         {
-            if (!List.Any(guild => guild.Id == id))
+            Console.WriteLine(anonymous.JoinedAt);
+            if (anonymous.JoinedAt is not null && !true)
+                JoinedAt = DateTimeOffset.Parse(anonymous.JoinedAt);
+            Large = anonymous.Large;
+            MemberCount = anonymous.MemberCount;
+            Members = anonymous.Members;
+            Channels = [];
+            Threads = [];
+            Presences = anonymous.Presences;
+            StageInstances = anonymous.StageInstances;
+            GuildScheduledEvents = anonymous.GuildScheduledEvents;
+
+            Guild instance = List.FirstOrDefault(c => c.Id == Id);
+            if (instance is not null)
+                List.Insert(List.IndexOf(instance), this);
+            else
                 List.Add(this);
         }
 
-        public Guild(SocketGuild socket) : this(socket.Id, socket.Name, socket.Icon, socket.Splash, socket.DiscoverySplash, socket.AfkChannelId, socket.AfkTimeout, socket.VerificationLevel, socket.DefaultMessageNotifications, socket.ExplicitContentFilter, socket.Roles, socket.Emojis, socket.Features, socket.MfaLevel, socket.PremiumTier, socket.PreferredLocale, socket.ApplicationId, socket.SystemChannelId, socket.SystemChannelFlags, socket.RulesChannelId, socket.MaxPresence, socket.MaxMembers, socket.VanityUrlCode, socket.Description, socket.Banner, socket.PublicUpdatedChannelId, socket.NsfwLevel, socket.PremiumProgressBarEnable)
-        { }
+        public GuildChannel? GetChannel(long id) => Channels.FirstOrDefault(channel => channel.Id == id);
 
-        public Guild(GuildCreatedMember member) : this(member as SocketGuild)
-        { }
+        public SocketMember GetMember(long id) => Members.FirstOrDefault(member => member.User is not null && member.User.Id == id);
+
+        internal void SafeUpdateChannel(GuildChannel channel)
+        {
+            Console.WriteLine($"Calling update for channel {channel.Name}\n");
+            if (channel is GuildThreadChannel thread)
+            {
+                SafeUpdateThread(thread);
+                return;
+            }
+
+            GuildChannel instance = Channels.FirstOrDefault(c => c.Id == channel.Id && c.GuildId == Id);
+            if (instance is not null)
+                Channels[Channels.IndexOf(instance)] = channel;
+            else
+                Channels.Add(channel);
+        }
+
+        internal void SafeUpdateThread(GuildThreadChannel thread)
+        {
+            GuildThreadChannel instance = Threads.FirstOrDefault(c => c.Id == thread.Id && c.GuildId == Id);
+            if (instance is not null)
+                Threads[Threads.IndexOf(instance)] = thread;
+            else
+                Threads.Add(thread);
+        }
     }
 }

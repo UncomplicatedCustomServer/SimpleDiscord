@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 namespace SimpleDiscord
 {
 #pragma warning disable IDE1006
-    public class Discord
+    internal class Discord
     {
         public ConnectionStatus connectionStatus = ConnectionStatus.Ready;
 
@@ -121,6 +121,7 @@ namespace SimpleDiscord
 
             if (connectionStatus is ConnectionStatus.Connected or ConnectionStatus.Connecting && ev is not null && ev.GatewayMessage.EventName != null)
             {
+                Console.WriteLine($"\nInvoking event {ev.GatewayMessage.EventName} ({ev.GatewayMessage.OpCode}) -- found {ev.GetType().FullName}\n");
                 Handler.Invoke(ev.GatewayMessage.EventName, ev);
             }
 
