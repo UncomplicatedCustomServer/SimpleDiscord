@@ -29,7 +29,7 @@ namespace SimpleDiscord.Components
             else
                 List.Add(this);
 
-            Guild = Client.Instance.GetSafeGuild(guildId);
+            Guild = Guild.GetSafeGuild(guildId);
             if (parentId is not null)
                 Parent = Guild.GetChannel((long)parentId);
 
@@ -58,11 +58,11 @@ namespace SimpleDiscord.Components
             }
 
             Type = (ChannelType)socketChannel.Type;
-            Guild = Client.Instance.GetSafeGuild(socketChannel.GuildId);
+            Guild = Guild.GetSafeGuild(socketChannel.GuildId);
             if (socketChannel.ParentId is not null)
                 Parent = Guild.GetChannel((long)socketChannel.ParentId);
 
-            Console.WriteLine($"\n\nWE HAVE {Client.Instance.Guilds.Count} REGISTERED GUILDS - this id is {socketChannel.GuildId}\n\n");
+            Console.WriteLine($"\n\nWE HAVE {Guild.List.Count} REGISTERED GUILDS - this id is {socketChannel.GuildId}\n\n");
             if (pushUpdate)
                 Guild.SafeUpdateChannel(this);
 

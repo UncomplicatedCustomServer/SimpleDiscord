@@ -1,14 +1,21 @@
 ﻿using Newtonsoft.Json;
 using SimpleDiscord.Components;
-using SimpleDiscord.Gateway.Events.LocalizedData;
+using SimpleDiscord.Gateway.Events.Attributes;
 using SimpleDiscord.Gateway.Messages;
 
 namespace SimpleDiscord.Gateway.Events
 {
-    internal class INTERACTION_CREATE(DiscordGatewayMessage msg) : BaseGatewayEvent(msg)
+    [InternalEvent("INTERACTION_CREATE")]
+    public class InteractionCreate(DiscordGatewayMessage msg) : BaseGatewayEvent(msg)
     {
-        public new static int OpCode => 0;
+        public SocketInteraction Data { get; private set; }
 
-        public static string Event => "INTERACTION_CREATE";
+        public Interaction Interaction { get; private set; }
+
+        public override void Init()
+        {
+            Data = JsonConvert.DeserializeObject<SocketInteraction>(RawData);
+            Interaction = new(Data);
+        }
     }
 }

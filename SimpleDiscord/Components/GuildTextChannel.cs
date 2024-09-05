@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SimpleDiscord.Components.Attributes;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SimpleDiscord.Components
@@ -17,6 +19,8 @@ namespace SimpleDiscord.Components
         public int? RateLimitPerUser { get; }
 
         public int? TotalMessageSent { get; }
+
+        public List<Message> Messages { get; } = [];
 
         [JsonConstructor]
         public GuildTextChannel(long id, int type, long guildId, int? position, Overwrite[]? permissionOverwrites, string? name, long? parentId, string? permissions, int? flags, string? topic, bool? nsfw, long? lastMessageId, int? rateLimitPerUser, int? totalMessageSent, bool safeUpdate = true) : base(id, type, guildId, position, permissionOverwrites, name, parentId, permissions, flags, false)
@@ -55,8 +59,23 @@ namespace SimpleDiscord.Components
                 Guild.SafeUpdateChannel(this);
         }
 
-        public async Task<SocketMessage> SendMessage(string content) => await Client.Instance.RestHttp.SendMessage(this, new(content));
+        internal void SafeUpdateMessage(Message message)
+        {
+            if (!Guild.Client.SaveMessages)
+                return;
 
-        public async Task<SocketMessage> SendMessage(SocketSendMessage msg) => await Client.Instance.RestHttp.SendMessage(this, msg);
+            Message instance = Messages.FirstOrDefault(msg => msg.Id == message.Id);
+            if (instance is null)
+                Messages.Add(message);
+            else
+                Messages[Messages.IndexOf(instance)] = message;
+        }
+        
+        internal Message GetSafeMessage(long id) => Messages.FirstOrDefault(msg => msg.Id == id);
+
+        public async Task<SocketMessage> SendMessage(string content) => await Guild.Client.RestHttp.SendMessage(this, new(content));
+
+        public async Task<SocketMessage> SendMessage(SocketSendMessage msg) => await Guild.Client.RestHttp.SendMessage(this, msg);
+
     }
 }

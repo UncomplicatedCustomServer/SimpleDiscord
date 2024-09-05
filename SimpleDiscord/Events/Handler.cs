@@ -7,15 +7,15 @@ namespace SimpleDiscord.Events
 {
     public class Handler
     {
-        public static Dictionary<string, HashSet<KeyValuePair<object, MethodInfo>>> List { get; } = [];
+        public Dictionary<string, HashSet<KeyValuePair<object, MethodInfo>>> List { get; } = [];
 
-        public static void RegisterEvents(Assembly assembly, object caller = null)
+        public void RegisterEvents(Assembly assembly, object caller = null)
         {
             foreach (Type type in assembly.GetTypes())
                 RegisterEvents(caller: caller, type: type);
         }
 
-        public static void RegisterEvents(object caller = null, Type type = null)
+        public void RegisterEvents(object caller = null, Type type = null)
         {
             if (type is null && caller is null)
                 throw new ArgumentException("Invalid arguments!\nAt least 'caller' or 'type' is required!");
@@ -37,7 +37,7 @@ namespace SimpleDiscord.Events
             }
         }
 
-        internal static void Invoke(string name, object args)
+        internal void Invoke(string name, object args)
         {
             if (List.TryGetValue(name, out HashSet<KeyValuePair<object, MethodInfo>> list))
                 foreach (KeyValuePair<object, MethodInfo> method in list)

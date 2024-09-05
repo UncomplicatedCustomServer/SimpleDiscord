@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SimpleDiscord.Components.Attributes;
+using SimpleDiscord.Components.DiscordComponents;
 using SimpleDiscord.Networking;
 using System;
 
@@ -7,7 +8,7 @@ namespace SimpleDiscord.Components
 {
 #nullable enable
     [EndpointInfo("/channels/{channel.id}/messages/{message.id}", "MESSAGE")]
-    public class SocketMessage : SyncableElement
+    public class SocketMessage : ClientChild
     {
         public long Id { get; }
 
@@ -37,7 +38,7 @@ namespace SimpleDiscord.Components
 
         public Embed[] Embeds { get; }
 
-        public Reaction[] Reactions { get; }
+        public SocketPartialReaction[] Reactions { get; }
 
         public bool Pinned { get; }
 
@@ -47,17 +48,18 @@ namespace SimpleDiscord.Components
 
         public int? Flags { get; }
 
+        public SocketActionRow[]? Components { get; }
+
         public MessageReference? MessageReference { get; }
 
-        public SocketGuildThreadChannel[]? Threads { get; }
+        public SocketGuildThreadChannel? Thread { get; }
 
         public Poll? Poll { get; }
 
         [JsonConstructor]
-        public SocketMessage(long id, long channelId, long? guildId, SocketUser author, string content, string timestamp, string editedTimestamp, bool tts, bool mentionEveryone, SocketUser[] mentions, Role[] mentionRoles, Attachment[] attachments, Embed[] embeds, Reaction[] reactions, bool pinned, long? webhookId, int type, int? flags, MessageReference? messageReference, SocketGuildThreadChannel[]? threads, Poll? poll)
+        public SocketMessage(long id, long channelId, long? guildId, SocketUser author, string content, string timestamp, string editedTimestamp, bool tts, bool mentionEveryone, SocketUser[] mentions, Role[] mentionRoles, Attachment[] attachments, Embed[] embeds, SocketPartialReaction[] reactions, bool pinned, long? webhookId, int type, int? flags, SocketActionRow[] components, MessageReference? messageReference, SocketGuildThreadChannel? thread, Poll? poll)
         {
             Id = id;
-            Console.WriteLine($"\n\nCalled SocketMessage::...ctor, with {channelId} and {guildId}!\n\n");
             ChannelId = channelId;
             GuildId = guildId;
             Author = author;
@@ -75,8 +77,9 @@ namespace SimpleDiscord.Components
             WebhookId = webhookId;
             Type = type;
             Flags = flags;
+            Components = components;
             MessageReference = messageReference;
-            Threads = threads;
+            Thread = thread;
             Poll = poll;
         }
 
@@ -100,8 +103,9 @@ namespace SimpleDiscord.Components
             WebhookId= instance.WebhookId;
             Type = instance.Type;
             Flags = instance.Flags;
+            Components = instance.Components;
             MessageReference = instance.MessageReference;
-            Threads = instance.Threads;
+            Thread = instance.Thread;
             Poll = instance.Poll;
         }
     }

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Channels;
 
 namespace SimpleDiscord.Components
 {
@@ -29,6 +28,8 @@ namespace SimpleDiscord.Components
         public SocketStageInstance[] StageInstances { get; }
 
         public SocketScheduledEvent[] GuildScheduledEvents { get; }
+
+        public List<Interaction> Interactions { get; } = [];
 
         public Guild(DateTimeOffset joinedAt, bool large, int memberCount, SocketMember[] members, GuildChannel[] channels, GuildThreadChannel[] threads, SocketPresence[] presences, SocketStageInstance[] stageInstances, SocketScheduledEvent[] guildScheduledEvents, SocketGuild guild) : base(guild)
         {
@@ -72,6 +73,8 @@ namespace SimpleDiscord.Components
 
         public GuildChannel? GetChannel(long id) => Channels.FirstOrDefault(channel => channel.Id == id);
 
+        internal GuildChannel GetSafeChannel(long id) => Channels.FirstOrDefault(channel => channel.Id == id);
+
         public SocketMember GetMember(long id) => Members.FirstOrDefault(member => member.User is not null && member.User.Id == id);
 
         internal void SafeUpdateChannel(GuildChannel channel)
@@ -98,5 +101,9 @@ namespace SimpleDiscord.Components
             else
                 Threads.Add(thread);
         }
+
+        public static Guild? GetGuild(long id) => List.FirstOrDefault(guild => guild.Id == id);
+
+        public static Guild GetSafeGuild(long id) => List.FirstOrDefault(guild => guild.Id == id);
     }
 }

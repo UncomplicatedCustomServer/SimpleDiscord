@@ -1,10 +1,9 @@
 ﻿using SimpleDiscord.Components;
 using SimpleDiscord.Enums;
 using SimpleDiscord.Events;
-using SimpleDiscord.Gateway.Events;
+using SimpleDiscord.Gateway;
 using SimpleDiscord.Networking;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,9 +12,9 @@ namespace SimpleDiscord
 #pragma warning disable IDE1006
     public class Client
     {
-        public HashSet<Guild> Guilds => [.. Guild.List];
+        public bool SaveMessages { get; set; } = true;
 
-        public static Client Instance { get; private set; }
+        public bool ForceRegisterMessages { get; set; } = false;
 
         public SocketPresence Presence { 
             get
@@ -35,16 +34,20 @@ namespace SimpleDiscord
 
         private Discord _discordClient { get; }
 
+        internal GatewatEventHandler GatewatEventHandler { get; }
+
+        public Handler EventHandler { get; }
+
         internal Http RestHttp { get; }
 
         internal string Token { get; private set; }
 
         public Client()
         {
-            BaseGatewayEvent.InitEvents();
-            _discordClient = new();
+            GatewatEventHandler = new();
+            EventHandler = new();
+            _discordClient = new(this);
             RestHttp = new(_discordClient.httpClient);
-            Instance = this;
         }
 
         public async Task LoginAsync(string token, GatewayIntents intents = Gateway.Gateway.defaultIntents)
@@ -52,14 +55,11 @@ namespace SimpleDiscord
             Token = token;
             RestHttp.HttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bot {token}");
             await _discordClient.AuthAsync(token, intents);
-            Handler.Invoke("READY", null);
+            EventHandler.Invoke("READY", null);
         }
 
-        public void Disconnect()
-        {
-            _discordClient.Disconnect();
-        }
-      
+        public void Disconnect() => _discordClient.Disconnect();
+
 #nullable enable
         public Guild? GetGuild(long id) => Guild.List.FirstOrDefault(guild => guild.Id == id);
 #nullable disable

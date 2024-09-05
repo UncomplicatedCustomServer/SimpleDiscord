@@ -18,8 +18,8 @@ using System.Threading.Tasks;
 
 namespace SimpleDiscord
 {
-#pragma warning disable IDE1006
-    internal class Discord
+#pragma warning disable IDE0052
+    internal class Discord(Client client)
     {
         public ConnectionStatus connectionStatus = ConnectionStatus.Ready;
 
@@ -29,7 +29,9 @@ namespace SimpleDiscord
 
         internal HttpClient httpClient = new();
 
-        private Random random = new();
+        private readonly Client DiscordClient = client;
+
+        private readonly Random Random = new();
 
         private uint? heartbeatDelay = null;
 
@@ -116,7 +118,16 @@ namespace SimpleDiscord
             if (rawMsg.S is not null)
                 lastSequence = rawMsg.S;
 
-            BaseGatewayEvent ev = BaseGatewayEvent.Parse(new(rawMsg));
+            BaseGatewayEvent ev = DiscordClient.GatewatEventHandler.Parse(new(rawMsg));
+
+            if (ev is GuildCreate guildCreate)
+                guildCreate.Guild.SetClient(DiscordClient);
+
+            if (ev is MessageCreate messageCreate)
+                messageCreate.Message.SetClient(DiscordClient);
+
+            if (ev is InteractionCreate interactionCreate)
+                interactionCreate.Interaction.SetClient(DiscordClient);
 
             if (connectionStatus is ConnectionStatus.Connected or ConnectionStatus.Connecting && ev is not null && ev.GatewayMessage.EventName != null)
             {
@@ -124,21 +135,10 @@ namespace SimpleDiscord
                 if (ev is IUserDeniableEvent deniableEvent && deniableEvent.CanShare)
                     goto proceed;
 
-                Handler.Invoke(ev.GatewayMessage.EventName, ev);
+                DiscordClient.EventHandler.Invoke(ev.GatewayMessage.EventName, ev);
             }
 
-            proceed:
-
-            if(ev is ChannelCreate messages)
-            {
-                if(messages.Data is GuildTextChannel evee)
-                {
-                    Console.WriteLine(evee.GuildId);
-                } else
-                {
-                    Console.WriteLine("Nope");
-                }
-            }
+        proceed:
 
             if (ev is Hello hello)
             {

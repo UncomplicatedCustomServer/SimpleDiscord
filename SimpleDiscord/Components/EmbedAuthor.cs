@@ -1,7 +1,7 @@
 ﻿namespace SimpleDiscord.Components
 {
 #nullable enable
-    public class EmbedAuthor(string name, string url, string iconUrl, string proxyUrl)
+    public class EmbedAuthor(string name, string? url, string? iconUrl, string? proxyUrl = null)
     {
         public string Name { get; } = name;
 

@@ -1,4 +1,6 @@
-﻿namespace SimpleDiscord.Components
+﻿using Newtonsoft.Json;
+
+namespace SimpleDiscord.Components
 {
     public class SocketStageInstance
     { 
@@ -16,6 +18,7 @@
 
         public long? GuildScheduledEventId { get; }
 
+        [JsonConstructor]
         public SocketStageInstance(long id, long guildId, long channelId, string topic, int privacyLevel, bool discoverableDisabled, long? guildScheduledEventId)
         {
             Id = id;

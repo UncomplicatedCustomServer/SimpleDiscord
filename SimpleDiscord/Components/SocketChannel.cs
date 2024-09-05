@@ -4,7 +4,7 @@ using SimpleDiscord.Networking;
 namespace SimpleDiscord.Components
 {
     [EndpointInfo("/channels/{channel.id}", "CHANNEL")]
-    public class SocketChannel(long id, int type) : SyncableElement
+    public class SocketChannel(long id, int type)
     {
         public long Id { get; } = id;
 

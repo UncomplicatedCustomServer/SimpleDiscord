@@ -5,7 +5,7 @@ namespace SimpleDiscord.Components
 {
 #nullable enable
     [EndpointInfo("/guilds/{guild.id}", "GUILD")]
-    public class SocketGuild
+    public class SocketGuild : ClientChild
     {
         public long Id { get; }
 

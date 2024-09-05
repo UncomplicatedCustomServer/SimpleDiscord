@@ -1,4 +1,6 @@
-﻿namespace SimpleDiscord.Components
+﻿using Newtonsoft.Json;
+
+namespace SimpleDiscord.Components
 {
     public class SocketScheduledEvent
     {
@@ -16,6 +18,7 @@
 
         public long? EntityId { get; }
 
+        [JsonConstructor]
         public SocketScheduledEvent(long id, long guildId, string name, int privacyLevel, int status, int entityType, long? entityId)
         {
             Id = id;

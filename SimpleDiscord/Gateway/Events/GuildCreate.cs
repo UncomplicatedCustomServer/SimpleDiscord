@@ -14,6 +14,8 @@ namespace SimpleDiscord.Gateway.Events
     {
         public AnonymousGuild Data { get; private set; }
 
+        public Guild Guild { get; private set; }
+
         public override void Init()
         {
             JObject localData = JObject.Parse(RawData);
@@ -58,6 +60,8 @@ namespace SimpleDiscord.Gateway.Events
                     thread["guild_id"] = Data.Id;
                     guild.SafeUpdateThread(new GuildThreadChannel(thread.ToObject<SocketGuildThreadChannel>()));
                 }
+
+            Guild = guild;
         }
     }
 }

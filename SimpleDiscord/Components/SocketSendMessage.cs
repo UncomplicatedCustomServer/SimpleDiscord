@@ -1,22 +1,39 @@
-﻿namespace SimpleDiscord.Components
+﻿using SimpleDiscord.Components.DiscordComponents;
+
+namespace SimpleDiscord.Components
 {
 #nullable enable
-    public class SocketSendMessage(string? content, bool? tts = null, Embed[]? embeds = null, string? allowedMentions = null, MessageReference? messageReference = null, Attachment[]? attachments = null, int? flags = null, Poll? poll = null)
+    public class SocketSendMessage : InteractionCallbackData
     {
-        public string? Content { get; } = content;
+        public string? Content { get; internal set; }
 
-        public bool? Tts { get; } = tts;
+        public Embed[]? Embeds { get; internal set; }
 
-        public Embed[]? Embeds { get; } = embeds;
+        public string? AllowedMentions { get; internal set; }
 
-        public string? AllowedMentions { get; } = allowedMentions;
+        public MessageReference? MessageReference { get; internal set; }
 
-        public MessageReference? MessageReference { get; } = messageReference;
+        public Attachment[]? Attachments { get; internal set; }
 
-        public Attachment[]? Attachments { get; } = attachments;
+        public SocketActionRow[]? Components { get; internal set; }
 
-        public int? Flags { get; } = flags;
+        public int? Flags { get; internal set; }
 
-        public Poll? Poll { get; } = poll;
+        public Poll? Poll { get; internal set; }
+
+        public SocketSendMessage(string? content, Embed[]? embeds = null, string? allowedMentions = null, MessageReference? messageReference = null, Attachment[]? attachments = null, SocketActionRow[]? components = null, int? flags = null, Poll? poll = null)
+        {
+            Content = content;
+            Embeds = embeds;
+            AllowedMentions = allowedMentions;
+            MessageReference = messageReference;
+            Attachments = attachments;
+            Components = components;
+            Flags = flags;
+            Poll = poll;
+        }
+
+        internal SocketSendMessage()
+        { }
     }
 }
