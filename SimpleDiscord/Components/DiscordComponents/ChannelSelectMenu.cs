@@ -10,16 +10,16 @@ namespace SimpleDiscord.Components.DiscordComponents
 
         public SelectDefaultValue[]? DefaultValues { get; }
 
-        public ChannelType[]? ChannelTypes { get; }
+        public int[]? ChannelTypes { get; }
 
         [JsonConstructor]
-        public ChannelSelectMenu(SelectDefaultValue[]? defaultValues, ChannelType[]? channelTypes, string customId, string placeholder, int minValues, int maxValues, bool disabled = false) : base(customId, placeholder, minValues, maxValues, disabled)
+        public ChannelSelectMenu(SelectDefaultValue[]? defaultValues, int[]? channelTypes, string customId, string placeholder, int minValues, int maxValues, bool disabled = false) : base(customId, placeholder, minValues, maxValues, disabled)
         {
             DefaultValues = defaultValues;
             ChannelTypes = channelTypes;
         }
 
-        public ChannelSelectMenu(SelectMenu socketSelectMenu, SelectDefaultValue[]? defaultValues, ChannelType[]? channelTypes) : base(socketSelectMenu)
+        public ChannelSelectMenu(SelectMenu socketSelectMenu, SelectDefaultValue[]? defaultValues, int[]? channelTypes) : base(socketSelectMenu)
         {
             DefaultValues = defaultValues;
             ChannelTypes = channelTypes;

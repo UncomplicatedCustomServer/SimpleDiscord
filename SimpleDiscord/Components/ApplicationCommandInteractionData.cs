@@ -14,13 +14,13 @@ namespace SimpleDiscord.Components
 
         public ResolvedData? Data { get; }
 
-        public CommandOption[]? Options { get; }
+        public ReplyCommandOption[]? Options { get; }
 
         public Guild? Guild { get; }
 
         public long? TargetId { get; }
 
-        public ApplicationCommandInteractionData(long id, string name, int type, ResolvedData? data, CommandOption[]? options, long? guildId, long? targetId)
+        public ApplicationCommandInteractionData(long id, string name, int type, ResolvedData? data, ReplyCommandOption[]? options, long? guildId, long? targetId)
         {
             Id = id;
             Name = name;

@@ -1,7 +1,9 @@
 ﻿using SimpleDiscord.Components.Attributes;
+using SimpleDiscord.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SimpleDiscord.Components
 {
@@ -29,26 +31,7 @@ namespace SimpleDiscord.Components
 
         public SocketScheduledEvent[] GuildScheduledEvents { get; }
 
-        public List<Interaction> Interactions { get; } = [];
-
-        public Guild(DateTimeOffset joinedAt, bool large, int memberCount, SocketMember[] members, GuildChannel[] channels, GuildThreadChannel[] threads, SocketPresence[] presences, SocketStageInstance[] stageInstances, SocketScheduledEvent[] guildScheduledEvents, SocketGuild guild) : base(guild)
-        {
-            JoinedAt = joinedAt;
-            Large = large;
-            MemberCount = memberCount;
-            Members = members;
-            Channels = [.. channels];
-            Threads = [.. threads];
-            Presences = presences;
-            StageInstances = stageInstances;
-            GuildScheduledEvents = guildScheduledEvents;
-
-            Guild instance = List.FirstOrDefault(c => c.Id == Id);
-            if (instance is not null)
-                List.Insert(List.IndexOf(instance), this);
-            else
-                List.Add(this);
-        }
+        public List<ApplicationCommand> Commands { get; } = [];
 
         public Guild(AnonymousGuild anonymous) : base(anonymous)
         {
@@ -64,6 +47,14 @@ namespace SimpleDiscord.Components
             StageInstances = anonymous.StageInstances;
             GuildScheduledEvents = anonymous.GuildScheduledEvents;
 
+            if (Client.Config.SaveGuildRegisteredCommands)
+            {
+                Task<SocketApplicationCommand[]> commands = Client.RestHttp.GetGuildCommands(this);
+                commands.Wait();
+                foreach (SocketApplicationCommand command in commands.Result)
+                    Commands.Add(new(command));
+            }
+
             Guild instance = List.FirstOrDefault(c => c.Id == Id);
             if (instance is not null)
                 List.Insert(List.IndexOf(instance), this);
@@ -71,11 +62,26 @@ namespace SimpleDiscord.Components
                 List.Add(this);
         }
 
+        private bool HasCommand(string name) => Commands.Any(c => c.Name == name);
+
         public GuildChannel? GetChannel(long id) => Channels.FirstOrDefault(channel => channel.Id == id);
 
         internal GuildChannel GetSafeChannel(long id) => Channels.FirstOrDefault(channel => channel.Id == id);
 
         public SocketMember GetMember(long id) => Members.FirstOrDefault(member => member.User is not null && member.User.Id == id);
+
+        public async Task<ApplicationCommand?> RegisterCommand(SocketSendApplicationCommand command)
+        {
+            if (Client.Config.RegisterCommands is RegisterCommandType.None)
+                return null;
+
+            if (HasCommand(command.Name) && Client.Config.RegisterCommands is not RegisterCommandType.CreateAndEdit)
+                return null;
+
+            ApplicationCommand createdCommand = new(await Client.RestHttp.CreateGuildCommand(this, command));
+            SafeUpdateCommand(createdCommand);
+            return createdCommand;
+        }
 
         internal void SafeUpdateChannel(GuildChannel channel)
         {
@@ -100,6 +106,15 @@ namespace SimpleDiscord.Components
                 Threads[Threads.IndexOf(instance)] = thread;
             else
                 Threads.Add(thread);
+        }
+
+        internal void SafeUpdateCommand(ApplicationCommand cmd)
+        {
+            ApplicationCommand instance = Commands.FirstOrDefault(c => c.Name == cmd.Name);
+            if (instance is not null)
+                Commands[Commands.IndexOf(instance)] = cmd;
+            else
+                Commands.Add(cmd);
         }
 
         public static Guild? GetGuild(long id) => List.FirstOrDefault(guild => guild.Id == id);

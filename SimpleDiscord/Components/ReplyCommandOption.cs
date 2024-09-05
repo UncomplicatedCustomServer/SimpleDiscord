@@ -1,7 +1,7 @@
 ﻿namespace SimpleDiscord.Components
 {
 #nullable enable
-    public class CommandOption(string name, int type, object? value, CommandOption[]? options, bool? focused)
+    public class ReplyCommandOption(string name, int type, object? value, ReplyCommandOption[]? options, bool? focused)
     {
         public string Name { get; } = name;
 
@@ -9,7 +9,7 @@
 
         public object? Value { get; } = value;
 
-        public CommandOption[]? Options { get; } = options;
+        public ReplyCommandOption[]? Options { get; } = options;
 
         public bool? Focused { get; } = focused;
     }

@@ -1,8 +1,7 @@
-﻿using SimpleDiscord.Components;
-using SimpleDiscord.Components.Attributes;
+﻿using SimpleDiscord.Components.Attributes;
 using SimpleDiscord.Components.DiscordComponents;
 
-namespace SimpleDiscord
+namespace SimpleDiscord.Components
 {
 #nullable enable
     [SocketInstance(typeof(SocketMessageComponentInteractionData))]

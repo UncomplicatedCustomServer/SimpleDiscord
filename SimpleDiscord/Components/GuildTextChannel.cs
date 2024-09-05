@@ -61,7 +61,7 @@ namespace SimpleDiscord.Components
 
         internal void SafeUpdateMessage(Message message)
         {
-            if (!Guild.Client.SaveMessages)
+            if (!Guild.Client.Config.SaveMessages)
                 return;
 
             Message instance = Messages.FirstOrDefault(msg => msg.Id == message.Id);

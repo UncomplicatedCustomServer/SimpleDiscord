@@ -43,16 +43,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
+    <Compile Include="ClientConfig.cs" />
     <Compile Include="Components\Activity.cs" />
+    <Compile Include="Components\Application.cs" />
+    <Compile Include="Components\ApplicationCommand.cs" />
     <Compile Include="Components\ApplicationCommandInteractionData.cs" />
     <Compile Include="Components\Attachment.cs" />
     <Compile Include="Components\Attributes\EndpointInfo.cs" />
     <Compile Include="Components\Attributes\SocketInstance.cs" />
     <Compile Include="Components\Builders\ActionRowBuilder.cs" />
+    <Compile Include="Components\Builders\ApplicationCommandBuilder.cs" />
     <Compile Include="Components\Builders\EmbedBuilder.cs" />
+    <Compile Include="Components\Builders\HttpMessageBuilder.cs" />
     <Compile Include="Components\Builders\MessageBuilder.cs" />
     <Compile Include="Components\Builders\ModalBuilder.cs" />
     <Compile Include="Components\ClientChild.cs" />
+    <Compile Include="Components\CommandOptionChoice.cs" />
+    <Compile Include="Components\PartialApplication.cs" />
+    <Compile Include="Components\SocketCommandOption.cs" />
     <Compile Include="Components\DiscordComponents\ActionRow.cs" />
     <Compile Include="Components\DiscordComponents\InteractionCallbackData.cs" />
     <Compile Include="Components\InteractionResponse.cs" />
@@ -76,7 +84,7 @@
     <Compile Include="Components\GuildThreadChannel.cs" />
     <Compile Include="Components\GuildVoiceChannel.cs" />
     <Compile Include="Components\IGuildElement.cs" />
-    <Compile Include="Components\CommandOption.cs" />
+    <Compile Include="Components\ReplyCommandOption.cs" />
     <Compile Include="Components\Interaction.cs" />
     <Compile Include="Components\InteractionData.cs" />
     <Compile Include="Components\Message.cs" />
@@ -96,6 +104,7 @@
     <Compile Include="Components\PollMediaObject.cs" />
     <Compile Include="Components\Reaction.cs" />
     <Compile Include="Components\ResolvedData.cs" />
+    <Compile Include="Components\SocketApplicationCommand.cs" />
     <Compile Include="Components\SocketInteractionResponse.cs" />
     <Compile Include="Components\SocketMessageComponentInteractionData.cs" />
     <Compile Include="Components\SocketModalSubmitInteractionData.cs" />
@@ -110,13 +119,13 @@
     <Compile Include="Components\SocketGuildTextChannel.cs" />
     <Compile Include="Components\SocketGuildThreadChannel.cs" />
     <Compile Include="Components\SocketGuildVoiceChannel.cs" />
-    <Compile Include="Components\Communicator\ReadyFields.cs" />
     <Compile Include="Components\Emoji.cs" />
     <Compile Include="Components\SocketGuild.cs" />
     <Compile Include="Components\SocketMember.cs" />
     <Compile Include="Components\Role.cs" />
     <Compile Include="Components\SocketMessage.cs" />
     <Compile Include="Components\SocketReaction.cs" />
+    <Compile Include="Components\SocketSendApplicationCommand.cs" />
     <Compile Include="Components\SocketSendMessage.cs" />
     <Compile Include="Components\SocketPresence.cs" />
     <Compile Include="Components\SocketScheduledEvent.cs" />
@@ -131,6 +140,9 @@
     <Compile Include="Enums\ButtonStyle.cs" />
     <Compile Include="Enums\ChannelType.cs" />
     <Compile Include="Enums\Classes\EmbedType.cs" />
+    <Compile Include="Enums\Classes\Language.cs" />
+    <Compile Include="Enums\CommandOptionType.cs" />
+    <Compile Include="Enums\CommandType.cs" />
     <Compile Include="Enums\ComponentType.cs" />
     <Compile Include="Enums\ConnectionStatus.cs" />
     <Compile Include="Enums\GatewayIntents.cs" />
@@ -139,6 +151,7 @@
     <Compile Include="Enums\InteractionType.cs" />
     <Compile Include="Enums\MessageFlags.cs" />
     <Compile Include="Enums\ReactionType.cs" />
+    <Compile Include="Enums\RegisterCommandType.cs" />
     <Compile Include="Enums\TextInputStyle.cs" />
     <Compile Include="Events\Attributes\SocketEvent.cs" />
     <Compile Include="Events\Handler.cs" />
@@ -158,6 +171,7 @@
     <Compile Include="Gateway\Events\LocalizedData\EventIntents.cs" />
     <Compile Include="Gateway\Events\LocalizedData\HelloDataMember.cs" />
     <Compile Include="Gateway\Events\InteractionCreate.cs" />
+    <Compile Include="Gateway\Events\LocalizedData\ReadyDataMember.cs" />
     <Compile Include="Gateway\Events\MessageCreate.cs" />
     <Compile Include="Gateway\Events\Ready.cs" />
     <Compile Include="Gateway\GatewatEventHandler.cs" />
@@ -169,9 +183,11 @@
     <Compile Include="Logger\Log.cs" />
     <Compile Include="Logger\LogEntry.cs" />
     <Compile Include="Logger\LogLevel.cs" />
-    <Compile Include="MessageComponentInteractionData.cs" />
+    <Compile Include="Enums\MessageComponentInteractionData.cs" />
     <Compile Include="Networking\Endpoints.cs" />
     <Compile Include="Networking\Http.cs" />
+    <Compile Include="Networking\RateLimit.cs" />
+    <Compile Include="Networking\RateLimitHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

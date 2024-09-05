@@ -31,7 +31,7 @@ namespace SimpleDiscord
 
         private readonly Client DiscordClient = client;
 
-        private readonly Random Random = new();
+        internal static readonly Random Random = new();
 
         private uint? heartbeatDelay = null;
 
@@ -129,6 +129,21 @@ namespace SimpleDiscord
             if (ev is InteractionCreate interactionCreate)
                 interactionCreate.Interaction.SetClient(DiscordClient);
 
+            if (ev is Ready ready)
+            {
+                DiscordClient.Application = ready.Data.Application;
+                DiscordClient.Bot = ready.Data.User;
+                DiscordClient.SessionId = ready.Data.SessionId;
+                DiscordClient.ResumeGatewayUrl = ready.Data.ResumeGatewayUrl;
+
+                if (DiscordClient.Config.LoadAppInfo)
+                {
+                    Task<Application> task = DiscordClient.RestHttp.GetCurrentApplication();
+                    task.Wait();
+                    DiscordClient.Application = task.Result;
+                }
+            }
+
             if (connectionStatus is ConnectionStatus.Connected or ConnectionStatus.Connecting && ev is not null && ev.GatewayMessage.EventName != null)
             {
                 Console.WriteLine($"\nInvoking event {ev.GatewayMessage.EventName} ({ev.GatewayMessage.OpCode}) -- found {ev.GetType().FullName}\n");
@@ -180,10 +195,36 @@ namespace SimpleDiscord
             {
                 Console.WriteLine("\nREADY!\n");
                 connectionStatus = ConnectionStatus.Connected;
+                Task.Run(RegisterGlobalCommands); // Register global commands with the respect of RL
             }
 
             if (ev is null)
                 Console.WriteLine("Event is not handled");
+        }
+
+        public async void RegisterGlobalCommands()
+        {
+            if (DiscordClient.Config.RegisterCommands is RegisterCommandType.None)
+                return;
+
+            await Task.Delay(1500);
+            List<SocketApplicationCommand> globalCommands = [.. (await DiscordClient.RestHttp.GetGlobalCommands())];
+            foreach (SocketSendApplicationCommand cmd in DiscordClient.sendCommandsQueue)
+            {
+                bool exists = globalCommands.FirstOrDefault(c => c.Name == cmd.Name) is not null;
+                if (exists && DiscordClient.Config.RegisterCommands is not RegisterCommandType.CreateAndEdit)
+                    continue;
+
+                SocketApplicationCommand command = await DiscordClient.RestHttp.CreateGlobalCommand(cmd);
+                globalCommands.Add(command);
+                await Task.Delay(4250);
+            }
+
+            DiscordClient.sendCommandsQueue = null;
+
+            if (DiscordClient.Config.SaveGlobalRegisteredCommands)
+                foreach (SocketApplicationCommand cmd in globalCommands)
+                    DiscordClient.Commands.Add(new(cmd));
         }
 
         internal void SendMessage(DiscordRawGatewayMessage raw)
@@ -218,12 +259,12 @@ namespace SimpleDiscord
         {
             while (connectionStatus is not ConnectionStatus.NotAvailable and not ConnectionStatus.NotConnected and not ConnectionStatus.Ready && heartbeatDelay is not null)
             {
-                if (heartbeatDelay == 0)
+                if (heartbeatDelay is 0)
                     return;
 
                 Console.WriteLine("\nHeartbeat!\n");
                 SendHeartbeat();
-                int time = (int)(heartbeatDelay * 1);
+                int time = (int)heartbeatDelay + Random.Next(-50, 50);
                 Console.WriteLine($"Waiting time: {time} -- {heartbeatDelay}");
                 await Task.Delay(time);
             }

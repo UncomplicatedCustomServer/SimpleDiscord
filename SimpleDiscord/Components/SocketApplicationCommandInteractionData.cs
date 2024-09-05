@@ -13,14 +13,14 @@ namespace SimpleDiscord.Components
 
         public SocketResolvedData? Data { get; }
 
-        public CommandOption[]? Options { get; }
+        public ReplyCommandOption[]? Options { get; }
 
         public long? GuildId { get; }
 
         public long? TargetId { get; }
 
         [JsonConstructor]
-        public SocketApplicationCommandInteractionData(long id, string name, int type, SocketResolvedData? data, CommandOption[]? options, long? guildId, long? targetId)
+        public SocketApplicationCommandInteractionData(long id, string name, int type, SocketResolvedData? data, ReplyCommandOption[]? options, long? guildId, long? targetId)
         {
             Id = id;
             Name = name;
