@@ -6,16 +6,20 @@ namespace SimpleDiscord.Components
     {
         public long Id { get; }
 
+        [JsonProperty("guild_id")]
         public long GuildId { get; }
 
-        public string Name { get; } 
+        public string Name { get; }
 
+        [JsonProperty("privacy_level")]
         public int PrivacyLevel { get; }
 
         public int Status { get; }
 
+        [JsonProperty("entity_type")]
         public int EntityType { get; }
 
+        [JsonProperty("entity_id")]
         public long? EntityId { get; }
 
         [JsonConstructor]

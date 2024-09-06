@@ -4,6 +4,8 @@ namespace SimpleDiscord.Networking
 {
     internal class RateLimit(string uri, int initialLimit, int initialRemain, float resetAfter, float reset, bool def = false)
     {
+        public readonly string id = Guid.NewGuid().ToString();
+
         public string Uri { get; } = uri;
 
         public int Limit { get; } = initialLimit;

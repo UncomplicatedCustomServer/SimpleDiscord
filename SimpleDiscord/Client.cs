@@ -2,6 +2,7 @@
 using SimpleDiscord.Enums;
 using SimpleDiscord.Events;
 using SimpleDiscord.Gateway;
+using SimpleDiscord.Logger;
 using SimpleDiscord.Networking;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,8 @@ namespace SimpleDiscord
         public PartialApplication Application { get; internal set; }
 
         public List<ApplicationCommand> Commands { get; } = [];
+
+        public readonly Log Logger;
 
         public SocketSendPresence Presence { 
             get
@@ -56,6 +59,7 @@ namespace SimpleDiscord
         public Client(ClientConfig config = null)
         {
             Config = config ?? new();
+            Logger = new(Config);
             GatewatEventHandler = new();
             EventHandler = new();
             _discordClient = new(this);

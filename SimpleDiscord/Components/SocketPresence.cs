@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace SimpleDiscord.Components
 {
@@ -15,10 +16,10 @@ namespace SimpleDiscord.Components
         public UserActivity[] Activities { get; }
 
         [JsonProperty("client_status")]
-        public string ClientStatus { get; }
+        public Dictionary<string, string> ClientStatus { get; }
 
         [JsonConstructor]
-        public SocketPresence(SocketUser user, long guildId, string status, UserActivity[] activities, string clientStatus)
+        public SocketPresence(SocketUser user, long guildId, string status, UserActivity[] activities, Dictionary<string, string> clientStatus)
         {
             User = user;
             GuildId = guildId;

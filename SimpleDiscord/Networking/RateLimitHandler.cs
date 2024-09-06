@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 
 namespace SimpleDiscord.Networking
 {
@@ -12,6 +13,8 @@ namespace SimpleDiscord.Networking
         private readonly Dictionary<string, RateLimit> EndpointRateLimits = [];
 
         private readonly Dictionary<string, float> WaitingTime = [];
+
+        private readonly Dictionary<string, float> CalculatedTime = [];
 
         public RateLimit GetRateLimit(HttpRequestMessage request)
         {
@@ -25,7 +28,7 @@ namespace SimpleDiscord.Networking
             }
         }
 
-        public float GetWaitingTime(HttpRequestMessage request)
+        public float GetWaitingTime(HttpRequestMessage request, string id)
         {
             string uri = GenerateUri(request);
             RateLimit rateLimit = GetRateLimit(request);
@@ -34,14 +37,21 @@ namespace SimpleDiscord.Networking
             else
                 WaitingTime.Add(uri, rateLimit.EnqueueTime());
 
+            CalculatedTime.Add(id, rateLimit.EnqueueTime());
+
             return WaitingTime[uri];
         }
 
-        public void ResolveWaitingTime(HttpRequestMessage request, RateLimit rateLimit)
+        public void ResolveWaitingTime(HttpRequestMessage request, string id)
         {
+            if (id == string.Empty)
+                return;
+
             string uri = GenerateUri(request);
             if (WaitingTime.ContainsKey(uri))
-                WaitingTime[GenerateUri(request)] -= rateLimit.EnqueueTime();
+                WaitingTime[GenerateUri(request)] -= CalculatedTime[id];
+
+            CalculatedTime.Remove(id); // Garbage collector
         }
 
         public void MakeRequest(RateLimit rateLimit)
@@ -79,7 +89,6 @@ namespace SimpleDiscord.Networking
             string uri = GenerateUri(request);
             RateLimit rateLimit = new(uri, int.Parse(rateLimitLimit), int.Parse(rateLimitRemaining), (int)float.Parse(rateLimitResetAfter.Replace('.', ',')), float.Parse(rateLimitReset.Replace('.', ',')));
             EndpointRateLimits[uri] = rateLimit;
-            Log.Warn($"We got {rateLimit.Uri} @ {rateLimit.Limit}, {rateLimit.Remaining}, {rateLimit.ResetAfter}, {rateLimit.EnqueueTime()}\n\n\n");
         }
 
         internal static string GenerateUri(HttpRequestMessage msg)

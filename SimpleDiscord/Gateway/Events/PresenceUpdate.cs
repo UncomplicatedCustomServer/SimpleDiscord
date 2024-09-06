@@ -15,7 +15,7 @@ namespace SimpleDiscord.Gateway.Events
         public override void Init()
         {
             Data = JsonConvert.DeserializeObject<SocketPresence>(RawData);
-            Presence = new(Presence);
+            Presence = new(Data);
         }
     }
 }

@@ -51,7 +51,7 @@ namespace SimpleDiscord
             this.token = token;
             this.intents = intents;
             await RetriveEndpoint();
-            Console.WriteLine($"\nFound endpoint: {endpoint}!");
+            DiscordClient.Logger.Silent($"Found Discord Gateway: {endpoint}");
             await Connect();
         }
 
@@ -80,25 +80,20 @@ namespace SimpleDiscord
             await MessageReceiver();
         }
 
-        internal void Disconnect()
-        {
-            _ = webSocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None).ConfigureAwait(false);
-        }
+        internal async void Disconnect() => await webSocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
 
         internal async Task MessageReceiver()
         {
-            Console.WriteLine($"Current status: {connectionStatus}");
             List<byte> received = [];
             while (connectionStatus is not ConnectionStatus.NotAvailable and not ConnectionStatus.NotConnected and not ConnectionStatus.Ready && webSocketClient.State is WebSocketState.Open)
             {
-                Console.WriteLine("buffer!");
                 byte[] buffer = new byte[2048];
                 WebSocketReceiveResult result = await webSocketClient.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 received.AddRange(buffer.Take(result.Count));
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
-                    Console.WriteLine($"\nConnection closed!\nStatus: {result.CloseStatus} - {result.CloseStatusDescription}");
+                    DiscordClient.Logger.Error($"Connection to the Discord Gateway has closed!\nClose code: {result.CloseStatus} - {result.CloseStatusDescription}");
                     return;
                 }
 
@@ -126,7 +121,8 @@ namespace SimpleDiscord
             if (ev is GuildCreate guildCreate)
             {
                 guildCreate.Guild.SetClient(DiscordClient);
-                guildCreate.Guild.SafeRegisterCommands();
+                Task.Run(guildCreate.Guild.SafeRegisterCommands); // Async plz
+
                 // Register every user if needed
                 if (DiscordClient.Config.LoadMembers)
                     SendMessage(new(string.Empty, 8, new GuildChunkMemberData(guildCreate.Guild.Id)));
@@ -164,14 +160,13 @@ namespace SimpleDiscord
 
             if (connectionStatus is ConnectionStatus.Connected or ConnectionStatus.Connecting && ev is not null && ev.GatewayMessage.EventName != null)
             {
-                Console.WriteLine($"\nInvoking event {ev.GatewayMessage.EventName} ({ev.GatewayMessage.OpCode}) -- found {ev.GetType().FullName}\n");
                 if (ev is IUserDeniableEvent deniableEvent && deniableEvent.CanShare)
                     goto proceed;
 
                 if (ev is MessageUpdate messageUpdated && pollResults.Contains(messageUpdated.Message.Id))
                 {
                     DiscordClient.EventHandler.Invoke("POLL_ENDED", new PollEnded(messageUpdated.Message, messageUpdated.Message.Poll));
-                    Log.Error("POLL ENDED NO WAY NON CI CREDOO");
+                    DiscordClient.Logger.Error("POLL ENDED NO WAY NON CI CREDOO");
                     goto proceed;
                 }
 
@@ -182,16 +177,14 @@ namespace SimpleDiscord
 
             if (ev is Hello hello)
             {
-                Console.WriteLine($"\nHELLO!\nDDL: {hello.Data.HeartbeatInterval}\n");
                 connectionStatus = ConnectionStatus.Identifying;
                 heartbeatDelay = hello.Data.HeartbeatInterval;
                 HeartbeatHandler();
             }
             else if (ev is HeartbeatAck)
             {
-                Console.WriteLine("\nACK!\n");
                 if (_areadyAuthed)
-                    Console.WriteLine("\nReceived ACK\n");
+                    DiscordClient.Logger.Silent("[HEARTBEAT] Got ACK!");
                 else
                 {
                     SendMessage(new(string.Empty, 2, new Identify(token, new()
@@ -218,13 +211,9 @@ namespace SimpleDiscord
             }
             else if (ev is Ready)
             {
-                Console.WriteLine("\nREADY!\n");
                 connectionStatus = ConnectionStatus.Connected;
                 Task.Run(RegisterGlobalCommands); // Register global commands with the respect of RL
             }
-
-            if (ev is null)
-                Console.WriteLine("Event is not handled");
         }
 
         public async void RegisterGlobalCommands()
@@ -266,11 +255,8 @@ namespace SimpleDiscord
                     ContractResolver = contractResolver,
                     Formatting = Formatting.Indented
                 });
-                Console.WriteLine("\nSending info!\nData: " + data + "\n");
 
                 webSocketClient.SendAsync(new(Encoding.UTF8.GetBytes(data)), WebSocketMessageType.Binary, true, CancellationToken.None);
-
-                Console.WriteLine("Ok were here");
                 return;
             }
             catch (Exception e)
@@ -287,10 +273,9 @@ namespace SimpleDiscord
                 if (heartbeatDelay is 0)
                     return;
 
-                Console.WriteLine("\nHeartbeat!\n");
+                DiscordClient.Logger.Silent("[HEARTBEAT] Sending heartbeat...");
                 SendHeartbeat();
                 int time = (int)heartbeatDelay + Random.Next((int)(heartbeatDelay * -1) / 4, -15);
-                Console.WriteLine($"Waiting time: {time} -- {heartbeatDelay}");
                 await Task.Delay(time);
             }
         }

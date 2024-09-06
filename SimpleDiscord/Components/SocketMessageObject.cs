@@ -4,10 +4,13 @@ namespace SimpleDiscord.Components
 {
     public class SocketMessageObject
     {
+        [JsonProperty("channel_id")]
         public long ChannelId { get; }
 
+        [JsonProperty("message_id")]
         public long MessageId { get; }
 
+        [JsonProperty("guild_id")]
         public long? GuildId { get; }
 
         [JsonConstructor]

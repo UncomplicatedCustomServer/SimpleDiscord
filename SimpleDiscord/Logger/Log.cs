@@ -3,13 +3,15 @@
 namespace SimpleDiscord.Logger
 {
 #nullable enable
-    public static class Log
+    public class Log(ClientConfig config)
     {
-        public static string Prefix { get; set; } = "SimpleDiscord";
+        private readonly ClientConfig Config = config;
 
-        public static Func<LogEntry, bool>? SubstituteLogHandler { get; private set; }
+        public string Prefix { get; set; } = "SimpleDiscord";
 
-        public static void SendLog(LogEntry entry)
+        public Func<LogEntry, bool>? SubstituteLogHandler { get; private set; }
+
+        public void SendLog(LogEntry entry)
         {
             if (SubstituteLogHandler is not null)
                 if (!SubstituteLogHandler(entry))
@@ -31,14 +33,24 @@ namespace SimpleDiscord.Logger
             Console.ResetColor();
         }
 
-        public static void SendLog(string message, LogLevel level) => SendLog(new(message, level));
+        public void SendLog(string message, LogLevel level) => SendLog(new(message, level));
 
-        public static void Debug(string message) => SendLog(message, LogLevel.Debug);
+        public void Silent(string message)
+        {
+            if (Config.Debug)
+                SendLog(message, LogLevel.None);
+        }
 
-        public static void Info(string message) => SendLog(message, LogLevel.Info);
+        public void Debug(string message)
+        {
+            if (Config.Debug)
+                SendLog(message, LogLevel.Debug);
+        }
 
-        public static void Warn(string message) => SendLog(message, LogLevel.Warn);
+        public void Info(string message) => SendLog(message, LogLevel.Info);
 
-        public static void Error(string message) => SendLog(message, LogLevel.Error);
+        public void Warn(string message) => SendLog(message, LogLevel.Warn);
+
+        public void Error(string message) => SendLog(message, LogLevel.Error);
     }
 }

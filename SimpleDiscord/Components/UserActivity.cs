@@ -1,4 +1,5 @@
-﻿using SimpleDiscord.Enums;
+﻿using Newtonsoft.Json;
+using SimpleDiscord.Enums;
 
 namespace SimpleDiscord.Components
 {
@@ -11,8 +12,10 @@ namespace SimpleDiscord.Components
 
         public string? Url { get; } = url;
 
+        [JsonProperty("created_at")]
         public int CreatedAt { get; } = createdAt;
 
+        [JsonProperty("application_id")]
         public long? ApplicationId { get; } = applicationId;
 
         public string? Details { get; } = details;

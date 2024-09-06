@@ -5,16 +5,21 @@ namespace SimpleDiscord.Components
 #nullable enable
     public class SocketGuildThreadChannel : SocketGuildTextChannel
     {
+        [JsonProperty("owner_id")]
         public long? OwnerId { get; }
 
+        [JsonProperty("message_count")]
         public int? MessageCount { get; }
 
+        [JsonProperty("member_count")]
         public int? MemberCount { get; }
 
+        [JsonProperty("thread_metadata")]
         public ThreadMetadata? ThreadMetadata { get; }
 
         public ThreadMember? Member { get; }
 
+        [JsonProperty("default_auto_archive_duration")]
         public int? DefaultAutoArchiveDuration { get; }
 
         [JsonConstructor]

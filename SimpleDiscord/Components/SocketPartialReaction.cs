@@ -7,14 +7,17 @@ namespace SimpleDiscord.Components
     {
         public int Count { get; }
 
+        [JsonProperty("count_details")]
         public Dictionary<string, int> CountDetails { get; }
 
         public bool Me { get; }
 
+        [JsonProperty("me_burst")]
         public bool MeBurst { get; }
 
         public Emoji Emoji { get; }
 
+        [JsonProperty("burst_colors")]
         public int[] BurstColors { get; }
 
         [JsonConstructor]

@@ -9,6 +9,7 @@ namespace SimpleDiscord.Components
         [JsonProperty("custom_id")]
         public string CustomId { get; }
 
+        [JsonProperty("component_type")]
         public int ComponentType { get; }
 
         public SelectOption[]? Values { get; }

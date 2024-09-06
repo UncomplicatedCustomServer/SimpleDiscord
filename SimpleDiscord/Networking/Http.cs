@@ -24,30 +24,32 @@ namespace SimpleDiscord.Networking
 
         public async Task<HttpResponseMessage> Send(HttpRequestMessage message, HttpStatusCode expectedResponse = HttpStatusCode.OK, bool disableResponseCheck = false)
         {
-            Log.Debug($"Starting HTTP call with codified uri: {RateLimitHandler.GenerateUri(message)}");
+            discordClient.Logger.Silent($"[HTTP BUCKET] {message.Method.Method} {message.RequestUri.OriginalString}");
+            string requestId = string.Empty;
             RateLimit rateLimit = rateLimitHandler.GetRateLimit(message);
             if (!rateLimit.Validate())
             {
                 if (rateLimit.Default)
                 {
                     // Is a default one, we should just wait 1s and then proceed with the thing
-                    Log.Debug($"Got default rate limit, we just need to wait 1s before going back to scene!");
+                    discordClient.Logger.Debug($"Got default rate limit, we just need to wait 1s before going back to scene!");
                     await Task.Delay(1000);
                     return await Send(message, expectedResponse, disableResponseCheck);
                 }
 
                 // We must apply ratelimit
-                float wait = rateLimitHandler.GetWaitingTime(message);
-                Log.Debug($"RateLimit validated, awaiting {rateLimit.EnqueueTime()} ({wait}) seconds before accessing back the service...");
+                requestId = Guid.NewGuid().ToString();
+                float wait = rateLimitHandler.GetWaitingTime(message, requestId);
+                discordClient.Logger.Debug($"RateLimit validated, awaiting {rateLimit.EnqueueTime()} ({wait}) seconds before accessing back the service...");
                 await Task.Delay((int)(wait * 1000)); // Enqueued
                 
             }
 
             rateLimitHandler.MakeRequest(rateLimit); // Sync update
-            Log.Info($"Current rate limit rate: {rateLimit.Limit} -- remainings: {rateLimit.Remaining} -- wait: {rateLimit.ResetAfter} -- time: {rateLimit.EnqueueTime()}");
+            discordClient.Logger.Info($"Current rate limit rate: {rateLimit.Limit} -- remainings: {rateLimit.Remaining} -- wait: {rateLimit.ResetAfter} -- time: {rateLimit.EnqueueTime()}");
             HttpResponseMessage answer = await HttpClient.SendAsync(message);
-            rateLimitHandler.ResolveWaitingTime(message, rateLimit);
-            Log.Debug($"Received response from CHPN - {answer.StatusCode}");
+            rateLimitHandler.ResolveWaitingTime(message, requestId);
+            discordClient.Logger.Debug($"Received response from CHPN - {answer.StatusCode}");
             rateLimitHandler.UpdateRateLimit(message, answer.Headers); //  Async update
 
             if (!disableResponseCheck && answer.StatusCode != expectedResponse)
@@ -335,8 +337,6 @@ namespace SimpleDiscord.Networking
             HttpResponseMessage answer = await Send(request, HttpStatusCode.Created, true);
 
             string answ = await answer.Content.ReadAsStringAsync();
-
-            Log.Warn($"Magic thing: {answer.StatusCode} - {answ}");
 
             return JsonConvert.DeserializeObject<SocketGuildThreadChannel>(await answer.Content.ReadAsStringAsync());
         }

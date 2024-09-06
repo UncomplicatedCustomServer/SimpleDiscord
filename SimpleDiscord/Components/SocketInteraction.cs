@@ -34,6 +34,7 @@ namespace SimpleDiscord.Components
 
         public string? Locale { get; }
 
+        [JsonProperty("guild_locale")]
         public string? GuildLocale { get; }
 
         public int? Context { get; }

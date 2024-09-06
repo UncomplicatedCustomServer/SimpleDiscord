@@ -11,8 +11,10 @@ namespace SimpleDiscord.Components
 
         public string? Expiry { get; }
 
-        public bool AllowMultiselect { get; } 
+        [JsonProperty("allow_multiselect")]
+        public bool AllowMultiselect { get; }
 
+        [JsonProperty("layout_type")]
         public int LayoutType { get; }
 
         public PollResults? Results { get; }

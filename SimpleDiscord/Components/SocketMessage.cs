@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SimpleDiscord.Components.Attributes;
 using SimpleDiscord.Components.DiscordComponents;
-using SimpleDiscord.Networking;
-using System;
 
 namespace SimpleDiscord.Components
 {
@@ -24,14 +22,17 @@ namespace SimpleDiscord.Components
 
         public string Timestamp { get; }
 
+        [JsonProperty("edited_timestamp")]
         public string EditedTimestamp { get; }
 
         public bool Tts { get; }
 
+        [JsonProperty("mention_everyone")]
         public bool MentionEveryone { get; }
 
         public SocketUser[] Mentions { get; }
 
+        [JsonProperty("mention_roles")]
         public Role[] MentionRoles { get; }
 
         public Attachment[] Attachments { get; }
@@ -42,6 +43,7 @@ namespace SimpleDiscord.Components
 
         public bool Pinned { get; }
 
+        [JsonProperty("webhook_id")]
         public long? WebhookId { get; }
 
         public int Type { get; }
@@ -50,6 +52,7 @@ namespace SimpleDiscord.Components
 
         public SocketActionRow[]? Components { get; }
 
+        [JsonProperty("message_reference")]
         public MessageReference? MessageReference { get; }
 
         public SocketGuildThreadChannel? Thread { get; }

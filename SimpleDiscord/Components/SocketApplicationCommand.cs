@@ -10,20 +10,25 @@ namespace SimpleDiscord.Components
 
         public int Type { get; }
 
+        [JsonProperty("application_id")]
         public long ApplicationId { get; }
 
+        [JsonProperty("guild_id")]
         public long? GuildId { get; }
 
         public string Name { get; }
 
+        [JsonProperty("name_localizations")]
         public Dictionary<string, string>? NameLocalizations { get; }
 
         public string Description { get; }
 
+        [JsonProperty("description_localizations")]
         public Dictionary<string, string>? DescriptionLocalizations { get; }
 
         public SocketCommandOption[]? Options { get; }
 
+        [JsonProperty("dm_permission")]
         public bool? DmPermission { get; }
 
         public bool? Nsfw { get; }

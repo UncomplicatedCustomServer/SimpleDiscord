@@ -12,6 +12,7 @@ namespace SimpleDiscord.Components
 
         public bool Burst { get; }
 
+        [JsonProperty("burst_colors")]
         public string[]? BurstColors { get; }
 
         public int Type { get; }

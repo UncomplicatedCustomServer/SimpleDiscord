@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SimpleDiscord.Components
@@ -9,14 +10,19 @@ namespace SimpleDiscord.Components
     {
         public static readonly List<SocketUser> List = [];
 
+        [JsonProperty("id")]
         public long Id { get; }
 
+        [JsonProperty("username")]
         public string Username { get; }
 
+        [JsonProperty("discriminator")]
         public string Discriminator { get; }
 
+        [JsonProperty("global_name")]
         public string? GlobalName { get; }
 
+        [JsonProperty("avatar")]
         public string? Avatar { get; }
 
         public SocketUser(long id, string username, string discriminator, string? globalName = null, string? avatar = null)

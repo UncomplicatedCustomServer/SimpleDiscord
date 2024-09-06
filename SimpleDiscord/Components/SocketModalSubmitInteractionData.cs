@@ -6,6 +6,7 @@ namespace SimpleDiscord.Components
 #nullable enable
     public class SocketModalSubmitInteractionData : SocketInteractionData
     {
+        [JsonProperty("custom_id")]
         public string CustomId { get; }
 
         public TextInput[]? Components { get; }

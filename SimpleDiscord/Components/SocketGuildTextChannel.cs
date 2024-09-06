@@ -10,10 +10,13 @@ namespace SimpleDiscord.Components
 
         public bool? Nsfw { get; }
 
+        [JsonProperty("last_message_id")]
         public long? LastMessageId { get; }
 
+        [JsonProperty("rate_limit_per_user")]
         public int? RateLimitPerUser { get; }
 
+        [JsonProperty("total_message_sent")]
         public int? TotalMessageSent { get; }
 
         [JsonConstructor]

@@ -13,8 +13,10 @@ namespace SimpleDiscord.Components
 
         public long[] Roles { get; }
 
+        [JsonProperty("joined_at")]
         public string JoinedAt { get; }
 
+        [JsonProperty("premium_since")]
         public string? PremiumSince { get; }
 
         public bool Deaf { get; }
@@ -27,6 +29,7 @@ namespace SimpleDiscord.Components
 
         public string? Permissions { get; }
 
+        [JsonProperty("communication_disabled_until")]
         public string? CommunicationDisabledUntil { get; }
 
         [JsonConstructor]

@@ -10,10 +10,12 @@ namespace SimpleDiscord.Components
 
         public int? Position { get; }
 
+        [JsonProperty("permission_overwrites")]
         public Overwrite[]? PermissionOverwrites { get; }
 
         public string? Name { get; }
 
+        [JsonProperty("parent_id")]
         public long? ParentId { get; }
 
         public string? Permissions { get; }
