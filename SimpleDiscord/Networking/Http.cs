@@ -4,7 +4,6 @@ using SimpleDiscord.Components;
 using SimpleDiscord.Components.Builders;
 using SimpleDiscord.Components.DiscordComponents;
 using SimpleDiscord.Enums;
-using SimpleDiscord.Logger;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -41,19 +40,19 @@ namespace SimpleDiscord.Networking
                 requestId = Guid.NewGuid().ToString();
                 float wait = rateLimitHandler.GetWaitingTime(message, requestId);
                 discordClient.Logger.Debug($"RateLimit validated, awaiting {rateLimit.EnqueueTime()} ({wait}) seconds before accessing back the service...");
-                await Task.Delay((int)(wait * 1000)); // Enqueued
+                await Task.Delay((int)(wait * 1000 + (Discord.Random.Next(50, 500) / 2))); // Enqueued
                 
             }
 
             rateLimitHandler.MakeRequest(rateLimit); // Sync update
-            discordClient.Logger.Info($"Current rate limit rate: {rateLimit.Limit} -- remainings: {rateLimit.Remaining} -- wait: {rateLimit.ResetAfter} -- time: {rateLimit.EnqueueTime()}");
+            discordClient.Logger.Debug($"Current rate limit rate: {rateLimit.Limit} -- remainings: {rateLimit.Remaining} -- wait: {rateLimit.ResetAfter} -- time: {rateLimit.EnqueueTime()}");
             HttpResponseMessage answer = await HttpClient.SendAsync(message);
             rateLimitHandler.ResolveWaitingTime(message, requestId);
             discordClient.Logger.Debug($"Received response from CHPN - {answer.StatusCode}");
             rateLimitHandler.UpdateRateLimit(message, answer.Headers); //  Async update
 
             if (!disableResponseCheck && answer.StatusCode != expectedResponse)
-                throw new Exception($"Failed to send a HTTP {message.Method.Method} request to {message.RequestUri.OriginalString}.\nExpected OK (200), got {answer.StatusCode} ({(int)answer.StatusCode})");
+                discordClient.ErrorHub.Throw($"Failed to send a HTTP {message.Method.Method} request to {message.RequestUri.OriginalString}.\nExpected OK (200), got {answer.StatusCode} ({(int)answer.StatusCode})");
 
             return answer;
         }
@@ -91,7 +90,7 @@ namespace SimpleDiscord.Networking
                 query += $"&after={after}";
 
             if (limit > 100)
-                throw new ArgumentOutOfRangeException("Limit cannot be greater than 100!");
+                discordClient.ErrorHub.Throw("Limit cannot be greater than 100!", true);
 
             HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Get).SetUri($"{Endpoint}/channels/{message.ChannelId}/messages/{message.Id}/reactions/{emoji}{query}").SetJsonContent(EncodeJson(message)));
 
@@ -142,7 +141,7 @@ namespace SimpleDiscord.Networking
             HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/applications/{discordClient.Application.Id}/commands").SetJsonContent(EncodeJson(command)), disableResponseCheck:true);
 
             if (answer.StatusCode is not HttpStatusCode.OK and not HttpStatusCode.Created)
-                throw new Exception($"Failed to send a HTTP request!.\nExpected OK (200), got {answer.StatusCode} ({(int)answer.StatusCode})");
+                discordClient.ErrorHub.Throw($"Failed to send a HTTP request!.\nExpected OK (200), got {answer.StatusCode} ({(int)answer.StatusCode})");
 
             return JsonConvert.DeserializeObject<SocketApplicationCommand>(await answer.Content.ReadAsStringAsync());
         }
@@ -175,7 +174,7 @@ namespace SimpleDiscord.Networking
             HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/applications/{discordClient.Application.Id}/guilds/{guild.Id}/commands").SetJsonContent(EncodeJson(command)), disableResponseCheck: true);
 
             if (answer.StatusCode is not HttpStatusCode.OK or HttpStatusCode.Created)
-                throw new Exception($"Failed to send a HTTP request!.\nExpected OK (200), got {answer.StatusCode} ({(int)answer.StatusCode})");
+                discordClient.ErrorHub.Throw($"Failed to send a HTTP request!.\nExpected OK (200), got {answer.StatusCode} ({(int)answer.StatusCode})");
 
             return JsonConvert.DeserializeObject<SocketApplicationCommand>(await answer.Content.ReadAsStringAsync());
         }
@@ -286,7 +285,7 @@ namespace SimpleDiscord.Networking
         public async Task<SocketGuildChannel> ChannelEdit(GuildChannel channel, SocketSendGuildChannel newChannel, string reason = null)
         {
             if ((int)channel.Type != newChannel.Type)
-                throw new Exception("The two given channels are not the same type!\nYeah ik that you should be able to convert announcement channels to text ones and vice-versa but nuh uh");
+                discordClient.ErrorHub.Throw("The two given channels are not the same type!\nYeah ik that you should be able to convert announcement channels to text ones and vice-versa but nuh uh", true);
 
             HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod("PATCH").SetUri($"{Endpoint}/channels/{channel.Id}/channels").SetJsonContent(EncodeJson(channel));
 

@@ -28,6 +28,8 @@ namespace SimpleDiscord
 
         public readonly Log Logger;
 
+        public readonly ErrorHub ErrorHub;
+
         public SocketSendPresence Presence { 
             get
             {
@@ -60,6 +62,7 @@ namespace SimpleDiscord
         {
             Config = config ?? new();
             Logger = new(Config);
+            ErrorHub = new(this);
             GatewatEventHandler = new();
             EventHandler = new();
             _discordClient = new(this);

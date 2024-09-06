@@ -28,10 +28,7 @@ namespace SimpleDiscord.Gateway.Events
                 return;
 
             if (localData["channels"] is null)
-            {
-                Console.WriteLine($"Cannot find 'channels' inside guild object?");
                 return;
-            }
 
             foreach (JObject channel in localData["channels"].ToObject<List<JObject>>())
             {

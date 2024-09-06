@@ -33,8 +33,6 @@ namespace SimpleDiscord.Components
             MemberCount = memberCount;
             Members = members;
 
-            Console.WriteLine($"\n\n{Id} - {Name}\n\n");
-
             Channels = channels;
 
             Threads = threads;

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using SimpleDiscord.Components.Attributes;
 using SimpleDiscord.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,7 +27,7 @@ namespace SimpleDiscord.Components.DiscordComponents
         public void BulkAdd(IEnumerable<GenericComponent> components)
         {
             if (components.Count() > 5)
-                throw new System.Exception("Too many components!");
+                throw new Exception("Too many components!");
 
             foreach (GenericComponent component in components)
                 Components.Add(component);

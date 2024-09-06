@@ -65,15 +65,17 @@ namespace SimpleDiscord
             if (data.TryGetValue("url", out string url))
                 endpoint = url + "?v=10&encoding=json";
             else
-                throw new HttpRequestException("The answer from Discord API is not valid!");
+                DiscordClient.ErrorHub.Throw($"Got invalid response from Discord Gateway Hub!\nKilling process", true);
         }
 
         internal async Task Connect()
         {
             if (endpoint == null || endpoint == string.Empty)
-                throw new WebSocketException("Can't connect to the given URL: " + endpoint);
+                DiscordClient.ErrorHub.Throw($"Cannot connect to the given endpoint as it seems to be invalid!\nEndpoint: {endpoint}");
 
             await webSocketClient.ConnectAsync(new(endpoint), CancellationToken.None);
+
+            DiscordClient.Logger.Silent($"Successfully enstabilished connection with the Discord Gateway, authenticating...");
 
             connectionStatus = ConnectionStatus.Connecting;
 
@@ -107,8 +109,6 @@ namespace SimpleDiscord
 
         private void MessageHandler(string message)
         {
-            Console.WriteLine(message);
-
             DiscordRawGatewayMessage rawMsg = new(message, JsonConvert.DeserializeObject<Dictionary<string, object>>(message));
 
             if (rawMsg.S is not null)
@@ -145,6 +145,7 @@ namespace SimpleDiscord
 
             if (ev is Ready ready)
             {
+                DiscordClient.Logger.Silent("Client is ready!");
                 DiscordClient.Application = ready.Data.Application;
                 DiscordClient.Bot = ready.Data.User;
                 DiscordClient.SessionId = ready.Data.SessionId;
@@ -204,7 +205,6 @@ namespace SimpleDiscord
                                 "SimpleDiscord"
                             }
                         }, (int)intents)));
-                    Console.Write((int)intents);
                     _areadyAuthed = true;
                     connectionStatus = ConnectionStatus.Connecting;
                 }
@@ -243,27 +243,18 @@ namespace SimpleDiscord
 
         internal void SendMessage(DiscordRawGatewayMessage raw)
         {
-            try
+            DefaultContractResolver contractResolver = new()
             {
-                DefaultContractResolver contractResolver = new()
-                {
-                    NamingStrategy = new SnakeCaseNamingStrategy()
-                };
+                NamingStrategy = new SnakeCaseNamingStrategy()
+            };
 
-                string data = JsonConvert.SerializeObject(raw, new JsonSerializerSettings
-                {
-                    ContractResolver = contractResolver,
-                    Formatting = Formatting.Indented
-                });
-
-                webSocketClient.SendAsync(new(Encoding.UTF8.GetBytes(data)), WebSocketMessageType.Binary, true, CancellationToken.None);
-                return;
-            }
-            catch (Exception e)
+            string data = JsonConvert.SerializeObject(raw, new JsonSerializerSettings
             {
-                Console.WriteLine(e);
-                return;
-            }
+                ContractResolver = contractResolver,
+                Formatting = Formatting.Indented
+            });
+
+            webSocketClient.SendAsync(new(Encoding.UTF8.GetBytes(data)), WebSocketMessageType.Binary, true, CancellationToken.None);
         }
 
         private async void HeartbeatHandler()

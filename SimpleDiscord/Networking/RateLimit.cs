@@ -20,7 +20,7 @@ namespace SimpleDiscord.Networking
 
         public bool Validate() => Remaining > 0;
 
-        public float EnqueueTime() => Reset - DateTimeOffset.UtcNow.ToUnixTimeSeconds() + (Discord.Random.Next(1, 10) / 2);
+        public float EnqueueTime() => Reset - DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         public float Requested() => Remaining--;
     }

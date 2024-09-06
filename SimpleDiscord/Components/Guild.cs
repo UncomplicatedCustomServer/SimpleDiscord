@@ -39,7 +39,6 @@ namespace SimpleDiscord.Components
 
         public Guild(AnonymousGuild anonymous) : base(anonymous)
         {
-            Console.WriteLine(anonymous.JoinedAt);
             if (anonymous.JoinedAt is not null && !true)
                 JoinedAt = DateTimeOffset.Parse(anonymous.JoinedAt);
             Large = anonymous.Large;

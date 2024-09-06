@@ -4,7 +4,7 @@ using SimpleDiscord.Enums;
 namespace SimpleDiscord.Components
 {
 #nullable enable
-    public class UserActivity(string name, int type, string? url, int createdAt, long? applicationId, string? details, string? state, Emoji? emoji, bool? instance, int? flags, ActivityButton[]? buttons)
+    public class UserActivity(string name, int type, string? url, long createdAt, long? applicationId, string? details, string? state, Emoji? emoji, bool? instance, int? flags, ActivityButton[]? buttons)
     {
         public string Name { get; } = name;
 
@@ -13,7 +13,7 @@ namespace SimpleDiscord.Components
         public string? Url { get; } = url;
 
         [JsonProperty("created_at")]
-        public int CreatedAt { get; } = createdAt;
+        public long CreatedAt { get; } = createdAt;
 
         [JsonProperty("application_id")]
         public long? ApplicationId { get; } = applicationId;

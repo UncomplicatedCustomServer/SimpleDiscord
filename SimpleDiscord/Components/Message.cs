@@ -25,13 +25,10 @@ namespace SimpleDiscord.Components
 
         public Message(SocketMessage baseMessage) : base(baseMessage)
         {
-            Console.WriteLine($"Called message ..ctor with {baseMessage.Content} - {baseMessage.Id}\n\n");
-
             Thread = null;
             if (baseMessage.Thread is not null)
                 Thread = new(baseMessage.Thread);
 #nullable disable
-            Console.WriteLine($"We have a total of {GuildChannel.List.Count} cached channels!");
             Channel = GuildChannel.List.FirstOrDefault(channel => channel.Id == ChannelId) as GuildTextChannel;
 
             Guild = Channel.Guild;

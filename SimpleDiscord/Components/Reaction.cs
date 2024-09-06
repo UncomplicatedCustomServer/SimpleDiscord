@@ -24,7 +24,7 @@ namespace SimpleDiscord.Components
             BurstMembers = [];
 
             if (socketPartialReaction.Emoji is null)
-                throw new NullReferenceException("Emoji is null");
+                Message.Client.ErrorHub.Throw("Emoji is null", true);
 
             if (fetchMembers && CountDetails is not null && CountDetails.TryGetValue("burst", out int burstCount) && CountDetails.TryGetValue("normal", out int normalCount))
             {

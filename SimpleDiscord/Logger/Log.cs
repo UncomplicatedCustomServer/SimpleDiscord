@@ -37,7 +37,7 @@ namespace SimpleDiscord.Logger
 
         public void Silent(string message)
         {
-            if (Config.Debug)
+            if (Config.SystemLogs)
                 SendLog(message, LogLevel.None);
         }
 

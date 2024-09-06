@@ -4,7 +4,9 @@ namespace SimpleDiscord
 {
     public sealed class ClientConfig
     {
-        public bool Debug { get; set; } = false;
+        public bool Debug { get; set; } = true;
+
+        public bool SystemLogs { get; set; } = true;
 
         public bool LoadMembers { get; set; } = true; // That requires lots of ram :)
 
