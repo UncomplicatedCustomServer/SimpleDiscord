@@ -1,4 +1,5 @@
-﻿using SimpleDiscord.Components;
+﻿using Newtonsoft.Json;
+using SimpleDiscord.Components;
 
 namespace SimpleDiscord.Gateway.Events.LocalizedData
 {
@@ -11,8 +12,10 @@ namespace SimpleDiscord.Gateway.Events.LocalizedData
 
         public UnavailableGuild[] Guilds { get; } = guilds;
 
+        [JsonProperty("session_id")]
         public string SessionId { get; } = sessionId;
 
+        [JsonProperty("resume_gateway_url")]
         public string ResumeGatewayUrl { get; } = resumeGatewayUrl;
 
         public int[]? Shard { get; } = shard;

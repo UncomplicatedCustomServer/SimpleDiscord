@@ -6,10 +6,8 @@ using SimpleDiscord.Components.DiscordComponents;
 using SimpleDiscord.Enums;
 using SimpleDiscord.Logger;
 using System;
-using System.Data;
 using System.Net;
 using System.Net.Http;
-using System.Security.Authentication.ExtendedProtection;
 using System.Threading.Tasks;
 
 namespace SimpleDiscord.Networking
@@ -26,13 +24,31 @@ namespace SimpleDiscord.Networking
 
         public async Task<HttpResponseMessage> Send(HttpRequestMessage message, HttpStatusCode expectedResponse = HttpStatusCode.OK, bool disableResponseCheck = false)
         {
+            Log.Debug($"Starting HTTP call with codified uri: {RateLimitHandler.GenerateUri(message)}");
             RateLimit rateLimit = rateLimitHandler.GetRateLimit(message);
-            if (rateLimit is not null)
-                if (!rateLimit.Validate())
-                    await Task.Delay((int)(rateLimit.EnqueueTime() * 1000)); // Enqueued
+            if (!rateLimit.Validate())
+            {
+                if (rateLimit.Default)
+                {
+                    // Is a default one, we should just wait 1s and then proceed with the thing
+                    Log.Debug($"Got default rate limit, we just need to wait 1s before going back to scene!");
+                    await Task.Delay(1000);
+                    return await Send(message, expectedResponse, disableResponseCheck);
+                }
 
+                // We must apply ratelimit
+                float wait = rateLimitHandler.GetWaitingTime(message);
+                Log.Debug($"RateLimit validated, awaiting {rateLimit.EnqueueTime()} ({wait}) seconds before accessing back the service...");
+                await Task.Delay((int)(wait * 1000)); // Enqueued
+                
+            }
+
+            rateLimitHandler.MakeRequest(rateLimit); // Sync update
+            Log.Info($"Current rate limit rate: {rateLimit.Limit} -- remainings: {rateLimit.Remaining} -- wait: {rateLimit.ResetAfter} -- time: {rateLimit.EnqueueTime()}");
             HttpResponseMessage answer = await HttpClient.SendAsync(message);
-            rateLimitHandler.UpdateRateLimit(message, answer.Headers);
+            rateLimitHandler.ResolveWaitingTime(message, rateLimit);
+            Log.Debug($"Received response from CHPN - {answer.StatusCode}");
+            rateLimitHandler.UpdateRateLimit(message, answer.Headers); //  Async update
 
             if (!disableResponseCheck && answer.StatusCode != expectedResponse)
                 throw new Exception($"Failed to send a HTTP {message.Method.Method} request to {message.RequestUri.OriginalString}.\nExpected OK (200), got {answer.StatusCode} ({(int)answer.StatusCode})");
@@ -98,7 +114,7 @@ namespace SimpleDiscord.Networking
             return new(socketInteraction);
         }
 
-        public async void DeleteInteractionReply(Interaction interaction)
+        public async Task DeleteInteractionReply(Interaction interaction)
         {
             await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/interactions/{interaction.ApplicationId}/{interaction.Token}/messages/@original"));
 
@@ -136,7 +152,7 @@ namespace SimpleDiscord.Networking
             return JsonConvert.DeserializeObject<SocketApplicationCommand>(await answer.Content.ReadAsStringAsync());
         }
 
-        public async void DeleteGlobalCommand(ApplicationCommand command) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/applications/{discordClient.Application.Id}/commands/{command.Id}"), HttpStatusCode.NoContent);
+        public async  Task DeleteGlobalCommand(ApplicationCommand command) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/applications/{discordClient.Application.Id}/commands/{command.Id}"), HttpStatusCode.NoContent);
 
         public async Task<SocketApplicationCommand[]> BulkOverwriteGlobalCommands(SocketApplicationCommand[] commands)
         {
@@ -169,7 +185,7 @@ namespace SimpleDiscord.Networking
             return JsonConvert.DeserializeObject<SocketApplicationCommand>(await answer.Content.ReadAsStringAsync());
         }
 
-        public async void DeleteGuildCommand(Guild guild, ApplicationCommand command) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/applications/{discordClient.Application.Id}/guilds/{guild.Id}/commands/{command.Id}"), HttpStatusCode.NoContent);
+        public async  Task DeleteGuildCommand(Guild guild, ApplicationCommand command) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/applications/{discordClient.Application.Id}/guilds/{guild.Id}/commands/{command.Id}"), HttpStatusCode.NoContent);
 
         public async Task<SocketApplicationCommand[]> BulkOverwriteGuildCommands(Guild guild, SocketApplicationCommand[] commands)
         {
@@ -178,9 +194,9 @@ namespace SimpleDiscord.Networking
             return JsonConvert.DeserializeObject<SocketApplicationCommand[]>(await answer.Content.ReadAsStringAsync());
         }
 
-        public void MemberAddRole(Member member, Role role, string reason = null) => MemberAddRole(member, role.Id, reason);
+        public Task MemberAddRole(Member member, Role role, string reason = null) => MemberAddRole(member, role.Id, reason);
 
-        public async void MemberAddRole(Member member, long role, string reason = null)
+        public async Task MemberAddRole(Member member, long role, string reason = null)
         {
             HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/guilds/{member.Guild.Id}/members/{member.User.Id}/roles/{role}");
 
@@ -190,9 +206,9 @@ namespace SimpleDiscord.Networking
             await Send(message, HttpStatusCode.NoContent);
         }
 
-        public void MemberRemoveRole(Member member, Role role, string reason = null) => MemberRemoveRole(member, role.Id, reason);
+        public Task MemberRemoveRole(Member member, Role role, string reason = null) => MemberRemoveRole(member, role.Id, reason);
 
-        public async void MemberRemoveRole(Member member, long role, string reason = null)
+        public async Task MemberRemoveRole(Member member, long role, string reason = null)
         {
             HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/guilds/{member.Guild.Id}/members/{member.User.Id}/roles/{role}");
 
@@ -202,7 +218,7 @@ namespace SimpleDiscord.Networking
             await Send(message, HttpStatusCode.NoContent);
         }
 
-        public async void MemberKick(Member member, string reason = null)
+        public async Task MemberKick(Member member, string reason = null)
         {
             HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/guilds/{member.Guild.Id}/members/{member.User.Id}");
 
@@ -212,7 +228,7 @@ namespace SimpleDiscord.Networking
             await Send(message, HttpStatusCode.NoContent);
         }
 
-        public async void MemberBan(Member member, string reason = null, int deleteMessageSeconds = 0)
+        public async Task MemberBan(Member member, string reason = null, int deleteMessageSeconds = 0)
         {
             HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/guilds/{member.Guild.Id}/bans/{member.User.Id}?delete_message_seconds={deleteMessageSeconds}");
 
@@ -222,7 +238,7 @@ namespace SimpleDiscord.Networking
             await Send(message, HttpStatusCode.NoContent);
         }
 
-        public async void MemberUnban(Guild guild, long userId, string reason = null)
+        public async Task MemberUnban(Guild guild, long userId, string reason = null)
         {
             HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/guilds/{guild.Id}/bans/{userId}");
 
@@ -244,7 +260,7 @@ namespace SimpleDiscord.Networking
             return JsonConvert.DeserializeObject<Role>(await answer.Content.ReadAsStringAsync());
         }
 
-        public async void GuildDeleteRole(Guild guild, Role role, string reason = null)
+        public async Task GuildDeleteRole(Guild guild, Role role, string reason = null)
         {
             HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/guilds/{guild.Id}/roles/{role.Id}");
 
@@ -279,7 +295,7 @@ namespace SimpleDiscord.Networking
             return JsonConvert.DeserializeObject<SocketGuildChannel>(await answer.Content.ReadAsStringAsync());
         }
 
-        public async void ChannelDelete(GuildChannel channel, string reason = null)
+        public async Task ChannelDelete(GuildChannel channel, string reason = null)
         {
             HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{channel.Id}");
 
@@ -289,7 +305,7 @@ namespace SimpleDiscord.Networking
             await Send(message);
         }
 
-        public async void PinMessage(Message message, string reason = null)
+        public async Task PinMessage(Message message, string reason = null)
         {
             HttpMessageBuilder request = HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/channels/{message.Channel.Id}/pins/{message.Id}");
 
@@ -299,7 +315,7 @@ namespace SimpleDiscord.Networking
             await Send(request, HttpStatusCode.NoContent);
         }
 
-        public async void UnpinMessage(Message message, string reason = null)
+        public async Task UnpinMessage(Message message, string reason = null)
         {
             HttpMessageBuilder request = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/pins/{message.Id}");
 
@@ -337,13 +353,13 @@ namespace SimpleDiscord.Networking
             return JsonConvert.DeserializeObject<SocketGuildThreadChannel>(await answer.Content.ReadAsStringAsync());
         }
 
-        public async void JoinThread(GuildThreadChannel thread) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members/@me"), HttpStatusCode.NoContent);
+        public async Task JoinThread(GuildThreadChannel thread) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members/@me"), HttpStatusCode.NoContent);
 
-        public async void AddUserToThread(GuildThreadChannel thread, long id) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members/{id}"), HttpStatusCode.NoContent);
+        public async Task AddUserToThread(GuildThreadChannel thread, long id) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members/{id}"), HttpStatusCode.NoContent);
 
-        public async void LeaveThread(GuildThreadChannel thread) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members/@me"), HttpStatusCode.NoContent);
+        public async Task LeaveThread(GuildThreadChannel thread) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members/@me"), HttpStatusCode.NoContent);
 
-        public async void RemoveUserToThread(GuildThreadChannel thread, long id) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members/{id}"), HttpStatusCode.NoContent);
+        public async Task RemoveUserToThread(GuildThreadChannel thread, long id) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members/{id}"), HttpStatusCode.NoContent);
 
         public async Task<ThreadMember[]> GetThreadMembers(GuildThreadChannel thread)
         {
@@ -351,15 +367,15 @@ namespace SimpleDiscord.Networking
             return JsonConvert.DeserializeObject<ThreadMember[]>(await answer.Content.ReadAsStringAsync());
         }
 
-        public async void AddOwnReaction(Message message, Emoji emoji) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions/{emoji.Encode()}/@me"), HttpStatusCode.NoContent);
+        public async Task AddOwnReaction(Message message, Emoji emoji) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions/{emoji.Encode()}/@me"), HttpStatusCode.NoContent);
 
-        public async void DeleteOwnReaction(Message message, Emoji emoji) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions/{emoji.Encode()}/@me"), HttpStatusCode.NoContent);
+        public async Task DeleteOwnReaction(Message message, Emoji emoji) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions/{emoji.Encode()}/@me"), HttpStatusCode.NoContent);
 
-        public async void DeleteUserReaction(Message message, Emoji emoji, long user) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions/{emoji.Encode()}/{user}"), HttpStatusCode.NoContent);
+        public async Task DeleteUserReaction(Message message, Emoji emoji, long user) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions/{emoji.Encode()}/{user}"), HttpStatusCode.NoContent);
 
-        public async void DeleteAllReactions(Message message, Emoji emoji) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions/{emoji.Encode()}"), HttpStatusCode.NoContent);
+        public async Task DeleteAllReactions(Message message, Emoji emoji) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions/{emoji.Encode()}"), HttpStatusCode.NoContent);
 
-        public async void DeleteAllReactions(Message message) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions"), HttpStatusCode.NoContent);
+        public async Task DeleteAllReactions(Message message) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions"), HttpStatusCode.NoContent);
 
         public async Task<SocketMessage[]> GetMessages(GuildTextChannel channel, int? limit = 50, long? around = null, long? before = null, long? after = null)
         {
@@ -378,6 +394,22 @@ namespace SimpleDiscord.Networking
 
             return JsonConvert.DeserializeObject<SocketMessage[]>(await answer.Content.ReadAsStringAsync());
         }
+        public async Task<SocketMessage> EndPoll(Poll poll)
+        {
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/channels/{poll.Message.Channel.Id}/polls/{poll.Message.Id}/expire"));
+            SocketMessage message = JsonConvert.DeserializeObject<SocketMessage>(await answer.Content.ReadAsStringAsync());
+            discordClient._discordClient.pollResults.Add(poll.Message.Id);
+            return message;
+        }
+
+        public async Task<Message> GetMessage(GuildTextChannel channel, long id)
+        {
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Get).SetUri($"{Endpoint}/channels/{channel.Id}/messages/{id}"));
+            SocketMessage message = JsonConvert.DeserializeObject<SocketMessage>(await answer.Content.ReadAsStringAsync());
+            return new(message);
+        }
+
+        public async void Sync(Task task) => await task;
 
         private string EncodeJson(object data)
         {

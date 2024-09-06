@@ -54,10 +54,10 @@ namespace SimpleDiscord.Components
 
         public SocketGuildThreadChannel? Thread { get; }
 
-        public Poll? Poll { get; }
+        public SocketPoll? Poll { get; }
 
         [JsonConstructor]
-        public SocketMessage(long id, long channelId, long? guildId, SocketUser author, string content, string timestamp, string editedTimestamp, bool tts, bool mentionEveryone, SocketUser[] mentions, Role[] mentionRoles, Attachment[] attachments, Embed[] embeds, SocketPartialReaction[] reactions, bool pinned, long? webhookId, int type, int? flags, SocketActionRow[] components, MessageReference? messageReference, SocketGuildThreadChannel? thread, Poll? poll)
+        public SocketMessage(long id, long channelId, long? guildId, SocketUser author, string content, string timestamp, string editedTimestamp, bool tts, bool mentionEveryone, SocketUser[] mentions, Role[] mentionRoles, Attachment[] attachments, Embed[] embeds, SocketPartialReaction[] reactions, bool pinned, long? webhookId, int type, int? flags, SocketActionRow[] components, MessageReference? messageReference, SocketGuildThreadChannel? thread, SocketPoll? poll)
         {
             Id = id;
             ChannelId = channelId;

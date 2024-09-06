@@ -15,16 +15,22 @@ namespace SimpleDiscord.Components
 
         public string? Splash { get; }
 
-        public string? DiscoverySplash { get; } 
+        [JsonProperty("discovery_splash")]
+        public string? DiscoverySplash { get; }
 
+        [JsonProperty("afk_channel_id")]
         public long? AfkChannelId { get; }
 
+        [JsonProperty("afk_timeout")]
         public int AfkTimeout { get; }
 
+        [JsonProperty("verification_level")]
         public int VerificationLevel { get; }
 
+        [JsonProperty("default_message_notifications")]
         public int DefaultMessageNotifications { get; }
 
+        [JsonProperty("explicit_content_filter")]
         public int ExplicitContentFilter { get; }
 
         public Role[] Roles { get; }
@@ -33,38 +39,51 @@ namespace SimpleDiscord.Components
 
         public string[] Features { get; }
 
+        [JsonProperty("mfa_level")]
         public int MfaLevel { get; }
 
+        [JsonProperty("premium_tier")]
         public int PremiumTier { get; }
 
+        [JsonProperty("preferred_locale")]
         public string PreferredLocale { get; }
 
+        [JsonProperty("application_id")]
         public long? ApplicationId { get; }
 
+        [JsonProperty("system_channel_id")]
         public long? SystemChannelId { get; }
 
+        [JsonProperty("system_channel_flags")]
         public int SystemChannelFlags { get; }
 
+        [JsonProperty("rules_channel_id")]
         public long? RulesChannelId { get; }
 
+        [JsonProperty("max_presence")]
         public int? MaxPresence { get; }
 
-        public int MaxMembers { get; } 
+        [JsonProperty("max_members")]
+        public int MaxMembers { get; }
 
+        [JsonProperty("vanity_url_code")]
         public string? VanityUrlCode { get; }
 
         public string? Description { get; }
 
         public string? Banner { get; }
 
-        public long? PublicUpdatedChannelId { get; }
+        [JsonProperty("public_updates_channel_id")]
+        public long? PublicUpdatesChannelId { get; }
 
+        [JsonProperty("nsfw_level")]
         public int NsfwLevel { get; }
 
+        [JsonProperty("premium_progress_bar_enable")]
         public bool PremiumProgressBarEnable { get; }
 
         [JsonConstructor]
-        public SocketGuild(long id, string name, string? icon, string? splash, string? discoverySplash, long? afkChannelId, int afkTimeout, int verificationLevel, int defaultMessageNotifications, int explicitContentFilter, Role[] roles, Emoji[] emojis, string[] features, int mfaLevel, int premiumTier, string preferredLocale, long? applicationId, long? systemChannelId, int systemChannelFlags, long? rulesChannelId, int? maxPresence, int maxMembers, string? vanityUrlCode, string? description, string? banner, long? publicUpdatedChannelId, int nsfwLevel, bool premiumProgressBarEnable)
+        public SocketGuild(long id, string name, string? icon, string? splash, string? discoverySplash, long? afkChannelId, int afkTimeout, int verificationLevel, int defaultMessageNotifications, int explicitContentFilter, Role[] roles, Emoji[] emojis, string[] features, int mfaLevel, int premiumTier, string preferredLocale, long? applicationId, long? systemChannelId, int systemChannelFlags, long? rulesChannelId, int? maxPresence, int maxMembers, string? vanityUrlCode, string? description, string? banner, long? publicUpdatesChannelId, int nsfwLevel, bool premiumProgressBarEnable)
         {
             Id = id;
             Name = name;
@@ -91,7 +110,7 @@ namespace SimpleDiscord.Components
             VanityUrlCode = vanityUrlCode;
             Description = description;
             Banner = banner;
-            PublicUpdatedChannelId = publicUpdatedChannelId;
+            PublicUpdatesChannelId = publicUpdatesChannelId;
             NsfwLevel = nsfwLevel;
             PremiumProgressBarEnable = premiumProgressBarEnable;
         }
@@ -123,7 +142,7 @@ namespace SimpleDiscord.Components
             VanityUrlCode = guild.VanityUrlCode;
             Description = guild.Description;
             Banner = guild.Banner;
-            PublicUpdatedChannelId = guild.PublicUpdatedChannelId;
+            PublicUpdatesChannelId = guild.PublicUpdatesChannelId;
             NsfwLevel = guild.NsfwLevel;
             PremiumProgressBarEnable = guild.PremiumProgressBarEnable;
         }

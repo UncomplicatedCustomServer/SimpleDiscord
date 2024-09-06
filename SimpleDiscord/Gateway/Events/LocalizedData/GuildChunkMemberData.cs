@@ -1,13 +1,14 @@
 ﻿using Newtonsoft.Json;
-using SimpleDiscord.Components;
 
 namespace SimpleDiscord.Gateway.Events.LocalizedData
 {
-    public class RoleDataMember(Role role, long guildId)
+    internal class GuildChunkMemberData(long guildId)
     {
-        public Role Role { get; } = role;
-
         [JsonProperty("guild_id")]
         public long GuildId { get; } = guildId;
+
+        public int Limit => 0;
+
+        public string Query => string.Empty;
     }
 }

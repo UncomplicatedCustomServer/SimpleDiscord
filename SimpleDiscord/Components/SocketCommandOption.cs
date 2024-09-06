@@ -11,10 +11,12 @@ namespace SimpleDiscord.Components
 
         public string Name { get; internal set; }
 
+        [JsonProperty("name_localizations")]
         public Dictionary<string, string>? NameLocalizations { get; internal set; }
 
         public string Description { get; internal set; }
 
+        [JsonProperty("description_localizations")]
         public Dictionary<string, string>? DescriptionLocalizations { get; internal set; }
 
         public bool? Required { get; internal set; }
@@ -23,8 +25,10 @@ namespace SimpleDiscord.Components
 
         public SocketCommandOption[]? Options { get; internal set; }
 
+        [JsonProperty("min_length")]
         public int? MinLength { get; internal set; }
 
+        [JsonProperty("max_length")]
         public int? MaxLength { get; internal set; }
 
         public bool Autocomplete => false;

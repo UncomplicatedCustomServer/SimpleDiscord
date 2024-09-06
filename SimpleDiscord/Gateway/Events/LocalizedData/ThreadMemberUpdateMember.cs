@@ -1,4 +1,5 @@
-﻿using SimpleDiscord.Components;
+﻿using Newtonsoft.Json;
+using SimpleDiscord.Components;
 
 namespace SimpleDiscord.Gateway.Events.LocalizedData
 {
@@ -7,12 +8,16 @@ namespace SimpleDiscord.Gateway.Events.LocalizedData
     {
         public long Id { get; } = id;
 
+        [JsonProperty("guild_id")]
         public long GuildId { get; } = guildId;
 
+        [JsonProperty("member_count")]
         public int MemberCount { get; } = memberCount;
 
+        [JsonProperty("added_members")]
         public ThreadMember[] AddedMembers { get; } = addedMembers;
 
+        [JsonProperty("removed_member_ids")]
         public long[]? RemovedMemberIds { get; } = removedMemberIds;
     }
 }

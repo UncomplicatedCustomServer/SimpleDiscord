@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleDiscord.Logger;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -8,19 +9,45 @@ namespace SimpleDiscord.Networking
 {
     internal class RateLimitHandler()
     {
-        // The key is the url and it's encoded like <METHOD>@<URL> - in this way we can keep trace of X-RateLimit-Bucket
-        private readonly Dictionary<string, string> EndpointTokens = [];
+        private readonly Dictionary<string, RateLimit> EndpointRateLimits = [];
 
-        // The key is the X-RateLimit-Bucket
-        private readonly Dictionary<string, RateLimit> RateLimits = [];
+        private readonly Dictionary<string, float> WaitingTime = [];
 
         public RateLimit GetRateLimit(HttpRequestMessage request)
         {
-            if (EndpointTokens.TryGetValue($"{request.Method.Method}@{request.RequestUri.OriginalString}", out string token))
-                if (RateLimits.TryGetValue(token, out RateLimit rateLimit))
-                    return rateLimit;
+            if (EndpointRateLimits.TryGetValue(GenerateUri(request), out RateLimit rateLimit))
+                return rateLimit;
+            else
+            {
+                RateLimit rateLimit1 = new(GenerateUri(request), 1, 1, 0.75f, DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1.75f, true);
+                EndpointRateLimits[GenerateUri(request)] = rateLimit1;
+                return rateLimit1;
+            }
+        }
 
-            return null;
+        public float GetWaitingTime(HttpRequestMessage request)
+        {
+            string uri = GenerateUri(request);
+            RateLimit rateLimit = GetRateLimit(request);
+            if (WaitingTime.ContainsKey(uri))
+                WaitingTime[uri] += rateLimit.EnqueueTime();
+            else
+                WaitingTime.Add(uri, rateLimit.EnqueueTime());
+
+            return WaitingTime[uri];
+        }
+
+        public void ResolveWaitingTime(HttpRequestMessage request, RateLimit rateLimit)
+        {
+            string uri = GenerateUri(request);
+            if (WaitingTime.ContainsKey(uri))
+                WaitingTime[GenerateUri(request)] -= rateLimit.EnqueueTime();
+        }
+
+        public void MakeRequest(RateLimit rateLimit)
+        {
+            rateLimit.Requested();
+            EndpointRateLimits[rateLimit.Uri] = rateLimit;
         }
 
         public void UpdateRateLimit(HttpRequestMessage request, HttpResponseHeaders headers)
@@ -49,12 +76,31 @@ namespace SimpleDiscord.Networking
             if (!(rateLimitBucket != string.Empty && rateLimitLimit != string.Empty && rateLimitRemaining != string.Empty && rateLimitReset != string.Empty && rateLimitResetAfter != string.Empty))
                 return;
 
-            string uri = $"{request.Method.Method}@{request.RequestUri.OriginalString}";
-            RateLimit rateLimit = new(int.Parse(rateLimitLimit), int.Parse(rateLimitRemaining), (int)float.Parse(rateLimitResetAfter.Replace('.', ',')), float.Parse(rateLimitReset.Replace('.', ',')));
-            if (RateLimits.TryGetValue($"{request.Method.Method}@{request.RequestUri.OriginalString}", out RateLimit original))
-                original.Update(rateLimit);
-            else
-                RateLimits.Add(uri, rateLimit);
+            string uri = GenerateUri(request);
+            RateLimit rateLimit = new(uri, int.Parse(rateLimitLimit), int.Parse(rateLimitRemaining), (int)float.Parse(rateLimitResetAfter.Replace('.', ',')), float.Parse(rateLimitReset.Replace('.', ',')));
+            EndpointRateLimits[uri] = rateLimit;
+            Log.Warn($"We got {rateLimit.Uri} @ {rateLimit.Limit}, {rateLimit.Remaining}, {rateLimit.ResetAfter}, {rateLimit.EnqueueTime()}\n\n\n");
+        }
+
+        internal static string GenerateUri(HttpRequestMessage msg)
+        {
+            List<string> elements = [];
+            List<string> parts = [.. msg.RequestUri.OriginalString.Replace(Http.Endpoint, string.Empty).Split('/')];
+
+            for (int i = 0; i < parts.Count; i++)
+            {
+                string part = parts[i];
+                if (part is "reactions" && i < parts.Count + 1)
+                    parts.Remove(parts[part.IndexOf(part) + 1]);
+
+                if (part is "guilds" && i < part.Length + 1)
+                    parts[i + 1] += "_guild";
+
+                if (!long.TryParse(part, out _))
+                    elements.Add(part);
+            }
+
+            return $"{msg.Method.Method}@{string.Join("/", elements)}";
         }
     }
 }

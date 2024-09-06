@@ -1,4 +1,5 @@
-﻿using SimpleDiscord.Components;
+﻿using Newtonsoft.Json;
+using SimpleDiscord.Components;
 
 namespace SimpleDiscord.Gateway.Events.LocalizedData
 {
@@ -6,6 +7,7 @@ namespace SimpleDiscord.Gateway.Events.LocalizedData
     {
         public SocketMember Member { get; } = member;
 
+        [JsonProperty("guild_id")]
         public long GuildId { get; } = guildId;
     }
 }

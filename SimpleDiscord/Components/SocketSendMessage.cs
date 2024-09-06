@@ -19,9 +19,9 @@ namespace SimpleDiscord.Components
 
         public int? Flags { get; internal set; }
 
-        public Poll? Poll { get; internal set; }
+        public SocketSendPoll? Poll { get; internal set; }
 
-        public SocketSendMessage(string? content, Embed[]? embeds = null, string? allowedMentions = null, MessageReference? messageReference = null, Attachment[]? attachments = null, SocketActionRow[]? components = null, int? flags = null, Poll? poll = null)
+        public SocketSendMessage(string? content, Embed[]? embeds = null, string? allowedMentions = null, MessageReference? messageReference = null, Attachment[]? attachments = null, SocketActionRow[]? components = null, int? flags = null, SocketSendPoll? poll = null)
         {
             Content = content;
             Embeds = embeds;

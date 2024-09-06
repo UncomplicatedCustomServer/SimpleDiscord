@@ -1,13 +1,39 @@
-﻿namespace SimpleDiscord.Components
+﻿using Newtonsoft.Json;
+
+namespace SimpleDiscord.Components
 {
-    public class SocketPresence(Activity[] activities, string status, bool afk = false, long? since = null)
+    public class SocketPresence
     {
-        public long? Since { get; } = since;
+        [JsonProperty("user")]
+        public SocketUser User { get; }
 
-        public Activity[] Activities { get; } = activities;
+        [JsonProperty("guild_id")]
+        public long GuildId { get; }
 
-        public string Status { get; } = status;
+        public string Status { get; }
 
-        public bool Afk { get; } = afk;
+        public UserActivity[] Activities { get; }
+
+        [JsonProperty("client_status")]
+        public string ClientStatus { get; }
+
+        [JsonConstructor]
+        public SocketPresence(SocketUser user, long guildId, string status, UserActivity[] activities, string clientStatus)
+        {
+            User = user;
+            GuildId = guildId;
+            Status = status;
+            Activities = activities;
+            ClientStatus = clientStatus;
+        }
+
+        public SocketPresence(SocketPresence self)
+        {
+            User = self.User;
+            GuildId = self.GuildId;
+            Status = self.Status;
+            Activities = self.Activities;
+            ClientStatus = self.ClientStatus;
+        }
     }
 }

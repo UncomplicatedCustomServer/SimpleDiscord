@@ -17,22 +17,22 @@ namespace SimpleDiscord
 
         public readonly Handler EventHandler;
 
+        public static Version Version { get; } = new(0, 8, 2);
+
         public SocketUser Bot { get; internal set; }
 
         public PartialApplication Application { get; internal set; }
 
         public List<ApplicationCommand> Commands { get; } = [];
 
-        public SocketPresence Presence { 
+        public SocketSendPresence Presence { 
             get
             {
                 return _actualPresence;
             }
             set
             {
-                Console.WriteLine("\n\n\nPORCODIODSISI MAGIC MAFIZ!");
                 _discordClient.SendMessage(new(string.Empty, 3, value, null, null));
-                Console.WriteLine("\nMAGIC MAFIZ!");
                 _actualPresence = value;
             }
         }
@@ -49,9 +49,9 @@ namespace SimpleDiscord
 
         internal List<SocketSendApplicationCommand> sendCommandsQueue { get; set; } = [];
 
-        private SocketPresence _actualPresence;
+        internal Discord _discordClient { get; }
 
-        private Discord _discordClient { get; }
+        private SocketSendPresence _actualPresence;
 
         public Client(ClientConfig config = null)
         {
@@ -85,7 +85,7 @@ namespace SimpleDiscord
 
         public async Task<SocketApplicationCommand> EditCommand(ApplicationCommand command, SocketSendApplicationCommand newCommand) => await RestHttp.EditGlobalCommand(command, newCommand);
 
-        public void DeleteCommand(ApplicationCommand command) => RestHttp.DeleteGlobalCommand(command);
+        public Task DeleteCommand(ApplicationCommand command) => RestHttp.DeleteGlobalCommand(command);
 
 #nullable enable
         public Guild? GetGuild(long id) => Guild.List.FirstOrDefault(guild => guild.Id == id);

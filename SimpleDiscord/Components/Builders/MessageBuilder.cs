@@ -44,6 +44,13 @@ namespace SimpleDiscord.Components.Builders
             return this;
         }
 
+        public MessageBuilder SetPoll(SocketSendPoll poll)
+        {
+            Message.Content = null;
+            Message.Poll = poll;
+            return this;
+        }
+
         public static MessageBuilder New() => new();
 
         public static implicit operator SocketSendMessage(MessageBuilder builder) => builder.Message;

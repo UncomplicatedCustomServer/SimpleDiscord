@@ -1,15 +1,9 @@
 ﻿namespace SimpleDiscord.Components
 {
-    public class Poll(PollMediaObject question, PollAnswer[] answers, int duration, bool? allowMultiselect = null)
+    public class Poll(Message message, SocketPoll socketPoll) : SocketPoll(socketPoll)
     {
-        public PollMediaObject Question { get; } = question;
+        public Message Message { get; } = message;
 
-        public PollAnswer[] Answers { get; } = answers;
-
-        public int Duration { get; } = duration;
-
-        public bool? AllowMultiselect { get; } = allowMultiselect;
-
-        public int LayoutType => 1;
+        public void End() { }
     }
 }

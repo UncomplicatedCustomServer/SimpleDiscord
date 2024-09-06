@@ -2,10 +2,11 @@
 using Newtonsoft.Json.Serialization;
 using SimpleDiscord.Components;
 using SimpleDiscord.Enums;
-using SimpleDiscord.Events;
 using SimpleDiscord.Gateway.Events;
+using SimpleDiscord.Gateway.Events.LocalizedData;
 using SimpleDiscord.Gateway.Messages;
 using SimpleDiscord.Gateway.Messages.Predefined;
+using SimpleDiscord.Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,8 @@ namespace SimpleDiscord
         private GatewayIntents intents;
 
         private bool _areadyAuthed = false;
+
+        internal List<long> pollResults = [];
 
         internal async Task AuthAsync(string token, GatewayIntents intents)
         {
@@ -111,12 +114,12 @@ namespace SimpleDiscord
         {
             Console.WriteLine(message);
 
-            Dictionary<string, object> data = JsonConvert.DeserializeObject<Dictionary<string, object>>(message);
-
-            DiscordRawGatewayMessage rawMsg = new(message, data);
+            DiscordRawGatewayMessage rawMsg = new(message, JsonConvert.DeserializeObject<Dictionary<string, object>>(message));
 
             if (rawMsg.S is not null)
                 lastSequence = rawMsg.S;
+
+            DiscordClient.EventHandler.Invoke("RAW_GATEWAY_EVENT", new DiscordGatewayMessage(rawMsg));
 
             BaseGatewayEvent ev = DiscordClient.GatewatEventHandler.Parse(new(rawMsg));
 
@@ -124,6 +127,9 @@ namespace SimpleDiscord
             {
                 guildCreate.Guild.SetClient(DiscordClient);
                 guildCreate.Guild.SafeRegisterCommands();
+                // Register every user if needed
+                if (DiscordClient.Config.LoadMembers)
+                    SendMessage(new(string.Empty, 8, new GuildChunkMemberData(guildCreate.Guild.Id)));
             }
 
             if (ev is MessageCreate messageCreate)
@@ -161,6 +167,13 @@ namespace SimpleDiscord
                 Console.WriteLine($"\nInvoking event {ev.GatewayMessage.EventName} ({ev.GatewayMessage.OpCode}) -- found {ev.GetType().FullName}\n");
                 if (ev is IUserDeniableEvent deniableEvent && deniableEvent.CanShare)
                     goto proceed;
+
+                if (ev is MessageUpdate messageUpdated && pollResults.Contains(messageUpdated.Message.Id))
+                {
+                    DiscordClient.EventHandler.Invoke("POLL_ENDED", new PollEnded(messageUpdated.Message, messageUpdated.Message.Poll));
+                    Log.Error("POLL ENDED NO WAY NON CI CREDOO");
+                    goto proceed;
+                }
 
                 DiscordClient.EventHandler.Invoke(ev.GatewayMessage.EventName, ev);
             }

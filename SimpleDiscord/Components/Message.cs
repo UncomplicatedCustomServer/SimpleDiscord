@@ -13,7 +13,7 @@ namespace SimpleDiscord.Components
     {
         public GuildTextChannel Channel { get; }
 
-        public SocketMember MemberAuthor { get; }
+        public Member Member { get; }
 
         public Guild Guild { get; }
 
@@ -35,7 +35,7 @@ namespace SimpleDiscord.Components
             Channel = GuildChannel.List.FirstOrDefault(channel => channel.Id == ChannelId) as GuildTextChannel;
 
             Guild = Channel.Guild;
-            MemberAuthor = Guild.GetMember(baseMessage.Author.Id);
+            Member = Guild.GetMember(baseMessage.Author.Id);
 
             Components = null;
             if (baseMessage.Components is not null && baseMessage.Components.Length > 0)
@@ -72,27 +72,27 @@ namespace SimpleDiscord.Components
 
         public Task<bool> Delete(string reason = null) => Client.RestHttp.DeleteMessage(this, reason);
 
-        public void Pin(string reason = null) => Client.RestHttp.PinMessage(this, reason);
+        public Task Pin(string reason = null) => Client.RestHttp.PinMessage(this, reason);
 
-        public void Unpin(string reason = null) => Client.RestHttp.UnpinMessage(this, reason);
+        public Task Unpin(string reason = null) => Client.RestHttp.UnpinMessage(this, reason);
 
 #nullable enable
         public Task<SocketGuildThreadChannel>? StartThread(SocketSendPublicThread threadConfig, string? reason = null) => Channel is not GuildThreadChannel ? Client.RestHttp.StartThreadFromMessage(this, threadConfig, reason) : null;
 #nullable disable
 
-        public void React(Emoji emoji) => Client.RestHttp.AddOwnReaction(this, emoji);
+        public Task React(Emoji emoji) => Client.RestHttp.AddOwnReaction(this, emoji);
 
-        public void Unreact(Emoji emoji) => Client.RestHttp.DeleteOwnReaction(this, emoji);
+        public Task Unreact(Emoji emoji) => Client.RestHttp.DeleteOwnReaction(this, emoji);
 
-        public void RemoveUserReaction(Emoji emoji, long user) => Client.RestHttp.DeleteUserReaction(this, emoji, user);
+        public Task RemoveUserReaction(Emoji emoji, long user) => Client.RestHttp.DeleteUserReaction(this, emoji, user);
 
 #nullable enable
-        public void RemoveEveryReaction(Emoji? emoji = null)
+        public Task RemoveEveryReaction(Emoji? emoji = null)
         {
             if (emoji is null) // Remove all
-                Client.RestHttp.DeleteAllReactions(this);
+                return Client.RestHttp.DeleteAllReactions(this);
             else
-                Client.RestHttp.DeleteAllReactions(this, emoji);
+                return Client.RestHttp.DeleteAllReactions(this, emoji);
         }
     }
 }

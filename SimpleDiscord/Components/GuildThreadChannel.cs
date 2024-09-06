@@ -78,12 +78,12 @@ namespace SimpleDiscord.Components
                 textChannel.SafeClearThread(Id);
         }
 
-        public void Join() => Guild.Client.RestHttp.JoinThread(this);
+        public Task Join() => Guild.Client.RestHttp.JoinThread(this);
 
-        public void Leave() => Guild.Client.RestHttp.LeaveThread(this);
+        public Task Leave() => Guild.Client.RestHttp.LeaveThread(this);
 
-        public void AddMember(long id) => Guild.Client.RestHttp.AddUserToThread(this, id);
+        public Task AddMember(long id) => Guild.Client.RestHttp.AddUserToThread(this, id);
 
-        public void RemoveMember(long id) => Guild.Client.RestHttp.RemoveUserToThread(this, id);
+        public Task RemoveMember(long id) => Guild.Client.RestHttp.RemoveUserToThread(this, id);
     }
 }

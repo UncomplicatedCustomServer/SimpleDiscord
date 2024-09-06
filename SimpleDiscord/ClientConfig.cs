@@ -4,11 +4,13 @@ namespace SimpleDiscord
 {
     public sealed class ClientConfig
     {
+        public bool LoadMembers { get; set; } = true; // That requires lots of ram :)
+
         public bool SaveMessages { get; set; } = true;
 
         public bool FetchThreadMembers { get; set; } = true;
         
-        public RegisterCommandType RegisterCommands { get; set; } = RegisterCommandType.None; // This will override Load<both global and guild>RegisteredCommands to false and will override every registered command - by default we don't allow command registering
+        public RegisterCommandType RegisterCommands { get; set; } = RegisterCommandType.None;
 
         public bool SaveGlobalRegisteredCommands { get; set; } = true;
 

@@ -25,7 +25,7 @@ namespace SimpleDiscord.Components
 
         public List<GuildThreadChannel> Threads { get; }
 
-        public SocketPresence[] Presences { get; }
+        public SocketSendPresence[] Presences { get; }
 
         public SocketStageInstance[] StageInstances { get; }
 
@@ -45,17 +45,16 @@ namespace SimpleDiscord.Components
             Large = anonymous.Large;
             MemberCount = anonymous.MemberCount;
             Members = [];
-
-            foreach (SocketMember member in anonymous.Members)
-                Members.Add(new(this, member));
-
             Channels = [];
             Threads = [];
             Presences = anonymous.Presences;
             StageInstances = anonymous.StageInstances;
             GuildScheduledEvents = anonymous.GuildScheduledEvents;
-            Roles = [..anonymous.Roles];
+            Roles = [.. anonymous.Roles];
             Emojis = [.. anonymous.Emojis];
+
+            foreach (SocketMember member in anonymous.Members)
+                Members.Add(new(this, member));
 
             Guild instance = List.FirstOrDefault(c => c.Id == Id);
             if (instance is not null)
@@ -81,7 +80,7 @@ namespace SimpleDiscord.Components
             }
         }
 
-        public SocketMember GetMember(long id) => Members.FirstOrDefault(member => member.User is not null && member.User.Id == id);
+        public Member GetMember(long id) => Members.FirstOrDefault(member => member.User is not null && member.User.Id == id);
 
         public Role GetRole(long id) => Roles.FirstOrDefault(role => role.Id == id);
 
@@ -236,9 +235,9 @@ namespace SimpleDiscord.Components
 
         public Task<Role> CreateRole(SocketSendRole role, string? reason = null) => Client.RestHttp.GuildCreateRole(this, role, reason);
 
-        public void DeleteRole(Role role, string? reason = null) => Client.RestHttp.GuildDeleteRole(this, role, reason);
+        public Task DeleteRole(Role role, string? reason = null) => Client.RestHttp.GuildDeleteRole(this, role, reason);
 
-        public void UnbanUser(long id, string? reason = null) => Client.RestHttp.MemberUnban(this, id, reason);
+        public Task UnbanUser(long id, string? reason = null) => Client.RestHttp.MemberUnban(this, id, reason);
 
         public static Guild? GetGuild(long id) => List.FirstOrDefault(guild => guild.Id == id);
 

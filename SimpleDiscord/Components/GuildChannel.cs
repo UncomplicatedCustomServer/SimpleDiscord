@@ -56,7 +56,7 @@ namespace SimpleDiscord.Components
 
         public Task<SocketGuildChannel> Edit(SocketSendGuildChannel newChannel, string? reason = null) => Guild.Client.RestHttp.ChannelEdit(this, newChannel, reason);
 
-        public void Delete(string? reason = null) => Guild.Client.RestHttp.ChannelDelete(this, reason);
+        public Task Delete(string? reason = null) => Guild.Client.RestHttp.ChannelDelete(this, reason);
 
         public static GuildChannel? Caster(JObject obj)
         {

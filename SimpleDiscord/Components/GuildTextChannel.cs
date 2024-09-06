@@ -86,6 +86,8 @@ namespace SimpleDiscord.Components
 
         public async Task<SocketMessage> SendMessage(SocketSendMessage msg) => await Guild.Client.RestHttp.SendMessage(this, msg);
 
+        public async Task<Message> GetMessage(long id) => await Guild.Client.RestHttp.GetMessage(this, id);
+
         public async Task<SocketMessage[]> GetMessages(int? limit = 50, long? around = null, long? before = null, long? after = null) => await Guild.Client.RestHttp.GetMessages(this, limit, around, before, after);
     }
 }

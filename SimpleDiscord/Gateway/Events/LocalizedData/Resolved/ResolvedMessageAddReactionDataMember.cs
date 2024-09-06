@@ -29,11 +29,14 @@ namespace SimpleDiscord.Gateway.Events.LocalizedData.Resolved
 
         public ResolvedMessageAddReactionDataMember(MessageAddReactionDataMember instance) : base(instance.UserId, instance.ChannelId, instance.MessageId, instance.GuildId, instance.Member, instance.Emoji, instance.MessageAuthorId, instance.Burst, instance.BurstColors, instance.Type)
         {
-            if (GuildId is null or 0)
-                throw new Exception("Guild cannot be null!");
+            if (instance.GuildId is null or 0)
+                throw new Exception("Guild cannot be null!\nFound " + instance.GuildId);
 
             User = SocketUser.List.FirstOrDefault(u => u.Id == UserId);
+
+#pragma warning disable CS8629
             Guild = Guild.GetSafeGuild((long)GuildId);
+#pragma warning restore CS8629
 
             if (Guild.GetSafeChannel(ChannelId) is GuildTextChannel textChannel)
                 Channel = textChannel;

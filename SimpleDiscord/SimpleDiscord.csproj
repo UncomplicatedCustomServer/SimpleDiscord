@@ -45,6 +45,7 @@
     <Compile Include="Client.cs" />
     <Compile Include="ClientConfig.cs" />
     <Compile Include="Components\Activity.cs" />
+    <Compile Include="Components\ActivityButton.cs" />
     <Compile Include="Components\Application.cs" />
     <Compile Include="Components\ApplicationCommand.cs" />
     <Compile Include="Components\ApplicationCommandInteractionData.cs" />
@@ -63,6 +64,12 @@
     <Compile Include="Components\DisposableElement.cs" />
     <Compile Include="Components\Member.cs" />
     <Compile Include="Components\PartialApplication.cs" />
+    <Compile Include="Components\Poll.cs" />
+    <Compile Include="Components\SocketPoll.cs" />
+    <Compile Include="Components\PollAnswerCount.cs" />
+    <Compile Include="Components\PollResults.cs" />
+    <Compile Include="Components\Presence.cs" />
+    <Compile Include="Components\SocketPresence.cs" />
     <Compile Include="Components\SocketCommandOption.cs" />
     <Compile Include="Components\DiscordComponents\ActionRow.cs" />
     <Compile Include="Components\DiscordComponents\InteractionCallbackData.cs" />
@@ -102,7 +109,7 @@
     <Compile Include="Components\AnonymousGuild.cs" />
     <Compile Include="Components\MessageReference.cs" />
     <Compile Include="Components\PartialAttachment.cs" />
-    <Compile Include="Components\Poll.cs" />
+    <Compile Include="Components\SocketSendPoll.cs" />
     <Compile Include="Components\PollAnswer.cs" />
     <Compile Include="Components\PollMediaObject.cs" />
     <Compile Include="Components\Reaction.cs" />
@@ -132,7 +139,7 @@
     <Compile Include="Components\SocketSendGuildChannel.cs" />
     <Compile Include="Components\SocketSendGuildVoiceChannel.cs" />
     <Compile Include="Components\SocketSendMessage.cs" />
-    <Compile Include="Components\SocketPresence.cs" />
+    <Compile Include="Components\SocketSendPresence.cs" />
     <Compile Include="Components\SocketScheduledEvent.cs" />
     <Compile Include="Components\SocketSendCustomizableThread.cs" />
     <Compile Include="Components\SocketSendPublicThread.cs" />
@@ -143,11 +150,13 @@
     <Compile Include="Components\ThreadMember.cs" />
     <Compile Include="Components\ThreadMetadata.cs" />
     <Compile Include="Components\UnavailableGuild.cs" />
+    <Compile Include="Components\UserActivity.cs" />
     <Compile Include="Discord.cs" />
     <Compile Include="Enums\ActivityType.cs" />
     <Compile Include="Enums\ApplicationCommandOptionType.cs" />
     <Compile Include="Enums\ButtonStyle.cs" />
     <Compile Include="Enums\ChannelType.cs" />
+    <Compile Include="Enums\Classes\ClientType.cs" />
     <Compile Include="Enums\Classes\EmbedType.cs" />
     <Compile Include="Enums\Classes\Language.cs" />
     <Compile Include="Enums\CommandOptionType.cs" />
@@ -180,6 +189,7 @@
     <Compile Include="Gateway\Events\EmojisUpdate.cs" />
     <Compile Include="Gateway\Events\GuildCreate.cs" />
     <Compile Include="Gateway\Events\GuildDelete.cs" />
+    <Compile Include="Gateway\Events\GuildMemberChunk.cs" />
     <Compile Include="Gateway\Events\Heartbeat.cs" />
     <Compile Include="Gateway\Events\HeartbeatAck.cs" />
     <Compile Include="Gateway\Events\Hello.cs" />
@@ -189,6 +199,8 @@
     <Compile Include="Gateway\Events\LocalizedData\BanMember.cs" />
     <Compile Include="Gateway\Events\LocalizedData\EmojisUpdateDataMember.cs" />
     <Compile Include="Gateway\Events\LocalizedData\EventIntents.cs" />
+    <Compile Include="Gateway\Events\LocalizedData\GuildChunkMemberData.cs" />
+    <Compile Include="Gateway\Events\LocalizedData\GuildMemberChunkMemberData.cs" />
     <Compile Include="Gateway\Events\LocalizedData\HelloDataMember.cs" />
     <Compile Include="Gateway\Events\InteractionCreate.cs" />
     <Compile Include="Gateway\Events\LocalizedData\MemberAddDataMember.cs" />
@@ -220,6 +232,8 @@
     <Compile Include="Gateway\Events\MessageCreate.cs" />
     <Compile Include="Gateway\Events\MessageDelete.cs" />
     <Compile Include="Gateway\Events\MessageUpdate.cs" />
+    <Compile Include="Gateway\Events\PollEnded.cs" />
+    <Compile Include="Gateway\Events\PresenceUpdate.cs" />
     <Compile Include="Gateway\Events\ReactionAdd.cs" />
     <Compile Include="Gateway\Events\ReactionRemove.cs" />
     <Compile Include="Gateway\Events\Ready.cs" />
@@ -238,6 +252,7 @@
     <Compile Include="Gateway\Messages\DiscordGatewayMessage.cs" />
     <Compile Include="Gateway\Messages\DiscordRawGatewayMessage.cs" />
     <Compile Include="Gateway\Messages\Predefined\Identify.cs" />
+    <Compile Include="Logger\ErrorHub.cs" />
     <Compile Include="Logger\Log.cs" />
     <Compile Include="Logger\LogEntry.cs" />
     <Compile Include="Logger\LogLevel.cs" />

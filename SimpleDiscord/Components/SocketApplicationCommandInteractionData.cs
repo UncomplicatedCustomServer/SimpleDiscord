@@ -14,10 +14,13 @@ namespace SimpleDiscord.Components
         [JsonProperty("resolved")]
         public SocketResolvedData? Resolved { get; }
 
+        [JsonProperty("options")]
         public ReplyCommandOption[]? Options { get; }
 
+        [JsonProperty("guild_id")]
         public long? GuildId { get; }
 
+        [JsonProperty("target_id")]
         public long? TargetId { get; }
 
         [JsonConstructor]

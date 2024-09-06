@@ -112,7 +112,7 @@ namespace SimpleDiscord.Components
         /// <summary>
         /// Delete the interaction original response
         /// </summary>
-        public void DeleteOriginalMessage() => Client.RestHttp.DeleteInteractionReply(this);
+        public Task DeleteOriginalMessage() => Client.RestHttp.DeleteInteractionReply(this);
 
         /// <summary>
         /// ACK by opening a modal

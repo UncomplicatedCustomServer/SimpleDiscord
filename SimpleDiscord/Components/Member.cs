@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SimpleDiscord.Components
 {
@@ -17,29 +18,29 @@ namespace SimpleDiscord.Components
                 Roles.Add(Guild.GetRole(role));
         }
 
-        public void AddRole(Role role, string reason = null) => AddRole(role.Id, reason);
+        public Task AddRole(Role role, string reason = null) => AddRole(role.Id, reason);
 
-        public void AddRole(long role, string reason = null)
+        public Task AddRole(long role, string reason = null)
         {
             if (Roles.Any(r => r.Id == role))
-                return;
+                return Task.CompletedTask;
 
-            Guild.Client.RestHttp.MemberAddRole(this, role, reason);
+            return Guild.Client.RestHttp.MemberAddRole(this, role, reason);
         }
 
-        public void RemoveRole(Role role, string reason = null) => RemoveRole(role.Id, reason);
+        public Task RemoveRole(Role role, string reason = null) => RemoveRole(role.Id, reason);
 
-        public void RemoveRole(long role, string reason = null)
+        public Task RemoveRole(long role, string reason = null)
         {
             if (!Roles.Any(r => r.Id == role))
-                return;
+                return Task.CompletedTask;
 
-            Guild.Client.RestHttp.MemberRemoveRole(this, role, reason);
+            return Guild.Client.RestHttp.MemberRemoveRole(this, role, reason);
         }
 
-        public void Kick(string reason = null) => Guild.Client.RestHttp.MemberKick(this, reason);
+        public Task Kick(string reason = null) => Guild.Client.RestHttp.MemberKick(this, reason);
 
-        public void Ban(string reason = null, int deleteMessageSeconds = 0) => Guild.Client.RestHttp.MemberBan(this, reason, deleteMessageSeconds);
+        public Task Ban(string reason = null, int deleteMessageSeconds = 0) => Guild.Client.RestHttp.MemberBan(this, reason, deleteMessageSeconds);
 
         public void SyncUser() => User = SocketUser.List.FirstOrDefault(u => u.Id == User.Id);
     }
