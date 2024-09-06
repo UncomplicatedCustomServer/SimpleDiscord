@@ -1,5 +1,6 @@
 ﻿using SimpleDiscord.Components.Attributes;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SimpleDiscord.Components
@@ -40,6 +41,22 @@ namespace SimpleDiscord.Components
                 Guild.SafeUpdateChannel(this);
         }
 
+        internal void SafeUpdateMember(ThreadMember member)
+        {
+            ThreadMember instance = Members.FirstOrDefault(m => m.Id == member.Id);
+            if (instance is not null)
+                Members[Members.IndexOf(instance)] = member;
+            else
+                Members.Add(member);
+        }
+
+        internal void SafeDisposeMember(long id)
+        {
+            ThreadMember instance = Members.FirstOrDefault(m => m.Id == id);
+            if (instance is not null)
+                Members.Remove(instance);
+        }
+
         public void FetchMembers()
         {
             if (Guild.Client.Config.FetchThreadMembers)
@@ -55,7 +72,7 @@ namespace SimpleDiscord.Components
             }
         }
 
-        public override void Dispose()
+        internal override void Dispose()
         {
             if (Parent is not null && Parent is GuildTextChannel textChannel)
                 textChannel.SafeClearThread(Id);

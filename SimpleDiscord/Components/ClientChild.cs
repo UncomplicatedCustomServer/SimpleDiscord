@@ -2,7 +2,7 @@
 
 namespace SimpleDiscord.Components
 {
-    public class ClientChild()
+    public class ClientChild() : DisposableElement
     {
         [JsonIgnore]
         internal Client Client { get; private set; }

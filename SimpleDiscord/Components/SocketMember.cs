@@ -5,7 +5,7 @@ namespace SimpleDiscord.Components
 #nullable enable
     public class SocketMember
     {
-        public SocketUser? User { get; }
+        public SocketUser? User { get; internal set; }
 
         public string? Nick { get; }
 

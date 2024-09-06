@@ -16,6 +16,9 @@ namespace SimpleDiscord.Gateway.Events
         {
             Data = JsonConvert.DeserializeObject<SocketMessage>(RawData);
             Message = new(Data);
+
+            // We might update the message on the channel
+            Message.Channel.SafeUpdateMessage(Message); // The check is implicit
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿namespace SimpleDiscord.Components
 {
 #nullable enable
-    public class ThreadMember(long? id, long? userId, string joinTimestamp, SocketMember member)
+    public class ThreadMember(long? id, long? userId, string? joinTimestamp, SocketMember? member)
     {
         public long? Id { get; } = id;
 

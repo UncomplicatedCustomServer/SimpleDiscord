@@ -2,7 +2,7 @@
 {
     public class DisposableElement
     {
-        public virtual void Dispose()
+        internal virtual void Dispose()
         { }
     }
 }

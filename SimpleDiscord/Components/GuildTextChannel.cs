@@ -73,6 +73,13 @@ namespace SimpleDiscord.Components
                 Threads.Remove(instance);
         }
 
+        internal override void Dispose()
+        {
+            foreach (GuildThreadChannel thread in Threads)
+                thread.Dispose();
+            base.Dispose();
+        }
+
         internal Message GetSafeMessage(long id) => Messages.FirstOrDefault(msg => msg.Id == id);
 
         public async Task<SocketMessage> SendMessage(string content) => await SendMessage(new SocketSendMessage(content));

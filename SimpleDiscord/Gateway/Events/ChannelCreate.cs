@@ -28,6 +28,8 @@ namespace SimpleDiscord.Gateway.Events
 
             Data = GuildChannel.Caster(obj);
 
+            Channel.Guild.SafeUpdateChannel(Channel);
+
             CanShare = Data is not null;
         }
     }

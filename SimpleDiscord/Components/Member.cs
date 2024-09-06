@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization.Formatters;
 
 namespace SimpleDiscord.Components
 {
@@ -41,5 +40,7 @@ namespace SimpleDiscord.Components
         public void Kick(string reason = null) => Guild.Client.RestHttp.MemberKick(this, reason);
 
         public void Ban(string reason = null, int deleteMessageSeconds = 0) => Guild.Client.RestHttp.MemberBan(this, reason, deleteMessageSeconds);
+
+        public void SyncUser() => User = SocketUser.List.FirstOrDefault(u => u.Id == User.Id);
     }
 }

@@ -10,7 +10,7 @@ using System.Linq;
 namespace SimpleDiscord.Gateway.Events
 {
     [InternalEvent("GUILD_CREATE")]
-    internal class GuildCreate(DiscordGatewayMessage msg) : BaseGatewayEvent(msg)
+    public class GuildCreate(DiscordGatewayMessage msg) : BaseGatewayEvent(msg)
     {
         public AnonymousGuild Data { get; private set; }
 

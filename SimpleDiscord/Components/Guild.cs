@@ -3,8 +3,6 @@ using SimpleDiscord.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Channels;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SimpleDiscord.Components
@@ -21,7 +19,7 @@ namespace SimpleDiscord.Components
 
         public int MemberCount { get; }
 
-        public SocketMember[] Members { get; }
+        public List<Member> Members { get; }
 
         public List<GuildChannel> Channels { get; }
 
@@ -37,7 +35,7 @@ namespace SimpleDiscord.Components
 
         public new List<Role> Roles { get; }
 
-        public new List<Emoji> Emojis { get; }
+        public new List<Emoji> Emojis { get; private set; }
 
         public Guild(AnonymousGuild anonymous) : base(anonymous)
         {
@@ -46,7 +44,11 @@ namespace SimpleDiscord.Components
                 JoinedAt = DateTimeOffset.Parse(anonymous.JoinedAt);
             Large = anonymous.Large;
             MemberCount = anonymous.MemberCount;
-            Members = anonymous.Members;
+            Members = [];
+
+            foreach (SocketMember member in anonymous.Members)
+                Members.Add(new(this, member));
+
             Channels = [];
             Threads = [];
             Presences = anonymous.Presences;
@@ -174,9 +176,11 @@ namespace SimpleDiscord.Components
                 Roles.Add(role);
         }
 
-        internal void SafeClearRole(Role role)
+        internal void SafeClearRole(Role role) => SafeClearRole(role.Id);
+
+        internal void SafeClearRole(long role)
         {
-            Role instance = Roles.FirstOrDefault(r => r.Id == role.Id);
+            Role instance = Roles.FirstOrDefault(r => r.Id == role);
             if (instance is not null)
                 Roles.Remove(instance);
         }
@@ -197,6 +201,37 @@ namespace SimpleDiscord.Components
                 Emojis.Remove(instance);
         }
 
+        internal void SafeBulkUpdateEmojis(Emoji[] emojis) => Emojis = [.. emojis];
+
+        internal void SafeUpdateMember(Member member)
+        {
+            Member instance = Members.FirstOrDefault(m => m.User?.Id == member.User?.Id && m.User is not null);
+            if (instance is not null)
+                Members[Members.IndexOf(instance)] = member;
+            else
+                Members.Add(member);
+        }
+
+        internal void SafeClearMember(long member)
+        {
+            Member instance = Members.FirstOrDefault(m => m.User?.Id == member && m.User is not null);
+            if (instance is not null)
+                Members.Remove(instance);
+        }
+
+        internal override void Dispose()
+        {
+            List.Remove(this);
+
+            foreach (GuildChannel channel in Channels)
+                channel.Dispose();
+
+            foreach (GuildThreadChannel threads in Threads)
+                threads.Dispose();
+
+            base.Dispose();
+        }
+
         public Task<SocketGuildChannel> CreateChannel(SocketSendGuildChannel channel, string? reason = null) => Client.RestHttp.GuildCreateChannel(this, channel, reason);
 
         public Task<Role> CreateRole(SocketSendRole role, string? reason = null) => Client.RestHttp.GuildCreateRole(this, role, reason);
@@ -208,5 +243,9 @@ namespace SimpleDiscord.Components
         public static Guild? GetGuild(long id) => List.FirstOrDefault(guild => guild.Id == id);
 
         public static Guild GetSafeGuild(long id) => List.FirstOrDefault(guild => guild.Id == id);
+
+        public GuildThreadChannel? GetThreadChannel(long id) => Threads.FirstOrDefault(thread => thread.Id == id);
+
+        public GuildThreadChannel GetSafeThreadChannel(long id) => Threads.FirstOrDefault(thread => thread.Id == id);
     }
 }

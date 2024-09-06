@@ -46,6 +46,12 @@ namespace SimpleDiscord.Components
                 List.Add(this);
         }
 
+        internal override void Dispose()
+        {
+            List.Remove(this);
+            base.Dispose();
+        }
+
         public Task<SocketGuildChannel> Update(SocketSendGuildChannel newChannel, string? reason = null) => Edit(newChannel, reason);
 
         public Task<SocketGuildChannel> Edit(SocketSendGuildChannel newChannel, string? reason = null) => Guild.Client.RestHttp.ChannelEdit(this, newChannel, reason);
