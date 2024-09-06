@@ -81,8 +81,11 @@ namespace SimpleDiscord
                 if (Config.SaveGlobalRegisteredCommands)
                     Commands.Add(new(cmd));
             }
-
         }
+
+        public async Task<SocketApplicationCommand> EditCommand(ApplicationCommand command, SocketSendApplicationCommand newCommand) => await RestHttp.EditGlobalCommand(command, newCommand);
+
+        public void DeleteCommand(ApplicationCommand command) => RestHttp.DeleteGlobalCommand(command);
 
 #nullable enable
         public Guild? GetGuild(long id) => Guild.List.FirstOrDefault(guild => guild.Id == id);

@@ -71,5 +71,28 @@ namespace SimpleDiscord.Components
         public Task<SocketMessage> Reply(string content, Embed[] embeds = null) => Channel.SendMessage(new SocketSendMessage(content, embeds, null, new MessageReference(0, Id, ChannelId, GuildId), null, null, null));
 
         public Task<bool> Delete(string reason = null) => Client.RestHttp.DeleteMessage(this, reason);
+
+        public void Pin(string reason = null) => Client.RestHttp.PinMessage(this, reason);
+
+        public void Unpin(string reason = null) => Client.RestHttp.UnpinMessage(this, reason);
+
+#nullable enable
+        public Task<SocketGuildThreadChannel>? StartThread(SocketSendPublicThread threadConfig, string? reason = null) => Channel is not GuildThreadChannel ? Client.RestHttp.StartThreadFromMessage(this, threadConfig, reason) : null;
+#nullable disable
+
+        public void React(Emoji emoji) => Client.RestHttp.AddOwnReaction(this, emoji);
+
+        public void Unreact(Emoji emoji) => Client.RestHttp.DeleteOwnReaction(this, emoji);
+
+        public void RemoveUserReaction(Emoji emoji, long user) => Client.RestHttp.DeleteUserReaction(this, emoji, user);
+
+#nullable enable
+        public void RemoveEveryReaction(Emoji? emoji = null)
+        {
+            if (emoji is null) // Remove all
+                Client.RestHttp.DeleteAllReactions(this);
+            else
+                Client.RestHttp.DeleteAllReactions(this, emoji);
+        }
     }
 }

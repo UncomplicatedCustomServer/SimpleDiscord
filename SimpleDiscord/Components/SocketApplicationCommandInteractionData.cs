@@ -11,7 +11,8 @@ namespace SimpleDiscord.Components
 
         public int Type { get; }
 
-        public SocketResolvedData? Data { get; }
+        [JsonProperty("resolved")]
+        public SocketResolvedData? Resolved { get; }
 
         public ReplyCommandOption[]? Options { get; }
 
@@ -20,12 +21,12 @@ namespace SimpleDiscord.Components
         public long? TargetId { get; }
 
         [JsonConstructor]
-        public SocketApplicationCommandInteractionData(long id, string name, int type, SocketResolvedData? data, ReplyCommandOption[]? options, long? guildId, long? targetId)
+        public SocketApplicationCommandInteractionData(long id, string name, int type, SocketResolvedData? resolved, ReplyCommandOption[]? options, long? guildId, long? targetId)
         {
             Id = id;
             Name = name;
             Type = type;
-            Data = data;
+            Resolved = resolved;
             Options = options;
             GuildId = guildId;
             TargetId = targetId;
@@ -36,7 +37,7 @@ namespace SimpleDiscord.Components
             Id = self.Id;
             Name = self.Name;
             Type = self.Type;
-            Data = self.Data;
+            Resolved = self.Resolved;
             Options = self.Options;
             GuildId = self.GuildId;
             TargetId = self.TargetId;

@@ -3,6 +3,8 @@ using SimpleDiscord.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SimpleDiscord.Components
@@ -33,6 +35,10 @@ namespace SimpleDiscord.Components
 
         public List<ApplicationCommand> Commands { get; } = [];
 
+        public new List<Role> Roles { get; }
+
+        public new List<Emoji> Emojis { get; }
+
         public Guild(AnonymousGuild anonymous) : base(anonymous)
         {
             Console.WriteLine(anonymous.JoinedAt);
@@ -46,14 +52,8 @@ namespace SimpleDiscord.Components
             Presences = anonymous.Presences;
             StageInstances = anonymous.StageInstances;
             GuildScheduledEvents = anonymous.GuildScheduledEvents;
-
-            if (Client.Config.SaveGuildRegisteredCommands)
-            {
-                Task<SocketApplicationCommand[]> commands = Client.RestHttp.GetGuildCommands(this);
-                commands.Wait();
-                foreach (SocketApplicationCommand command in commands.Result)
-                    Commands.Add(new(command));
-            }
+            Roles = [..anonymous.Roles];
+            Emojis = [.. anonymous.Emojis];
 
             Guild instance = List.FirstOrDefault(c => c.Id == Id);
             if (instance is not null)
@@ -68,7 +68,20 @@ namespace SimpleDiscord.Components
 
         internal GuildChannel GetSafeChannel(long id) => Channels.FirstOrDefault(channel => channel.Id == id);
 
+        internal void SafeRegisterCommands()
+        {
+            if (Client.Config.SaveGuildRegisteredCommands)
+            {
+                Task<SocketApplicationCommand[]> commands = Client.RestHttp.GetGuildCommands(this);
+                commands.Wait();
+                foreach (SocketApplicationCommand command in commands.Result)
+                    Commands.Add(new(command));
+            }
+        }
+
         public SocketMember GetMember(long id) => Members.FirstOrDefault(member => member.User is not null && member.User.Id == id);
+
+        public Role GetRole(long id) => Roles.FirstOrDefault(role => role.Id == id);
 
         public async Task<ApplicationCommand?> RegisterCommand(SocketSendApplicationCommand command)
         {
@@ -85,7 +98,6 @@ namespace SimpleDiscord.Components
 
         internal void SafeUpdateChannel(GuildChannel channel)
         {
-            Console.WriteLine($"Calling update for channel {channel.Name}\n");
             if (channel is GuildThreadChannel thread)
             {
                 SafeUpdateThread(thread);
@@ -99,6 +111,25 @@ namespace SimpleDiscord.Components
                 Channels.Add(channel);
         }
 
+        internal void SafeClearChannel(GuildChannel channel)
+        {
+            if (channel is GuildThreadChannel thread)
+            {
+                SafeClearThread(thread);
+                return;
+            }
+
+            SafeClearChannel(channel.Id);
+        }
+
+        internal void SafeClearChannel(long id)
+        {
+            GuildChannel instance = Channels.FirstOrDefault(c => c.Id == id);
+            instance?.Dispose();
+            if (instance is not null)
+                Channels.Remove(instance);
+        }
+
         internal void SafeUpdateThread(GuildThreadChannel thread)
         {
             GuildThreadChannel instance = Threads.FirstOrDefault(c => c.Id == thread.Id && c.GuildId == Id);
@@ -106,6 +137,16 @@ namespace SimpleDiscord.Components
                 Threads[Threads.IndexOf(instance)] = thread;
             else
                 Threads.Add(thread);
+        }
+
+        internal void SafeClearThread(GuildThreadChannel thread) => SafeClearThread(thread.Id);
+
+        internal void SafeClearThread(long id)
+        {
+            GuildThreadChannel instance = Threads.FirstOrDefault(t => t.Id == id);
+            instance?.Dispose();
+            if (instance is not null)
+                Threads.Remove(instance);
         }
 
         internal void SafeUpdateCommand(ApplicationCommand cmd)
@@ -116,6 +157,53 @@ namespace SimpleDiscord.Components
             else
                 Commands.Add(cmd);
         }
+
+        internal void SafeClearCommand(ApplicationCommand cmd)
+        {
+            ApplicationCommand instance = Commands.FirstOrDefault(c => c.Id == cmd.Id);
+            if (instance is not null)
+                Commands.Remove(instance);
+        }
+
+        internal void SafeUpdateRole(Role role)
+        {
+            Role instance = Roles.FirstOrDefault(r => r.Id == role.Id);
+            if (instance is not null)
+                Roles[Roles.IndexOf(instance)] = role;
+            else
+                Roles.Add(role);
+        }
+
+        internal void SafeClearRole(Role role)
+        {
+            Role instance = Roles.FirstOrDefault(r => r.Id == role.Id);
+            if (instance is not null)
+                Roles.Remove(instance);
+        }
+
+        internal void SafeUpdateEmoji(Emoji emoji)
+        {
+            Emoji instance = Emojis.FirstOrDefault(e => e.Id == emoji.Id);
+            if (instance is not null)
+                Emojis[Emojis.IndexOf(instance)] = emoji;
+            else
+                Emojis.Add(emoji);
+        }
+
+        internal void SafeClearEmoji(Emoji emoji)
+        {
+            Emoji instance = Emojis.FirstOrDefault(e => e.Id == emoji.Id);
+            if (instance is not null)
+                Emojis.Remove(instance);
+        }
+
+        public Task<SocketGuildChannel> CreateChannel(SocketSendGuildChannel channel, string? reason = null) => Client.RestHttp.GuildCreateChannel(this, channel, reason);
+
+        public Task<Role> CreateRole(SocketSendRole role, string? reason = null) => Client.RestHttp.GuildCreateRole(this, role, reason);
+
+        public void DeleteRole(Role role, string? reason = null) => Client.RestHttp.GuildDeleteRole(this, role, reason);
+
+        public void UnbanUser(long id, string? reason = null) => Client.RestHttp.MemberUnban(this, id, reason);
 
         public static Guild? GetGuild(long id) => List.FirstOrDefault(guild => guild.Id == id);
 

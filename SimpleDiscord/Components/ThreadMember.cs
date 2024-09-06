@@ -9,6 +9,6 @@
 
         public string? JoinTimestamp { get; } = joinTimestamp;
 
-        public SocketMember? Member { get; } = member;
+        public SocketMember? Member { get; internal set; } = member;
     }
 }

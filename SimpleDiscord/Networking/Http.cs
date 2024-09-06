@@ -4,9 +4,12 @@ using SimpleDiscord.Components;
 using SimpleDiscord.Components.Builders;
 using SimpleDiscord.Components.DiscordComponents;
 using SimpleDiscord.Enums;
+using SimpleDiscord.Logger;
 using System;
+using System.Data;
 using System.Net;
 using System.Net.Http;
+using System.Security.Authentication.ExtendedProtection;
 using System.Threading.Tasks;
 
 namespace SimpleDiscord.Networking
@@ -20,15 +23,6 @@ namespace SimpleDiscord.Networking
         private readonly Client discordClient = originalClient;
 
         public const string Endpoint = "https://discord.com/api/v10";
-
-        public async Task<string> SendGenericGetRequest(string url)
-        {
-            HttpResponseMessage answer = await HttpClient.GetAsync($"{Endpoint}{url}");
-            if (answer.StatusCode != HttpStatusCode.OK)
-                throw new HttpRequestException($"Invalid answer: {answer.StatusCode} - {answer.ReasonPhrase}");
-
-            return await answer.Content.ReadAsStringAsync();
-        }
 
         public async Task<HttpResponseMessage> Send(HttpRequestMessage message, HttpStatusCode expectedResponse = HttpStatusCode.OK, bool disableResponseCheck = false)
         {
@@ -129,7 +123,7 @@ namespace SimpleDiscord.Networking
         {
             HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/applications/{discordClient.Application.Id}/commands").SetJsonContent(EncodeJson(command)), disableResponseCheck:true);
 
-            if (answer.StatusCode is not HttpStatusCode.OK and HttpStatusCode.Created)
+            if (answer.StatusCode is not HttpStatusCode.OK and not HttpStatusCode.Created)
                 throw new Exception($"Failed to send a HTTP request!.\nExpected OK (200), got {answer.StatusCode} ({(int)answer.StatusCode})");
 
             return JsonConvert.DeserializeObject<SocketApplicationCommand>(await answer.Content.ReadAsStringAsync());
@@ -142,7 +136,7 @@ namespace SimpleDiscord.Networking
             return JsonConvert.DeserializeObject<SocketApplicationCommand>(await answer.Content.ReadAsStringAsync());
         }
 
-        public async void DeleteGlobalCommand(ApplicationCommand command) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/applications/{discordClient.Application.Id}/commands/{command.Id}"));
+        public async void DeleteGlobalCommand(ApplicationCommand command) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/applications/{discordClient.Application.Id}/commands/{command.Id}"), HttpStatusCode.NoContent);
 
         public async Task<SocketApplicationCommand[]> BulkOverwriteGlobalCommands(SocketApplicationCommand[] commands)
         {
@@ -175,13 +169,214 @@ namespace SimpleDiscord.Networking
             return JsonConvert.DeserializeObject<SocketApplicationCommand>(await answer.Content.ReadAsStringAsync());
         }
 
-        public async void DeleteGuildCommand(Guild guild, ApplicationCommand command) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/applications/{discordClient.Application.Id}/guilds/{guild.Id}/commands/{command.Id}"));
+        public async void DeleteGuildCommand(Guild guild, ApplicationCommand command) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/applications/{discordClient.Application.Id}/guilds/{guild.Id}/commands/{command.Id}"), HttpStatusCode.NoContent);
 
         public async Task<SocketApplicationCommand[]> BulkOverwriteGuildCommands(Guild guild, SocketApplicationCommand[] commands)
         {
             HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/applications/{discordClient.Application.Id}/guilds/{guild.Id}/commands").SetJsonContent(EncodeJson(commands)));
 
             return JsonConvert.DeserializeObject<SocketApplicationCommand[]>(await answer.Content.ReadAsStringAsync());
+        }
+
+        public void MemberAddRole(Member member, Role role, string reason = null) => MemberAddRole(member, role.Id, reason);
+
+        public async void MemberAddRole(Member member, long role, string reason = null)
+        {
+            HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/guilds/{member.Guild.Id}/members/{member.User.Id}/roles/{role}");
+
+            if (reason is not null)
+                message.SetHeader("X-Audit-Log-Reason", reason);
+
+            await Send(message, HttpStatusCode.NoContent);
+        }
+
+        public void MemberRemoveRole(Member member, Role role, string reason = null) => MemberRemoveRole(member, role.Id, reason);
+
+        public async void MemberRemoveRole(Member member, long role, string reason = null)
+        {
+            HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/guilds/{member.Guild.Id}/members/{member.User.Id}/roles/{role}");
+
+            if (reason is not null)
+                message.SetHeader("X-Audit-Log-Reason", reason);
+
+            await Send(message, HttpStatusCode.NoContent);
+        }
+
+        public async void MemberKick(Member member, string reason = null)
+        {
+            HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/guilds/{member.Guild.Id}/members/{member.User.Id}");
+
+            if (reason is not null)
+                message.SetHeader("X-Audit-Log-Reason", reason);
+
+            await Send(message, HttpStatusCode.NoContent);
+        }
+
+        public async void MemberBan(Member member, string reason = null, int deleteMessageSeconds = 0)
+        {
+            HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/guilds/{member.Guild.Id}/bans/{member.User.Id}?delete_message_seconds={deleteMessageSeconds}");
+
+            if (reason is not null)
+                message.SetHeader("X-Audit-Log-Reason", reason);
+
+            await Send(message, HttpStatusCode.NoContent);
+        }
+
+        public async void MemberUnban(Guild guild, long userId, string reason = null)
+        {
+            HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/guilds/{guild.Id}/bans/{userId}");
+
+            if (reason is not null)
+                message.SetHeader("X-Audit-Log-Reason", reason);
+
+            await Send(message, HttpStatusCode.NoContent);
+        }
+
+        public async Task<Role> GuildCreateRole(Guild guild, SocketSendRole role, string reason = null)
+        {
+            HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/guilds/{guild.Id}/roles").SetJsonContent(EncodeJson(role));
+
+            if (reason is not null)
+                message.SetHeader("X-Audit-Log-Reason", reason);
+
+            HttpResponseMessage answer = await Send(message);
+
+            return JsonConvert.DeserializeObject<Role>(await answer.Content.ReadAsStringAsync());
+        }
+
+        public async void GuildDeleteRole(Guild guild, Role role, string reason = null)
+        {
+            HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/guilds/{guild.Id}/roles/{role.Id}");
+
+            if (reason is not null)
+                message.SetHeader("X-Audit-Log-Reason", reason);
+
+            await Send(message, HttpStatusCode.NoContent);
+        }
+
+        public async Task<SocketGuildChannel> GuildCreateChannel(Guild guild, SocketSendGuildChannel channel, string reason = null)
+        {
+            HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/guilds/{guild.Id}/channels").SetJsonContent(EncodeJson(channel));
+
+            if (reason is not null)
+                message.SetHeader("X-Audit-Log-Reason", reason);
+
+            HttpResponseMessage answer = await Send(message);
+            return JsonConvert.DeserializeObject<SocketGuildChannel>(await answer.Content.ReadAsStringAsync());
+        }
+
+        public async Task<SocketGuildChannel> ChannelEdit(GuildChannel channel, SocketSendGuildChannel newChannel, string reason = null)
+        {
+            if ((int)channel.Type != newChannel.Type)
+                throw new Exception("The two given channels are not the same type!\nYeah ik that you should be able to convert announcement channels to text ones and vice-versa but nuh uh");
+
+            HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod("PATCH").SetUri($"{Endpoint}/channels/{channel.Id}/channels").SetJsonContent(EncodeJson(channel));
+
+            if (reason is not null)
+                message.SetHeader("X-Audit-Log-Reason", reason);
+
+            HttpResponseMessage answer = await Send(message);
+            return JsonConvert.DeserializeObject<SocketGuildChannel>(await answer.Content.ReadAsStringAsync());
+        }
+
+        public async void ChannelDelete(GuildChannel channel, string reason = null)
+        {
+            HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{channel.Id}");
+
+            if (reason is not null)
+                message.SetHeader("X-Audit-Log-Reason", reason);
+
+            await Send(message);
+        }
+
+        public async void PinMessage(Message message, string reason = null)
+        {
+            HttpMessageBuilder request = HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/channels/{message.Channel.Id}/pins/{message.Id}");
+
+            if (reason is not null)
+                request.SetHeader("X-Audit-Log-Reason", reason);
+
+            await Send(request, HttpStatusCode.NoContent);
+        }
+
+        public async void UnpinMessage(Message message, string reason = null)
+        {
+            HttpMessageBuilder request = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/pins/{message.Id}");
+
+            if (reason is not null)
+                request.SetHeader("X-Audit-Log-Reason", reason);
+
+            await Send(request, HttpStatusCode.NoContent);
+        }
+
+        public async Task<SocketGuildThreadChannel> StartThreadFromMessage(Message message, SocketSendPublicThread thread ,string reason = null)
+        {
+            HttpMessageBuilder request = HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/threads").SetJsonContent(EncodeJson(thread));
+
+            if (reason is not null)
+                request.SetHeader("X-Audit-Log-Reason", reason);
+
+            HttpResponseMessage answer = await Send(request, HttpStatusCode.Created, true);
+
+            string answ = await answer.Content.ReadAsStringAsync();
+
+            Log.Warn($"Magic thing: {answer.StatusCode} - {answ}");
+
+            return JsonConvert.DeserializeObject<SocketGuildThreadChannel>(await answer.Content.ReadAsStringAsync());
+        }
+
+        public async Task<SocketGuildThreadChannel> StartThread(GuildTextChannel channel, SocketSendPublicThread thread, string reason = null)
+        {
+            HttpMessageBuilder request = HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/channels/{channel.Id}/threads").SetJsonContent(EncodeJson(thread));
+
+            if (reason is not null)
+                request.SetHeader("X-Audit-Log-Reason", reason);
+
+            HttpResponseMessage answer = await Send(request, HttpStatusCode.Created);
+
+            return JsonConvert.DeserializeObject<SocketGuildThreadChannel>(await answer.Content.ReadAsStringAsync());
+        }
+
+        public async void JoinThread(GuildThreadChannel thread) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members/@me"), HttpStatusCode.NoContent);
+
+        public async void AddUserToThread(GuildThreadChannel thread, long id) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members/{id}"), HttpStatusCode.NoContent);
+
+        public async void LeaveThread(GuildThreadChannel thread) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members/@me"), HttpStatusCode.NoContent);
+
+        public async void RemoveUserToThread(GuildThreadChannel thread, long id) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members/{id}"), HttpStatusCode.NoContent);
+
+        public async Task<ThreadMember[]> GetThreadMembers(GuildThreadChannel thread)
+        {
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Get).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members"));
+            return JsonConvert.DeserializeObject<ThreadMember[]>(await answer.Content.ReadAsStringAsync());
+        }
+
+        public async void AddOwnReaction(Message message, Emoji emoji) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions/{emoji.Encode()}/@me"), HttpStatusCode.NoContent);
+
+        public async void DeleteOwnReaction(Message message, Emoji emoji) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions/{emoji.Encode()}/@me"), HttpStatusCode.NoContent);
+
+        public async void DeleteUserReaction(Message message, Emoji emoji, long user) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions/{emoji.Encode()}/{user}"), HttpStatusCode.NoContent);
+
+        public async void DeleteAllReactions(Message message, Emoji emoji) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions/{emoji.Encode()}"), HttpStatusCode.NoContent);
+
+        public async void DeleteAllReactions(Message message) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions"), HttpStatusCode.NoContent);
+
+        public async Task<SocketMessage[]> GetMessages(GuildTextChannel channel, int? limit = 50, long? around = null, long? before = null, long? after = null)
+        {
+            string q = string.Empty;
+
+            if (around is not null and not 0)
+                q = $"&around={around}";
+
+            if (before is not null and not 0)
+                q = $"&before={before}";
+
+            if (after is not null and not 0)
+                q = $"&after={after}";
+
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Get).SetUri($"{Endpoint}/channels/{channel.Id}/messages?limit={limit}{q}"));
+
+            return JsonConvert.DeserializeObject<SocketMessage[]>(await answer.Content.ReadAsStringAsync());
         }
 
         private string EncodeJson(object data)

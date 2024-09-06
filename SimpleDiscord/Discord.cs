@@ -121,13 +121,25 @@ namespace SimpleDiscord
             BaseGatewayEvent ev = DiscordClient.GatewatEventHandler.Parse(new(rawMsg));
 
             if (ev is GuildCreate guildCreate)
+            {
                 guildCreate.Guild.SetClient(DiscordClient);
+                guildCreate.Guild.SafeRegisterCommands();
+            }
 
             if (ev is MessageCreate messageCreate)
                 messageCreate.Message.SetClient(DiscordClient);
 
+            if (ev is MessageUpdate messageUpdate)
+                messageUpdate.Message.SetClient(DiscordClient);
+
             if (ev is InteractionCreate interactionCreate)
                 interactionCreate.Interaction.SetClient(DiscordClient);
+
+            if (ev is Heartbeat)
+            {
+                SendHeartbeat();
+                return;
+            }
 
             if (ev is Ready ready)
             {
@@ -264,7 +276,7 @@ namespace SimpleDiscord
 
                 Console.WriteLine("\nHeartbeat!\n");
                 SendHeartbeat();
-                int time = (int)heartbeatDelay + Random.Next(-50, 50);
+                int time = (int)heartbeatDelay + Random.Next((int)(heartbeatDelay * -1) / 4, -15);
                 Console.WriteLine($"Waiting time: {time} -- {heartbeatDelay}");
                 await Task.Delay(time);
             }

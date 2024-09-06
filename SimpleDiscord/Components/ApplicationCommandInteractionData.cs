@@ -12,7 +12,7 @@ namespace SimpleDiscord.Components
 
         public int Type { get; }
 
-        public ResolvedData? Data { get; }
+        public ResolvedData? Resolved { get; }
 
         public ReplyCommandOption[]? Options { get; }
 
@@ -20,12 +20,12 @@ namespace SimpleDiscord.Components
 
         public long? TargetId { get; }
 
-        public ApplicationCommandInteractionData(long id, string name, int type, ResolvedData? data, ReplyCommandOption[]? options, long? guildId, long? targetId)
+        public ApplicationCommandInteractionData(long id, string name, int type, ResolvedData? resolved, ReplyCommandOption[]? options, long? guildId, long? targetId)
         {
             Id = id;
             Name = name;
             Type = type;
-            Data = data;
+            Resolved = resolved;
             Options = options;
             TargetId = targetId;
 
@@ -34,10 +34,10 @@ namespace SimpleDiscord.Components
                 Guild = Guild.GetSafeGuild((long)guildId);
         }
 
-        public ApplicationCommandInteractionData(ApplicationCommandInteractionData self) : this(self.Id, self.Name, self.Type, self.Data, self.Options, self.Guild?.Id, self.TargetId)
+        public ApplicationCommandInteractionData(ApplicationCommandInteractionData self) : this(self.Id, self.Name, self.Type, self.Resolved, self.Options, self.Guild?.Id, self.TargetId)
         { }
 
-        public ApplicationCommandInteractionData(SocketApplicationCommandInteractionData socketInstance) : this(socketInstance.Id, socketInstance.Name, socketInstance.Type, socketInstance.Data is not null ? new(socketInstance.Data) : null, socketInstance.Options, socketInstance.GuildId, socketInstance.TargetId) 
+        public ApplicationCommandInteractionData(SocketApplicationCommandInteractionData socketInstance) : this(socketInstance.Id, socketInstance.Name, socketInstance.Type, socketInstance.Resolved is not null ? new(socketInstance.Resolved) : null, socketInstance.Options, socketInstance.GuildId, socketInstance.TargetId) 
         { }
     }
 }

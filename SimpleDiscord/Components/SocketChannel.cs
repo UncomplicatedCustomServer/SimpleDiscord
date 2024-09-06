@@ -1,10 +1,9 @@
 ﻿using SimpleDiscord.Components.Attributes;
-using SimpleDiscord.Networking;
 
 namespace SimpleDiscord.Components
 {
     [EndpointInfo("/channels/{channel.id}", "CHANNEL")]
-    public class SocketChannel(long id, int type)
+    public class SocketChannel(long id, int type) : DisposableElement
     {
         public long Id { get; } = id;
 
