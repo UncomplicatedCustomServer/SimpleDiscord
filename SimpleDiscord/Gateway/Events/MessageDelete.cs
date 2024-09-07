@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
+using SimpleDiscord.Components;
 using SimpleDiscord.Gateway.Events.Attributes;
 using SimpleDiscord.Gateway.Events.LocalizedData;
 using SimpleDiscord.Gateway.Events.LocalizedData.Resolved;
 using SimpleDiscord.Gateway.Messages;
+using System.Linq;
 
 namespace SimpleDiscord.Gateway.Events
 {
@@ -16,7 +18,9 @@ namespace SimpleDiscord.Gateway.Events
         public override void Init()
         {
             Data = JsonConvert.DeserializeObject<MessageDeleteDataMember>(RawData);
-            Message = new(Data);
+
+            if (GuildChannel.List.FirstOrDefault(c => c.Id == Data.ChannelId) is GuildTextChannel textChannel)
+                Message = new(Data);
         }
     }
 }

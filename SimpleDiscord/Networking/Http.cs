@@ -4,7 +4,6 @@ using SimpleDiscord.Components;
 using SimpleDiscord.Components.Builders;
 using SimpleDiscord.Components.DiscordComponents;
 using SimpleDiscord.Enums;
-using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;

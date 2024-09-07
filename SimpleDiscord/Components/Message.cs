@@ -1,6 +1,5 @@
 ﻿using SimpleDiscord.Components.Attributes;
 using SimpleDiscord.Components.DiscordComponents;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,13 +24,16 @@ namespace SimpleDiscord.Components
 
         public new Poll? Poll { get; }
 
-        public Message(SocketMessage baseMessage) : base(baseMessage)
+        public Message(SocketMessage baseMessage, GuildTextChannel? channel = null) : base(baseMessage)
         {
+            channel ??= GuildChannel.List.FirstOrDefault(channel => channel.Id == ChannelId) as GuildTextChannel;
+
+#nullable disable
+            Channel = channel;
+
             Thread = null;
             if (baseMessage.Thread is not null)
                 Thread = new(baseMessage.Thread);
-#nullable disable
-            Channel = GuildChannel.List.FirstOrDefault(channel => channel.Id == ChannelId) as GuildTextChannel;
 
             Guild = Channel.Guild;
             Member = Guild.GetMember(baseMessage.Author.Id);

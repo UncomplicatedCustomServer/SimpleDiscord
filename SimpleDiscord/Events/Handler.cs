@@ -9,10 +9,10 @@ namespace SimpleDiscord.Events
     {
         public Dictionary<string, HashSet<KeyValuePair<object, MethodInfo>>> List { get; } = [];
 
-        public void RegisterEvents(Assembly assembly, object caller = null)
+        public void RegisterEvents(Assembly assembly)
         {
             foreach (Type type in assembly.GetTypes())
-                RegisterEvents(caller: caller, type: type);
+                RegisterEvents(null, type);
         }
 
         public void RegisterEvents(object caller = null, Type type = null)

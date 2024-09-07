@@ -79,12 +79,12 @@ namespace SimpleDiscord
 
             connectionStatus = ConnectionStatus.Connecting;
 
-            await MessageReceiver();
+            MessageReceiver();
         }
 
         internal async void Disconnect() => await webSocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
 
-        internal async Task MessageReceiver()
+        internal async void MessageReceiver()
         {
             List<byte> received = [];
             while (connectionStatus is not ConnectionStatus.NotAvailable and not ConnectionStatus.NotConnected and not ConnectionStatus.Ready && webSocketClient.State is WebSocketState.Open)
@@ -128,10 +128,10 @@ namespace SimpleDiscord
                     SendMessage(new(string.Empty, 8, new GuildChunkMemberData(guildCreate.Guild.Id)));
             }
 
-            if (ev is MessageCreate messageCreate)
+            if (ev is MessageCreate messageCreate && messageCreate.CanShare)
                 messageCreate.Message.SetClient(DiscordClient);
 
-            if (ev is MessageUpdate messageUpdate)
+            if (ev is MessageUpdate messageUpdate && messageUpdate.CanShare)
                 messageUpdate.Message.SetClient(DiscordClient);
 
             if (ev is InteractionCreate interactionCreate)
@@ -161,7 +161,7 @@ namespace SimpleDiscord
 
             if (connectionStatus is ConnectionStatus.Connected or ConnectionStatus.Connecting && ev is not null && ev.GatewayMessage.EventName != null)
             {
-                if (ev is IUserDeniableEvent deniableEvent && deniableEvent.CanShare)
+                if (ev is IUserDeniableEvent deniableEvent && !deniableEvent.CanShare)
                     goto proceed;
 
                 if (ev is MessageUpdate messageUpdated && pollResults.Contains(messageUpdated.Message.Id))

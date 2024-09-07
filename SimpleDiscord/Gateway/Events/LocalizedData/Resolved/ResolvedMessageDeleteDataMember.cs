@@ -10,7 +10,7 @@ namespace SimpleDiscord.Gateway.Events.LocalizedData.Resolved
     {
         public Message? Message { get; } // Populated only if Config.SaveMessages is true!
 
-        public GuildTextChannel Channel { get; }
+        public GuildTextChannel? Channel { get; }
 
         public Guild? Guild { get; }
 

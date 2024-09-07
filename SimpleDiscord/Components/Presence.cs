@@ -7,9 +7,9 @@
 
         public Member? Member { get; }
 
-        public Presence(SocketPresence instance) : base(instance)
+        public Presence(SocketPresence instance, Guild? guild = null) : base(instance)
         {
-            Guild = Guild.GetSafeGuild(instance.GuildId);
+            Guild = guild ?? Guild.GetSafeGuild(instance.GuildId);
             Member = Guild.GetMember(instance.User.Id);
         }
     }

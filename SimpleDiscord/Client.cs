@@ -7,6 +7,8 @@ using SimpleDiscord.Networking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace SimpleDiscord
@@ -97,6 +99,8 @@ namespace SimpleDiscord
 #nullable enable
         public Guild? GetGuild(long id) => Guild.List.FirstOrDefault(guild => guild.Id == id);
 #nullable disable
+
+        public Task<HttpResponseMessage> ApiRequest(HttpRequestMessage message, HttpStatusCode expectedResult = HttpStatusCode.OK, bool disableResponseCheck = false) => RestHttp.Send(message, expectedResult, disableResponseCheck);
 
         internal Guild GetSafeGuild(long id) => Guild.List.FirstOrDefault(safeguild => safeguild.Id == id);
     }

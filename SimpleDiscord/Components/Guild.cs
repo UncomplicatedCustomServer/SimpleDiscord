@@ -25,7 +25,7 @@ namespace SimpleDiscord.Components
 
         public List<GuildThreadChannel> Threads { get; }
 
-        public SocketSendPresence[] Presences { get; }
+        public List<Presence> Presences { get; }
 
         public SocketStageInstance[] StageInstances { get; }
 
@@ -46,7 +46,8 @@ namespace SimpleDiscord.Components
             Members = [];
             Channels = [];
             Threads = [];
-            Presences = anonymous.Presences;
+            Presences = [];
+
             StageInstances = anonymous.StageInstances;
             GuildScheduledEvents = anonymous.GuildScheduledEvents;
             Roles = [.. anonymous.Roles];
@@ -54,6 +55,9 @@ namespace SimpleDiscord.Components
 
             foreach (SocketMember member in anonymous.Members)
                 Members.Add(new(this, member));
+
+            foreach (SocketPresence presence in anonymous.Presences)
+                Presences.Add(new(presence, this));
 
             Guild instance = List.FirstOrDefault(c => c.Id == Id);
             if (instance is not null)
