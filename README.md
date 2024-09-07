@@ -1,6 +1,6 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/UncomplicatedCustomServer/SimpleDiscord/resources/logo.png">
-  <h3 align="center">Fast, easy and mono-friendly library to host a Discord bot on your gameserver console</h3>
+  <h3 align="center">https://github.com/UncomplicatedCustomServer/SimpleDiscord/labels/PUBLIC%20BETA &nbsp;&nbsp;Fast, easy and mono-friendly library to host a Discord bot on your gameserver console</h3>
 </p>
 
 > [!NOTE]
