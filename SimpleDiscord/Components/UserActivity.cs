@@ -4,7 +4,7 @@ using SimpleDiscord.Enums;
 namespace SimpleDiscord.Components
 {
 #nullable enable
-    public class UserActivity(string name, int type, string? url, long createdAt, long? applicationId, string? details, string? state, Emoji? emoji, bool? instance, int? flags, ActivityButton[]? buttons)
+    public class UserActivity(string name, int type, string? url, long createdAt, long? applicationId, string? details, string? state, Emoji? emoji, bool? instance, int? flags, object[]? buttons)
     {
         public string Name { get; } = name;
 
@@ -28,6 +28,6 @@ namespace SimpleDiscord.Components
 
         public int? Flags { get; } = flags;
 
-        public ActivityButton[]? Buttons { get; } = buttons;
+        public object[]? Buttons { get; } = buttons;
     }
 }

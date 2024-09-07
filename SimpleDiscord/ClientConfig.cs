@@ -4,7 +4,7 @@ namespace SimpleDiscord
 {
     public sealed class ClientConfig
     {
-        public bool Debug { get; set; } = true;
+        public bool Debug { get; set; } = false;
 
         public bool SystemLogs { get; set; } = true;
 

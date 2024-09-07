@@ -23,6 +23,8 @@ namespace SimpleDiscord.Components
 
         public new List<ActionRow>? Components { get; }
 
+        public new Poll? Poll { get; }
+
         public Message(SocketMessage baseMessage) : base(baseMessage)
         {
             Thread = null;
@@ -41,6 +43,9 @@ namespace SimpleDiscord.Components
                 foreach (SocketActionRow socketActionRow in baseMessage.Components)
                     Components.Add(new(socketActionRow));
             }
+
+            if (baseMessage.Poll is not null)
+                Poll = new(this, baseMessage.Poll);
 
             List<Reaction> _reactions = [];
             if (baseMessage.Reactions is not null)
