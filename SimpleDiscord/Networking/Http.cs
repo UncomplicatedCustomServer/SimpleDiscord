@@ -21,34 +21,30 @@ namespace SimpleDiscord.Networking
 
         public const string Endpoint = "https://discord.com/api/v10";
 
-        public async Task<HttpResponseMessage> Send(HttpRequestMessage message, HttpStatusCode expectedResponse = HttpStatusCode.OK, bool disableResponseCheck = false)
+        public async Task<HttpResponseMessage> Send(HttpRequestMessage message, HttpStatusCode expectedResponse = HttpStatusCode.OK, bool disableResponseCheck = false, bool child = false)
         {
-            discordClient.Logger.Silent($"[HTTP BUCKET] {message.Method.Method} {message.RequestUri.OriginalString}");
-            string requestId = string.Empty;
-            RateLimit rateLimit = rateLimitHandler.GetRateLimit(message);
-            if (!rateLimit.Validate())
-            {
-                if (rateLimit.Default)
-                {
-                    // Is a default one, we should just wait 1s and then proceed with the thing
-                    discordClient.Logger.Debug($"Got default rate limit, we just need to wait 1s before going back to scene!");
-                    await Task.Delay(1000);
-                    return await Send(message, expectedResponse, disableResponseCheck);
-                }
+            if (!child)
+                discordClient.Logger.Silent($"[HTTP BUCKET] {message.Method.Method} {message.RequestUri.OriginalString}");
 
-                // We must apply ratelimit
-                requestId = Guid.NewGuid().ToString();
-                float wait = rateLimitHandler.GetWaitingTime(message, requestId);
-                discordClient.Logger.Debug($"RateLimit validated, awaiting {rateLimit.EnqueueTime()} ({wait}) seconds before accessing back the service...");
-                await Task.Delay((int)(wait * 1000 + (Discord.Random.Next(50, 500) / 2))); // Enqueued
-                
+            RateLimit rateLimit = rateLimitHandler.GetRateLimit(message);
+
+            if (!rateLimit.Validate(out decimal waitingTime))
+            {
+                await Task.Delay(decimal.ToInt32(waitingTime) + 10);
+                return await Send(message, expectedResponse, disableResponseCheck, true);
             }
 
-            rateLimitHandler.MakeRequest(rateLimit); // Sync update
-            discordClient.Logger.Debug($"Current rate limit rate: {rateLimit.Limit} -- remainings: {rateLimit.Remaining} -- wait: {rateLimit.ResetAfter} -- time: {rateLimit.EnqueueTime()}");
+            rateLimitHandler.MakeRequest(message); // Sync update
+
+            // Check RL also here!
+            if (rateLimit.Remaining < -1)
+            {
+                await Task.Delay(500);
+                return await Send(message, expectedResponse, disableResponseCheck, true);
+            }
+
             HttpResponseMessage answer = await HttpClient.SendAsync(message);
-            rateLimitHandler.ResolveWaitingTime(message, requestId);
-            discordClient.Logger.Debug($"Received response from CHPN - {answer.StatusCode}");
+
             rateLimitHandler.UpdateRateLimit(message, answer.Headers); //  Async update
 
             if (!disableResponseCheck && answer.StatusCode != expectedResponse)

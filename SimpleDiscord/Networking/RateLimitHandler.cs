@@ -1,10 +1,9 @@
-﻿using SimpleDiscord.Logger;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Cryptography;
 
 namespace SimpleDiscord.Networking
 {
@@ -12,9 +11,7 @@ namespace SimpleDiscord.Networking
     {
         private readonly Dictionary<string, RateLimit> EndpointRateLimits = [];
 
-        private readonly Dictionary<string, float> WaitingTime = [];
-
-        private readonly Dictionary<string, float> CalculatedTime = [];
+        public readonly Dictionary<string, decimal> ExpectedTryAgainTime = [];
 
         public RateLimit GetRateLimit(HttpRequestMessage request)
         {
@@ -22,42 +19,30 @@ namespace SimpleDiscord.Networking
                 return rateLimit;
             else
             {
-                RateLimit rateLimit1 = new(GenerateUri(request), 1, 1, 0.75f, DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1.75f, true);
+                RateLimit rateLimit1 = new(GenerateUri(request), 1, 1, 0.75m, DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1.75m, this, true);
                 EndpointRateLimits[GenerateUri(request)] = rateLimit1;
                 return rateLimit1;
             }
         }
 
-        public float GetWaitingTime(HttpRequestMessage request, string id)
+        public decimal GetExpectedTryAgainTime(string request)
         {
-            string uri = GenerateUri(request);
-            RateLimit rateLimit = GetRateLimit(request);
-            if (WaitingTime.ContainsKey(uri))
-                WaitingTime[uri] += rateLimit.EnqueueTime();
+            if (ExpectedTryAgainTime.TryGetValue(request, out decimal expectedTryAgainTime))
+                return expectedTryAgainTime;
             else
-                WaitingTime.Add(uri, rateLimit.EnqueueTime());
-
-            CalculatedTime.Add(id, rateLimit.EnqueueTime());
-
-            return WaitingTime[uri];
+                return 0m;
         }
 
-        public void ResolveWaitingTime(HttpRequestMessage request, string id)
+        public void UpdateExcepctedTryAgainTime(string response, decimal time)
         {
-            if (id == string.Empty)
-                return;
-
-            string uri = GenerateUri(request);
-            if (WaitingTime.ContainsKey(uri))
-                WaitingTime[GenerateUri(request)] -= CalculatedTime[id];
-
-            CalculatedTime.Remove(id); // Garbage collector
+            if (!ExpectedTryAgainTime.ContainsKey(response))
+                ExpectedTryAgainTime.Add(response, time);
         }
 
-        public void MakeRequest(RateLimit rateLimit)
+
+        public void MakeRequest(HttpRequestMessage msg)
         {
-            rateLimit.Requested();
-            EndpointRateLimits[rateLimit.Uri] = rateLimit;
+            EndpointRateLimits[GenerateUri(msg)].Requested();
         }
 
         public void UpdateRateLimit(HttpRequestMessage request, HttpResponseHeaders headers)
@@ -87,7 +72,12 @@ namespace SimpleDiscord.Networking
                 return;
 
             string uri = GenerateUri(request);
-            RateLimit rateLimit = new(uri, int.Parse(rateLimitLimit), int.Parse(rateLimitRemaining), (int)float.Parse(rateLimitResetAfter.Replace('.', ',')), float.Parse(rateLimitReset.Replace('.', ',')));
+            Console.WriteLine($"\nWARNING: Updated ratelimit for endpoint {uri}\nReset after {rateLimitReset}");
+            RateLimit rateLimit = new(uri, int.Parse(rateLimitLimit), int.Parse(rateLimitRemaining), decimal.Parse(rateLimitResetAfter, new CultureInfo("en-US")), decimal.Parse(rateLimitReset, new CultureInfo("en-US")), this)
+            {
+                RawReset = rateLimitReset
+            };
+            UpdateExcepctedTryAgainTime(uri, decimal.Parse(rateLimitResetAfter, new CultureInfo("en-US")));
             EndpointRateLimits[uri] = rateLimit;
         }
 
