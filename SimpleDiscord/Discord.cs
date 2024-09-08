@@ -6,7 +6,6 @@ using SimpleDiscord.Gateway.Events;
 using SimpleDiscord.Gateway.Events.LocalizedData;
 using SimpleDiscord.Gateway.Messages;
 using SimpleDiscord.Gateway.Messages.Predefined;
-using SimpleDiscord.Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +18,6 @@ using System.Threading.Tasks;
 
 namespace SimpleDiscord
 {
-#pragma warning disable IDE0052
     internal class Discord(Client client)
     {
         public ConnectionStatus connectionStatus = ConnectionStatus.Ready;
@@ -50,6 +48,7 @@ namespace SimpleDiscord
         {
             this.token = token;
             this.intents = intents;
+            DiscordClient.Logger.Silent("Starting the Discord Client, requireing the Discord Gateway from the APIs");
             await RetriveEndpoint();
             DiscordClient.Logger.Silent($"Found Discord Gateway: {endpoint}");
             await Connect();
@@ -138,7 +137,7 @@ namespace SimpleDiscord
             {
                 interactionCreate.Interaction.SetClient(DiscordClient);
                 if (interactionCreate.Interaction.Type is InteractionType.APPLICATION_COMMAND && interactionCreate.Interaction.Data is ApplicationCommandInteractionData data)
-                    DiscordClient.EventHandler.Invoke(data.Name, ev);
+                    DiscordClient.EventHandler.InvokeCommand(data.Name, interactionCreate.Interaction);
             }
 
             if (ev is Heartbeat)

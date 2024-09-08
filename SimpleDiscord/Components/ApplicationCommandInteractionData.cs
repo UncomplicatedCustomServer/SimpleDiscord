@@ -1,4 +1,5 @@
-﻿using SimpleDiscord.Components.Attributes;
+﻿using Newtonsoft.Json;
+using SimpleDiscord.Components.Attributes;
 
 namespace SimpleDiscord.Components
 {
@@ -16,11 +17,10 @@ namespace SimpleDiscord.Components
 
         public ReplyCommandOption[]? Options { get; }
 
-        public Guild? Guild { get; }
-
         public long? TargetId { get; }
 
-        public ApplicationCommandInteractionData(long id, string name, int type, ResolvedData? resolved, ReplyCommandOption[]? options, long? guildId, long? targetId)
+        [JsonConstructor]
+        public ApplicationCommandInteractionData(long id, string name, int type, ResolvedData? resolved, ReplyCommandOption[]? options, long? targetId)
         {
             Id = id;
             Name = name;
@@ -28,16 +28,12 @@ namespace SimpleDiscord.Components
             Resolved = resolved;
             Options = options;
             TargetId = targetId;
-
-            Guild = null;
-            if (guildId is not null)
-                Guild = Guild.GetSafeGuild((long)guildId);
         }
 
-        public ApplicationCommandInteractionData(ApplicationCommandInteractionData self) : this(self.Id, self.Name, self.Type, self.Resolved, self.Options, self.Guild?.Id, self.TargetId)
+        public ApplicationCommandInteractionData(ApplicationCommandInteractionData self) : this(self.Id, self.Name, self.Type, self.Resolved, self.Options, self.TargetId)
         { }
 
-        public ApplicationCommandInteractionData(SocketApplicationCommandInteractionData socketInstance) : this(socketInstance.Id, socketInstance.Name, socketInstance.Type, socketInstance.Resolved is not null ? new(socketInstance.Resolved) : null, socketInstance.Options, socketInstance.GuildId, socketInstance.TargetId) 
+        public ApplicationCommandInteractionData(SocketApplicationCommandInteractionData socketInstance) : this(socketInstance.Id, socketInstance.Name, socketInstance.Type, socketInstance.Resolved is not null ? new(socketInstance.Resolved) : null, socketInstance.Options, socketInstance.TargetId) 
         { }
     }
 }

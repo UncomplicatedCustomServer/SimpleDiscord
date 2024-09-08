@@ -98,5 +98,22 @@ namespace SimpleDiscord.Components
             else
                 return Client.RestHttp.DeleteAllReactions(this, emoji);
         }
+
+        public static string[] Chunk(string fullMessage)
+        {
+            List<string> chunks = [string.Empty];
+            int index = 0;
+
+            foreach (string part in fullMessage.Split(' '))
+                if (chunks[index].Length + part.Length + 1 > 1999)
+                {
+                    index++;
+                    chunks.Add(part);
+                }
+                else
+                    chunks[index] += $"{part} ";
+
+            return [.. chunks];
+        }
     }
 }

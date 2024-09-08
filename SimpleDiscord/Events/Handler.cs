@@ -62,5 +62,18 @@ namespace SimpleDiscord.Events
                     else
                         method.Value.Invoke(method.Key, []);
         }
+
+        internal void InvokeCommand(string name, object args)
+        {
+            if (CommandHandlers.TryGetValue(name, out HashSet<KeyValuePair<object, MethodInfo>> list))
+                foreach (KeyValuePair<object, MethodInfo> method in list)
+                    if (method.Value.GetParameters().Length > 0)
+                    {
+                        if (method.Value.GetParameters()[0].ParameterType == args.GetType())
+                            method.Value.Invoke(method.Key, [args]);
+                    }
+                    else
+                        method.Value.Invoke(method.Key, []);
+        }
     }
 }
