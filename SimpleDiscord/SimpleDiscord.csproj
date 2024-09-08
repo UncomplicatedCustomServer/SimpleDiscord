@@ -45,6 +45,7 @@
     <Compile Include="Client.cs" />
     <Compile Include="ClientConfig.cs" />
     <Compile Include="Components\Activity.cs" />
+    <Compile Include="Components\ActivityAsset.cs" />
     <Compile Include="Components\ActivityButton.cs" />
     <Compile Include="Components\Application.cs" />
     <Compile Include="Components\ApplicationCommand.cs" />
@@ -53,6 +54,7 @@
     <Compile Include="Components\Attributes\EndpointInfo.cs" />
     <Compile Include="Components\Attributes\SocketInstance.cs" />
     <Compile Include="Components\Builders\ActionRowBuilder.cs" />
+    <Compile Include="Components\Builders\ActivityBuilder.cs" />
     <Compile Include="Components\Builders\ApplicationCommandBuilder.cs" />
     <Compile Include="Components\Builders\CommandOptionBuilder.cs" />
     <Compile Include="Components\Builders\EmbedBuilder.cs" />
@@ -173,6 +175,7 @@
     <Compile Include="Enums\RoleCreate.cs" />
     <Compile Include="Enums\TextInputStyle.cs" />
     <Compile Include="Enums\ThreadType.cs" />
+    <Compile Include="Events\Attributes\CommandHandler.cs" />
     <Compile Include="Events\Attributes\SocketEvent.cs" />
     <Compile Include="Events\Handler.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />

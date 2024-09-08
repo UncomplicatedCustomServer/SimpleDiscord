@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SimpleDiscord.Components;
+using SimpleDiscord.Enums;
 using SimpleDiscord.Gateway.Events.Attributes;
 using SimpleDiscord.Gateway.Messages;
 

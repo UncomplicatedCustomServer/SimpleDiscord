@@ -31,13 +31,10 @@ namespace SimpleDiscord.Networking
             if (Remaining < 0)
             {
                 waitingTime = instance.GetExpectedTryAgainTime(Uri) * 1000 + 50;
-                Console.WriteLine($"\nOUTPUT FROM A WAS {waitingTime}");
                 return false; // Already smth is moving
             }
 
-            Console.WriteLine($"\n\nRVAL: {Reset} - NOWVAL: {DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()} - {Reset < DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000}");
             waitingTime = EnqueueTime() * 1000 + 35;
-            Console.WriteLine($"\nOUTPUT FROM B WAS {waitingTime}");
             return Reset < DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 

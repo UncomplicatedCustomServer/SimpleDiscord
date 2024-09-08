@@ -9,6 +9,8 @@ namespace SimpleDiscord.Events
     {
         public Dictionary<string, HashSet<KeyValuePair<object, MethodInfo>>> List { get; } = [];
 
+        public Dictionary<string, HashSet<KeyValuePair<object, MethodInfo>>> CommandHandlers { get; } = [];
+
         public void RegisterEvents(Assembly assembly)
         {
             foreach (Type type in assembly.GetTypes())
@@ -25,7 +27,7 @@ namespace SimpleDiscord.Events
             foreach (MethodInfo method in type.GetMethods())
             {
                 object[] attribs = method.GetCustomAttributes(typeof(SocketEvent), false);
-                if (attribs != null && attribs.Length > 0)
+                if (attribs is not null && attribs.Length > 0)
                     foreach (object rawAttribute in attribs)
                     {
                         SocketEvent attribute = rawAttribute as SocketEvent;
@@ -33,6 +35,17 @@ namespace SimpleDiscord.Events
                             List[attribute.Event].Add(new(caller, method));
                         else
                             List.Add(attribute.Event, [new(caller, method)]);
+                    }
+
+                object[] attribs2 = method.GetCustomAttributes(typeof(CommandHandler), false);
+                if (attribs2 is not null && attribs2.Length > 0)
+                    foreach (object rawAttribute2 in attribs2)
+                    {
+                        CommandHandler attribute = rawAttribute2 as CommandHandler;
+                        if (CommandHandlers.ContainsKey(attribute.CommandName))
+                            CommandHandlers[attribute.CommandName].Add(new(caller, method));
+                        else
+                            CommandHandlers.Add(attribute.CommandName, [new(caller, method)]);
                     }
             }
         }

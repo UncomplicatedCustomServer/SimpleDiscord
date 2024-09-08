@@ -86,7 +86,7 @@ namespace SimpleDiscord.Components.Builders
 
         public EmbedBuilder SetColor(string hex)
         {
-            Embed.Color = int.Parse(hex.Replace("#", string.Empty), System.Globalization.NumberStyles.HexNumber);
+            Embed.Color = int.Parse(hex.Replace("#", string.Empty), NumberStyles.HexNumber);
             return this;
         }
 

@@ -5,7 +5,7 @@ namespace SimpleDiscord.Components
 #nullable enable
     public class SocketSendMessage : InteractionCallbackData
     {
-        public string? Content { get; internal set; }
+        public string? Content { get; internal set; } = string.Empty;
 
         public Embed[]? Embeds { get; internal set; }
 

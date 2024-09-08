@@ -72,7 +72,6 @@ namespace SimpleDiscord.Networking
                 return;
 
             string uri = GenerateUri(request);
-            Console.WriteLine($"\nWARNING: Updated ratelimit for endpoint {uri}\nReset after {rateLimitReset}");
             RateLimit rateLimit = new(uri, int.Parse(rateLimitLimit), int.Parse(rateLimitRemaining), decimal.Parse(rateLimitResetAfter, new CultureInfo("en-US")), decimal.Parse(rateLimitReset, new CultureInfo("en-US")), this)
             {
                 RawReset = rateLimitReset

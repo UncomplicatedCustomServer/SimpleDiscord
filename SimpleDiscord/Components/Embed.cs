@@ -3,11 +3,11 @@
 #nullable enable
     public class Embed(string? title, string? type, string? description, string? url, string? timestamp, int? color, EmbedFooter? footer, EmbedResource? image, EmbedResource? thumbnail, EmbedResource? video, EmbedAuthor? author, EmbedField[]? fields)
     {
-        public string? Title { get; internal set; } = title;
+        public string? Title { get; internal set; } = title ?? string.Empty;
 
-        public string? Type { get; internal set; } = type;
+        public string? Type { get; internal set; } = type ?? "rich";
 
-        public string? Description { get; internal set; } = description;
+        public string? Description { get; internal set; } = description ?? string.Empty;
 
         public string? Url { get; internal set; } = url;
 

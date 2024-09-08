@@ -44,6 +44,8 @@ namespace SimpleDiscord
             }
         }
 
+        public ConnectionStatus ConnectionStatus => _discordClient.connectionStatus;
+
         internal GatewatEventHandler GatewatEventHandler { get; }
 
         internal Http RestHttp { get; }

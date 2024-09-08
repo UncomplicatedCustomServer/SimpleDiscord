@@ -135,7 +135,11 @@ namespace SimpleDiscord
                 messageUpdate.Message.SetClient(DiscordClient);
 
             if (ev is InteractionCreate interactionCreate)
+            {
                 interactionCreate.Interaction.SetClient(DiscordClient);
+                if (interactionCreate.Interaction.Type is InteractionType.APPLICATION_COMMAND && interactionCreate.Interaction.Data is ApplicationCommandInteractionData data)
+                    DiscordClient.EventHandler.Invoke(data.Name, ev);
+            }
 
             if (ev is Heartbeat)
             {

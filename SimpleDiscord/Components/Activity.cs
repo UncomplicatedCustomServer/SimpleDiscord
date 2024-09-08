@@ -1,29 +1,27 @@
 ﻿using Newtonsoft.Json;
-using SimpleDiscord.Enums;
-using System;
 
 namespace SimpleDiscord.Components
 {
 #nullable enable
-    public class Activity
+    public class Activity(string name, int type, string? url = null, long? createdAt = null, string? details = null, string? state = null, Emoji? emoji = null, ActivityAsset? assets = null, ActivityButton[]? buttons = null)
     {
-        public string Name { get; }
+        public string Name { get; set; } = name;
 
-        public int Type { get; }
+        public int Type { get; set; } = type;
 
-        public string? Url { get; }
+        public string? Url { get; internal set; } = url;
 
-        public long CreatedAt { get; } = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        [JsonProperty("created_at")]
+        public long? CreatedAt { get; internal set; } = createdAt;
 
-        [JsonConstructor]
-        public Activity(string name, int type, string? url)
-        {
-            Name = name;
-            Type = type;
-            Url = url;
-        }
+        public string? Details { get; internal set; } = details;
 
-        public Activity(string name, ActivityType type, string? url = null) : this(name, (int)type, url)
-        { }
+        public string? State { get; internal set; } = state;
+
+        public Emoji? Emoji { get; internal set; } = emoji;
+
+        public ActivityAsset? Assets { get; internal set; } = assets;
+
+        public ActivityButton[]? Buttons { get; internal set; } = buttons;
     }
 }

@@ -9,7 +9,7 @@ namespace SimpleDiscord.Logger
 
         public string Prefix { get; set; } = "SimpleDiscord";
 
-        public Func<LogEntry, bool>? SubstituteLogHandler { get; private set; }
+        public Func<LogEntry, bool>? SubstituteLogHandler { get; set; } = null;
 
         public void SendLog(LogEntry entry)
         {

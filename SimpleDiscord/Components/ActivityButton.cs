@@ -1,9 +1,9 @@
 ﻿namespace SimpleDiscord.Components
 {
-    public class ActivityButton
+    public class ActivityButton(string label, string url)
     {
-        public string Label { get; }
+        public string Label { get; } = label;
 
-        public string Url { get; }
+        public string Url { get; } = url;
     }
 }
