@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using Newtonsoft.Json.Linq;
 using SimpleDiscord.Components.Attributes;
 using SimpleDiscord.Enums;
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SimpleDiscord.Components
 {
@@ -19,32 +19,6 @@ namespace SimpleDiscord.Components
 
         public GuildChannel? Parent { get; }
 
-        [JsonConstructor]
-        public GuildChannel(long id, int type, long guildId, int? position, Overwrite[]? permissionOverwrites, string? name, long? parentId, string? permissions, int? flags, bool safeUpdate = true) : base(id, type, guildId, position, permissionOverwrites, name, parentId, permissions, flags)
-        {
-            GuildChannel instance = List.FirstOrDefault(guildChannel => guildChannel.Id == id && guildChannel.GuildId == guildId);
-            if (instance is not null)
-                List.Insert(List.IndexOf(instance), this);
-            else
-                List.Add(this);
-
-            Guild = Client.Instance.GetSafeGuild(guildId);
-            if (parentId is not null)
-                Parent = Guild.GetChannel((long)parentId);
-
-            Type = (ChannelType)type;
-
-            if (safeUpdate)
-                Guild.SafeUpdateChannel(this);
-        }
-
-        public GuildChannel(GuildChannel self) : base(self.Id, (int)self.Type, self.GuildId, self.Position, self.PermissionOverwrites, self.Name, self.ParentId, self.Permissions, self.Flags)
-        {
-            Type = self.Type;
-            Guild = self.Guild;
-            Parent = self.Parent;
-        }
-
         public GuildChannel(SocketGuildChannel socketChannel, bool pushUpdate = false) : base(socketChannel)
         {
             GuildChannel cached = List.FirstOrDefault(c => c.Id == socketChannel.Id && c.GuildId == socketChannel.GuildId);
@@ -57,11 +31,11 @@ namespace SimpleDiscord.Components
             }
 
             Type = (ChannelType)socketChannel.Type;
-            Guild = Client.Instance.GetSafeGuild(socketChannel.GuildId);
+            Guild = Guild.GetSafeGuild(socketChannel.GuildId);
+
             if (socketChannel.ParentId is not null)
                 Parent = Guild.GetChannel((long)socketChannel.ParentId);
 
-            Console.WriteLine($"\n\nWE HAVE {Client.Instance.Guilds.Count} REGISTERED GUILDS - this id is {socketChannel.GuildId}\n\n");
             if (pushUpdate)
                 Guild.SafeUpdateChannel(this);
 
@@ -70,6 +44,39 @@ namespace SimpleDiscord.Components
                 List.Insert(List.IndexOf(instance), this);
             else
                 List.Add(this);
+        }
+
+        internal override void Dispose()
+        {
+            List.Remove(this);
+            base.Dispose();
+        }
+
+        public Task<SocketGuildChannel> Update(SocketSendGuildChannel newChannel, string? reason = null) => Edit(newChannel, reason);
+
+        public Task<SocketGuildChannel> Edit(SocketSendGuildChannel newChannel, string? reason = null) => Guild.Client.RestHttp.ChannelEdit(this, newChannel, reason);
+
+        public Task Delete(string? reason = null) => Guild.Client.RestHttp.ChannelDelete(this, reason);
+
+        public static GuildChannel? Caster(JObject obj)
+        {
+            SocketGuildChannel? channel = obj.ToObject<SocketGuildChannel>();
+
+            if (channel is null)
+                return null;
+
+#nullable disable
+
+            // Ora dal tipo deduciamo quale canale andiamo ad avere
+            GuildChannel realChannel = (ChannelType)channel.Type switch
+            {
+                ChannelType.GUILD_TEXT or ChannelType.GUILD_ANNOUNCEMENT => new GuildTextChannel(obj.ToObject<SocketGuildTextChannel>(), true),
+                ChannelType.GUILD_VOICE => new GuildVoiceChannel(obj.ToObject<SocketGuildVoiceChannel>(), true),
+                ChannelType.PRIVATE_THREAD or ChannelType.PUBLIC_THREAD => new GuildThreadChannel(obj.ToObject<SocketGuildThreadChannel>(), true),
+                _ => new GuildChannel(channel)
+            };
+            
+            return realChannel;
         }
     }
 }

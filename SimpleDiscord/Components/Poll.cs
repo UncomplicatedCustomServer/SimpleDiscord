@@ -1,15 +1,18 @@
-﻿namespace SimpleDiscord.Components
+﻿using System.Threading.Tasks;
+
+namespace SimpleDiscord.Components
 {
-    public class Poll(PollMediaObject question, PollAnswer[] answers, int duration, bool? allowMultiselect = null)
+#nullable enable
+    public class Poll(Message message, SocketPoll socketPoll) : SocketPoll(socketPoll)
     {
-        public PollMediaObject Question { get; } = question;
+        public Message Message { get; } = message;
 
-        public PollAnswer[] Answers { get; } = answers;
+        public async Task<SocketMessage?> End()
+        {
+            if (Message.Author.Id != Message.Client.Bot.Id)
+                return null;
 
-        public int Duration { get; } = duration;
-
-        public bool? AllowMultiselect { get; } = allowMultiselect;
-
-        public int LayoutType => 1;
+            return await Message.Client.RestHttp.EndPoll(this);
+        }
     }
 }

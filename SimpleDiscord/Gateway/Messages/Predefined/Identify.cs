@@ -6,7 +6,7 @@ namespace SimpleDiscord.Gateway.Messages.Predefined
 {
 #nullable enable
 
-    internal class Identify(string token, Dictionary<string, string> properties, int intents, bool? compress = false, int? largeThreshold = 50, int[]? shard = null, SocketPresence? presence = null)
+    internal class Identify(string token, Dictionary<string, string> properties, int intents, bool? compress = false, int? largeThreshold = 50, int[]? shard = null, SocketSendPresence? presence = null)
     {
         public string Token { get; } = token;
 
@@ -19,7 +19,7 @@ namespace SimpleDiscord.Gateway.Messages.Predefined
         [JsonIgnore]
         public int[]? Shard { get; } = shard;
 
-        public SocketPresence? Presence { get; } = presence;
+        public SocketSendPresence? Presence { get; } = presence;
 
         public int Intents { get; } = intents;
     }

@@ -8,6 +8,6 @@ namespace SimpleDiscord.Gateway
 
         public const GatewayIntents privilegedIntents = GatewayIntents.GUILD_MEMBERS | GatewayIntents.GUILD_PRESENCES | GatewayIntents.MESSAGE_CONTENT;
 
-        public const GatewayIntents all = defaultIntents | privilegedIntents;
+        public const GatewayIntents allIntents = defaultIntents | privilegedIntents;
     }
 }

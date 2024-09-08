@@ -7,10 +7,13 @@ namespace SimpleDiscord.Components
     {
         public int Bitrate { get; }
 
+        [JsonProperty("user_limit")]
         public int UserLimit { get; }
 
+        [JsonProperty("rtc_region")]
         public string? RtcRegion { get; }
 
+        [JsonProperty("video_quality_mode")]
         public int? VideoQualityMode { get; }
 
         [JsonConstructor]

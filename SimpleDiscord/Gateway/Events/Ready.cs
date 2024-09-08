@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
-using SimpleDiscord.Components.Communicator;
 using SimpleDiscord.Gateway.Events.Attributes;
+using SimpleDiscord.Gateway.Events.LocalizedData;
 using SimpleDiscord.Gateway.Messages;
 
 namespace SimpleDiscord.Gateway.Events
@@ -9,8 +9,11 @@ namespace SimpleDiscord.Gateway.Events
     [InternalEvent("READY")]
     internal class Ready(DiscordGatewayMessage msg) : BaseGatewayEvent(msg)
     {
-        public ReadyFields ready { get; internal set; }
+        public ReadyDataMember Data { get; private set; }
 
-        public override void Init() => ready = JsonConvert.DeserializeObject<ReadyFields>(RawData);
+        public override void Init()
+        {
+            Data = JsonConvert.DeserializeObject<ReadyDataMember>(RawData);
+        }
     }
 }

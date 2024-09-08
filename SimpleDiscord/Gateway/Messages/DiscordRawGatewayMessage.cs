@@ -42,7 +42,6 @@ namespace SimpleDiscord.Gateway.Messages
 
             T = el.ForceGet("t")?.ToString();
             Raw = raw;
-            //Console.WriteLine($"\n\nRST TYPE: {D?.GetType().FullName}\n\n");
         }
     }
 }

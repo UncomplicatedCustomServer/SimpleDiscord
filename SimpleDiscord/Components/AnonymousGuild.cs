@@ -11,6 +11,7 @@ namespace SimpleDiscord.Components
 
         public bool Large { get; }
 
+        [JsonProperty("member_count")]
         public int MemberCount { get; }
 
         public SocketMember[] Members { get; }
@@ -21,8 +22,10 @@ namespace SimpleDiscord.Components
 
         public SocketPresence[] Presences { get; }
 
+        [JsonProperty("stage_instances")]
         public SocketStageInstance[] StageInstances { get; }
 
+        [JsonProperty("guild_scheduled_events")]
         public SocketScheduledEvent[] GuildScheduledEvents { get; }
 
         [JsonConstructor]
@@ -32,8 +35,6 @@ namespace SimpleDiscord.Components
             Large = large;
             MemberCount = memberCount;
             Members = members;
-
-            Console.WriteLine($"\n\n{Id} - {Name}\n\n");
 
             Channels = channels;
 
