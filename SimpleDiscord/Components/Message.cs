@@ -24,7 +24,7 @@ namespace SimpleDiscord.Components
 
         public new Poll? Poll { get; }
 
-        public string Link { get; };
+        public string Link { get; }
 
         public Message(SocketMessage baseMessage, GuildTextChannel? channel = null) : base(baseMessage)
         {
@@ -87,7 +87,7 @@ namespace SimpleDiscord.Components
         public Task Unpin(string reason = null) => Client.RestHttp.UnpinMessage(this, reason);
 
 #nullable enable
-        public Task<SocketGuildThreadChannel>? StartThread(SocketSendPublicThread threadConfig, string? reason = null) => Channel is not GuildThreadChannel ? Client.RestHttp.StartThreadFromMessage(this, threadConfig, reason) : null;
+        public Task<GuildThreadChannel>? StartThread(SocketSendPublicThread threadConfig, string? reason = null) => Channel is not GuildThreadChannel ? Client.RestHttp.StartThreadFromMessage(this, threadConfig, reason) : null;
 #nullable disable
 
         public Task React(Emoji emoji) => Client.RestHttp.AddOwnReaction(this, emoji);

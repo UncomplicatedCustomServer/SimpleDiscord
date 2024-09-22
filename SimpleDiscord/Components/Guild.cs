@@ -234,7 +234,7 @@ namespace SimpleDiscord.Components
             base.Dispose();
         }
 
-        public Task<SocketGuildChannel> CreateChannel(SocketSendGuildChannel channel, string? reason = null) => Client.RestHttp.GuildCreateChannel(this, channel, reason);
+        public Task<GuildChannel> CreateChannel(SocketSendGuildChannel channel, string? reason = null) => Client.RestHttp.GuildCreateChannel(this, channel, reason);
 
         public Task<Role> CreateRole(SocketSendRole role, string? reason = null) => Client.RestHttp.GuildCreateRole(this, role, reason);
 
@@ -249,5 +249,7 @@ namespace SimpleDiscord.Components
         public GuildThreadChannel? GetThreadChannel(long id) => Threads.FirstOrDefault(thread => thread.Id == id);
 
         public GuildThreadChannel GetSafeThreadChannel(long id) => Threads.FirstOrDefault(thread => thread.Id == id);
+
+        public Task<GuildThreadChannel[]> GetThreads() => Client.RestHttp.GetGuildThreads(this);
     }
 }
