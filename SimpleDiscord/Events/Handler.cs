@@ -1,4 +1,5 @@
-﻿using SimpleDiscord.Events.Attributes;
+﻿using SimpleDiscord.Components;
+using SimpleDiscord.Events.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -63,7 +64,7 @@ namespace SimpleDiscord.Events
                         method.Value.Invoke(method.Key, []);
         }
 
-        internal void InvokeCommand(string name, object args)
+        internal void InvokeCommand(string name, object args, InteractionData data = null)
         {
             if (CommandHandlers.TryGetValue(name, out HashSet<KeyValuePair<object, MethodInfo>> list))
                 foreach (KeyValuePair<object, MethodInfo> method in list)

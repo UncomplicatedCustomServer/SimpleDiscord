@@ -59,7 +59,18 @@ namespace SimpleDiscord
             if (endpoint != null && endpoint != string.Empty)
                 return;
 
-            Dictionary<string, string> data = JsonConvert.DeserializeObject<Dictionary<string, string>>(await httpClient.GetStringAsync("https://discord.com/api/gateway"));
+            if (httpClient is null)
+                DiscordClient.Logger.Error("HTTP CLIENT IS NULL!");
+
+            string endpointData = await httpClient.GetStringAsync("https://discord.com/api/gateway");
+
+            if (endpointData is null)
+            {
+                endpointData = "{\"url\":\"wss://gateway.discord.gg\"}";
+                DiscordClient.Logger.Error("Failed to retrive Discord gateway from APIs, using the default one...");
+            }
+
+            Dictionary<string, string> data = JsonConvert.DeserializeObject<Dictionary<string, string>>(endpointData);
 
             if (data.TryGetValue("url", out string url))
                 endpoint = url + "?v=10&encoding=json";
@@ -137,7 +148,7 @@ namespace SimpleDiscord
             {
                 interactionCreate.Interaction.SetClient(DiscordClient);
                 if (interactionCreate.Interaction.Type is InteractionType.APPLICATION_COMMAND && interactionCreate.Interaction.Data is ApplicationCommandInteractionData data)
-                    DiscordClient.EventHandler.InvokeCommand(data.Name, interactionCreate.Interaction);
+                    DiscordClient.EventHandler.InvokeCommand(data.Name, interactionCreate.Interaction, data);
             }
 
             if (ev is Heartbeat)

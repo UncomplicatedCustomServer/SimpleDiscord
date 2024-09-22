@@ -45,6 +45,8 @@ namespace SimpleDiscord.Components.Builders
 
         public ActivityBuilder AddButton(ActivityButton button)
         {
+            activity.Buttons ??= [];
+
             activity.Buttons.Append(button);
             return this;
         }
