@@ -25,6 +25,8 @@ namespace SimpleDiscord.Components
 
         public List<GuildThreadChannel> Threads { get; } = [];
 
+        public string Link { get; }
+
         public GuildTextChannel(SocketGuildTextChannel socketChannel, bool pushUpdate = false) : base(socketChannel)
         {
             Topic = socketChannel.Topic;
@@ -32,6 +34,8 @@ namespace SimpleDiscord.Components
             LastMessageId = socketChannel.LastMessageId;
             RateLimitPerUser = socketChannel.RateLimitPerUser;
             TotalMessageSent = socketChannel.TotalMessageSent;
+
+            Link = $"https://discord.com/channels/{GuildId}/{Id}";
 
             if (pushUpdate)
                 Guild.SafeUpdateChannel(this);

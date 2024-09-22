@@ -24,6 +24,8 @@ namespace SimpleDiscord.Components
 
         public new Poll? Poll { get; }
 
+        public string Link { get; };
+
         public Message(SocketMessage baseMessage, GuildTextChannel? channel = null) : base(baseMessage)
         {
             channel ??= GuildChannel.List.FirstOrDefault(channel => channel.Id == ChannelId) as GuildTextChannel;
@@ -55,6 +57,8 @@ namespace SimpleDiscord.Components
                     _reactions.Add(new(this, socketPartialReaction));
 
             Reactions = [.. _reactions];
+
+            Link = $"https://discord.com/channels/{GuildId}/{ChannelId}/{Id}";
 
             Channel.SafeUpdateMessage(this);
         }
