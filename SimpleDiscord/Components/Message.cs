@@ -18,7 +18,7 @@ namespace SimpleDiscord.Components
 
         public new GuildThreadChannel? Thread { get; }
 
-        public new List<Reaction>? Reactions { get; }
+        public new List<Reaction>? Reactions { get; private set; }
 
         public new List<ActionRow>? Components { get; }
 
@@ -61,6 +61,8 @@ namespace SimpleDiscord.Components
 
         internal void SafeUpdateReaction(Reaction reaction)
         {
+            Reactions ??= [];
+
             Reaction instance = Reactions.FirstOrDefault(r => r.Emoji.Encode() == reaction.Emoji.Encode());
             if (instance is null)
                 Reactions.Add(reaction);
