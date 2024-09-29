@@ -24,6 +24,8 @@ namespace SimpleDiscord
 
         public SocketUser Bot { get; internal set; }
 
+        public SocketUser CurrentUser => Bot;
+
         public PartialApplication Application { get; internal set; }
 
         public List<ApplicationCommand> Commands { get; } = [];

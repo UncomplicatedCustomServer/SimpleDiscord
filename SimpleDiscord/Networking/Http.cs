@@ -4,12 +4,14 @@ using SimpleDiscord.Components;
 using SimpleDiscord.Components.Builders;
 using SimpleDiscord.Components.DiscordComponents;
 using SimpleDiscord.Enums;
+using SimpleDiscord.Gateway.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.Remoting.Channels;
+using System.Security.Policy;
 using System.Threading.Tasks;
 
 namespace SimpleDiscord.Networking
@@ -445,6 +447,35 @@ namespace SimpleDiscord.Networking
                 threads.Add(new(thread));
 
             return [.. threads];
+        }
+
+        public async Task<VoiceState> GetMemberVoiceState(Member member)
+        {
+            string uri = $"{Endpoint}/guilds/voice-states/";
+            if (member.User.Id == discordClient.CurrentUser.Id)
+                uri += "@me";
+            else
+                uri += member.User.Id.ToString();
+
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Get).SetUri(uri));
+            return new(JsonConvert.DeserializeObject<SocketVoiceState>(await answer.Content.ReadAsStringAsync()));
+        }
+
+        public async Task UpdateMemberVoiceState(Member member, SocketSendVoiceState state)
+        {
+            string uri = $"{Endpoint}/guilds/voice-states/";
+            if (member.User.Id == discordClient.CurrentUser.Id)
+                uri += "@me";
+            else
+                uri += member.User.Id.ToString();
+
+            await Send(HttpMessageBuilder.New().SetMethod("PATCH").SetUri(uri), HttpStatusCode.NoContent);
+        }
+
+        internal static T Sync<T>(Task<T> task)
+        {
+            task.Wait();
+            return task.Result;
         }
 
         private string EncodeJson(object data)

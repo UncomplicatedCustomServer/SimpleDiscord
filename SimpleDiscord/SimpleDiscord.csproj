@@ -148,13 +148,16 @@
     <Compile Include="Components\SocketSendPublicThread.cs" />
     <Compile Include="Components\SocketSendRole.cs" />
     <Compile Include="Components\SocketSendGuildTextChannel.cs" />
+    <Compile Include="Components\SocketSendVoiceState.cs" />
     <Compile Include="Components\SocketStageInstance.cs" />
     <Compile Include="Components\SocketThreadList.cs" />
     <Compile Include="Components\SocketUser.cs" />
+    <Compile Include="Components\SocketVoiceState.cs" />
     <Compile Include="Components\ThreadMember.cs" />
     <Compile Include="Components\ThreadMetadata.cs" />
     <Compile Include="Components\UnavailableGuild.cs" />
     <Compile Include="Components\UserActivity.cs" />
+    <Compile Include="Components\VoiceState.cs" />
     <Compile Include="Discord.cs" />
     <Compile Include="Enums\ActivityType.cs" />
     <Compile Include="Enums\ApplicationCommandOptionType.cs" />
@@ -252,6 +255,7 @@
     <Compile Include="Gateway\Events\ThreadMembersUpdate.cs" />
     <Compile Include="Gateway\Events\ThreadUpdate.cs" />
     <Compile Include="Gateway\Events\UserUpdate.cs" />
+    <Compile Include="Gateway\Events\VoiceStateUpdate.cs" />
     <Compile Include="Gateway\GatewatEventHandler.cs" />
     <Compile Include="Gateway\Gateway.cs" />
     <Compile Include="Gateway\GatewayMessage.cs" />
