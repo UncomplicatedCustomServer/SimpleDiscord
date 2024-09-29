@@ -13,7 +13,7 @@ namespace SimpleDiscord.Components
 
         public SocketUser? User => Member?.User;
 
-        public bool Connected => ChannelId is not null;
+        public bool Connected => ChannelId is not 0 && ChannelId is not null;
 
 #nullable disable
         public VoiceState(SocketVoiceState socket) : base(socket)

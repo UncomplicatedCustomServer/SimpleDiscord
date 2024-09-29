@@ -45,7 +45,7 @@ namespace SimpleDiscord.Components.Builders
             return this;
         }
 
-        public ButtonBuilder New() => new();
+        public static ButtonBuilder New() => new();
 
         public static implicit operator Button(ButtonBuilder builder) => builder.button;
 

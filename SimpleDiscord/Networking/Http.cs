@@ -12,6 +12,7 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.Remoting.Channels;
 using System.Security.Policy;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SimpleDiscord.Networking
@@ -451,7 +452,7 @@ namespace SimpleDiscord.Networking
 
         public async Task<VoiceState> GetMemberVoiceState(Member member)
         {
-            string uri = $"{Endpoint}/guilds/voice-states/";
+            string uri = $"{Endpoint}/guilds/{member.Guild.Id}/voice-states/";
             if (member.User.Id == discordClient.CurrentUser.Id)
                 uri += "@me";
             else
@@ -461,15 +462,17 @@ namespace SimpleDiscord.Networking
             return new(JsonConvert.DeserializeObject<SocketVoiceState>(await answer.Content.ReadAsStringAsync()));
         }
 
-        public async Task UpdateMemberVoiceState(Member member, SocketSendVoiceState state)
+        public async Task<Member> GetGuildMember(Guild guild, long userId)
         {
-            string uri = $"{Endpoint}/guilds/voice-states/";
-            if (member.User.Id == discordClient.CurrentUser.Id)
-                uri += "@me";
-            else
-                uri += member.User.Id.ToString();
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Get).SetUri($"{Endpoint}/guilds/{guild.Id}/members/{userId}"));
+            return new(guild, JsonConvert.DeserializeObject<SocketMember>(await answer.Content.ReadAsStringAsync()));
+        }
 
-            await Send(HttpMessageBuilder.New().SetMethod("PATCH").SetUri(uri), HttpStatusCode.NoContent);
+        public async Task<Member> ModifyGuildMember(Guild guild, Member member, object update)
+        {
+            discordClient.Logger.Info(EncodeJson(update));
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod("PATCH").SetUri($"{Endpoint}/guilds/{guild.Id}/members/{member.User.Id}").SetContent(new StringContent(EncodeJson(update), Encoding.UTF8, "application/json")));
+            return new(guild, JsonConvert.DeserializeObject<SocketMember>(await answer.Content.ReadAsStringAsync()));
         }
 
         internal static T Sync<T>(Task<T> task)

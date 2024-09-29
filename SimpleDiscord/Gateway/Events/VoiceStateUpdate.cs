@@ -10,6 +10,12 @@ namespace SimpleDiscord.Gateway.Events
     {
         public SocketVoiceState Data { get; internal set; }
 
-        public override void Init() => Data = JsonConvert.DeserializeObject<SocketVoiceState>(RawData);
+        public VoiceState VoiceState { get; internal set; }
+
+        public override void Init()
+        {
+            Data = JsonConvert.DeserializeObject<SocketVoiceState>(RawData);
+            VoiceState = new(Data);
+        }
     }
 }

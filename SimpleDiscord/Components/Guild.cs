@@ -251,5 +251,7 @@ namespace SimpleDiscord.Components
         public GuildThreadChannel GetSafeThreadChannel(long id) => Threads.FirstOrDefault(thread => thread.Id == id);
 
         public Task<GuildThreadChannel[]> GetThreads() => Client.RestHttp.GetGuildThreads(this);
+
+        public Task<Member> FetchMember(long id) => Client.RestHttp.GetGuildMember(this, id);
     }
 }

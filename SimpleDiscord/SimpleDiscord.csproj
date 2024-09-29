@@ -65,6 +65,7 @@
     <Compile Include="Components\ClientChild.cs" />
     <Compile Include="Components\CommandOptionChoice.cs" />
     <Compile Include="Components\DisposableElement.cs" />
+    <Compile Include="Components\Helpers\MemberEditor.cs" />
     <Compile Include="Components\Member.cs" />
     <Compile Include="Components\PartialApplication.cs" />
     <Compile Include="Components\Poll.cs" />
@@ -148,7 +149,6 @@
     <Compile Include="Components\SocketSendPublicThread.cs" />
     <Compile Include="Components\SocketSendRole.cs" />
     <Compile Include="Components\SocketSendGuildTextChannel.cs" />
-    <Compile Include="Components\SocketSendVoiceState.cs" />
     <Compile Include="Components\SocketStageInstance.cs" />
     <Compile Include="Components\SocketThreadList.cs" />
     <Compile Include="Components\SocketUser.cs" />

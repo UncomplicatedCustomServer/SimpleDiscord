@@ -1,6 +1,8 @@
-﻿using SimpleDiscord.Networking;
+﻿using SimpleDiscord.Components.Helpers;
+using SimpleDiscord.Networking;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace SimpleDiscord.Components
@@ -23,13 +25,18 @@ namespace SimpleDiscord.Components
 
         internal VoiceState _voiceState { get; set; } = null;
 
-        public Member(Guild guild, SocketMember socketInstance, VoiceState voiceState = null) : base(socketInstance)
+        public Member(Guild guild, SocketMember socketInstance, VoiceState voiceState = null, bool push = false) : base(socketInstance)
         {
             Guild = guild;
             _voiceState = voiceState;
+
+            if (!push)
+                return;
             
             foreach (long role in socketInstance.Roles)
                 Roles.Add(Guild.GetRole(role));
+
+            Guild.SafeUpdateMember(this);
         }
 
         public Task AddRole(Role role, string reason = null) => AddRole(role.Id, reason);
@@ -62,22 +69,40 @@ namespace SimpleDiscord.Components
 
         public VoiceState GetVoiceStateSync() => Http.Sync(GetVoiceState());
 
-        public async Task Suppress()
+        public async Task DoMute()
         {
             if (!VoiceState.Connected)
                 return;
 
-            if (VoiceState.Suppress)
-                await Guild.Client.RestHttp.UpdateMemberVoiceState(this, SocketSendVoiceState.Mute(true));
+            if (!VoiceState.Mute)
+                await Guild.Client.RestHttp.ModifyGuildMember(Guild, this, MemberEditor.SetMute(true));
         }
 
-        public async Task Unsuppress()
+        public async Task Unmute()
         {
             if (!VoiceState.Connected)
                 return;
 
-            if (VoiceState.Suppress)
-                await Guild.Client.RestHttp.UpdateMemberVoiceState(this, SocketSendVoiceState.Mute(false));
+            if (VoiceState.Mute)
+                await Guild.Client.RestHttp.ModifyGuildMember(Guild, this, MemberEditor.SetMute(false));
+        }
+
+        public async Task DoDeaf()
+        {
+            if (!VoiceState.Connected)
+                return;
+
+            if (!VoiceState.Deaf)
+                await Guild.Client.RestHttp.ModifyGuildMember(Guild, this, MemberEditor.SetDeaf(true));
+        }
+
+        public async Task Undeaf()
+        {
+            if (!VoiceState.Connected)
+                return;
+
+            if (VoiceState.Deaf)
+                await Guild.Client.RestHttp.ModifyGuildMember(Guild, this, MemberEditor.SetDeaf(false));
         }
 
         public async Task Move(long channelId)
@@ -85,8 +110,10 @@ namespace SimpleDiscord.Components
             if (!VoiceState.Connected)
                 return;
 
-            if (VoiceState.Suppress)
-                await Guild.Client.RestHttp.UpdateMemberVoiceState(this, SocketSendVoiceState.Move(channelId));
+            if (VoiceState.ChannelId == channelId)
+                return;
+
+            await Guild.Client.RestHttp.ModifyGuildMember(Guild, this, MemberEditor.Move(channelId));
         }
 
         public async Task Move(GuildVoiceChannel channel) => await Move(channel.Id);
@@ -96,8 +123,9 @@ namespace SimpleDiscord.Components
             if (!VoiceState.Connected)
                 return;
 
-            if (VoiceState.Suppress)
-                await Guild.Client.RestHttp.UpdateMemberVoiceState(this, new(null, null));
+            await Guild.Client.RestHttp.ModifyGuildMember(Guild, this, MemberEditor.Move(null));
         }
+
+        public async Task ChangeNickname(string nick) => await Guild.Client.RestHttp.ModifyGuildMember(Guild, this, MemberEditor.ChangeNickname(nick));
     }
 }
