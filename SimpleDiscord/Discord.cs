@@ -34,6 +34,7 @@ namespace SimpleDiscord
 
         private uint? heartbeatDelay = null;
 
+        // Kinda useless for how is structured the lib
         private int? lastSequence = null;
 
         private string token;
@@ -42,7 +43,11 @@ namespace SimpleDiscord
 
         private bool _areadyAuthed = false;
 
+        // It just contains the pool messages Id for results forced by us
         internal List<long> pollResults = [];
+
+        // Just a Dictionary to hold every button callback (yeah we hate Modals and things like that) - Anyways the key is the CustomId while the values are the object data and the action
+        internal readonly Dictionary<string, KeyValuePair<object, Action<object>>> buttonCallbacks = [];
 
         internal async Task AuthAsync(string token, GatewayIntents intents)
         {
@@ -99,6 +104,12 @@ namespace SimpleDiscord
             List<byte> received = [];
             while (connectionStatus is not ConnectionStatus.NotAvailable and not ConnectionStatus.NotConnected and not ConnectionStatus.Ready && webSocketClient.State is WebSocketState.Open)
             {
+                if (webSocketClient.State is not WebSocketState.Open)
+                {
+                    DiscordClient.Logger.Warn("Lost connection with the Discord Gateway, reconnecting in 2 seconds...");
+                    await Task.Delay(2200);
+                    await Connect();
+                }
                 byte[] buffer = new byte[2048];
                 WebSocketReceiveResult result = await webSocketClient.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 received.AddRange(buffer.Take(result.Count));
@@ -149,6 +160,13 @@ namespace SimpleDiscord
                 interactionCreate.Interaction.SetClient(DiscordClient);
                 if (interactionCreate.Interaction.Type is InteractionType.APPLICATION_COMMAND && interactionCreate.Interaction.Data is ApplicationCommandInteractionData data)
                     DiscordClient.EventHandler.InvokeCommand(data.Name, interactionCreate.Interaction, data);
+                else if (interactionCreate.Interaction.Type is InteractionType.MESSAGE_COMPONENT && interactionCreate.Interaction.Data is MessageComponentInteractionData data2)
+                {
+                    if (data2.ComponentType is (int)ComponentType.Button && buttonCallbacks.TryGetValue(data2.CustomId, out KeyValuePair<object, Action<object>> callback))
+                        callback.Value(callback.Key);
+
+                    DiscordClient.EventHandler.InvokeComponent(data2.CustomId, data2);
+                }
             }
 
             if (ev is Heartbeat)
@@ -208,7 +226,8 @@ namespace SimpleDiscord
                                 "os",
                                 RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "windows" :
                                 RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "linux" :
-                                RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx" : "Unknown"
+                                RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx" : 
+                                "Unknown"
                             },
                             {
                                 "browser",

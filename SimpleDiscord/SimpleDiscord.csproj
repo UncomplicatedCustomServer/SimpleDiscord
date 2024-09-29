@@ -56,6 +56,7 @@
     <Compile Include="Components\Builders\ActionRowBuilder.cs" />
     <Compile Include="Components\Builders\ActivityBuilder.cs" />
     <Compile Include="Components\Builders\ApplicationCommandBuilder.cs" />
+    <Compile Include="Components\Builders\ButtonBuilder.cs" />
     <Compile Include="Components\Builders\CommandOptionBuilder.cs" />
     <Compile Include="Components\Builders\EmbedBuilder.cs" />
     <Compile Include="Components\Builders\HttpMessageBuilder.cs" />
@@ -177,6 +178,7 @@
     <Compile Include="Enums\TextInputStyle.cs" />
     <Compile Include="Enums\ThreadType.cs" />
     <Compile Include="Events\Attributes\CommandHandler.cs" />
+    <Compile Include="Events\Attributes\ComponentHandler.cs" />
     <Compile Include="Events\Attributes\SocketEvent.cs" />
     <Compile Include="Events\Handler.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />

@@ -20,7 +20,7 @@ namespace SimpleDiscord
 
         public readonly Handler EventHandler;
 
-        public static Version Version { get; } = new(0, 9, 0);
+        public static Version Version { get; } = new(1, 0, 0, 1);
 
         public SocketUser Bot { get; internal set; }
 

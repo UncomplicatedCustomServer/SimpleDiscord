@@ -6,6 +6,7 @@ using SimpleDiscord.Components.DiscordComponents;
 using SimpleDiscord.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.Remoting.Channels;
@@ -57,6 +58,12 @@ namespace SimpleDiscord.Networking
 
         public async Task<SocketMessage> SendMessage(GuildTextChannel channel, SocketSendMessage message)
         {
+            foreach (SocketActionRow actionRow in message.Components)
+                foreach (object button in actionRow.Components)
+                    if (button is not null && button is Button buttonComponent)
+                        if (buttonComponent.Callback is not null)
+                            discordClient._discordClient.buttonCallbacks.Add(buttonComponent.CustomId, new(buttonComponent.Data, buttonComponent.Callback));
+
             HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/channels/{channel.Id}/messages").SetJsonContent(EncodeJson(message)));
 
             return JsonConvert.DeserializeObject<SocketMessage>(await answer.Content.ReadAsStringAsync());
