@@ -18,11 +18,13 @@ namespace SimpleDiscord.Components
 
         public new GuildThreadChannel? Thread { get; }
 
-        public new List<Reaction>? Reactions { get; }
+        public new List<Reaction>? Reactions { get; private set; }
 
         public new List<ActionRow>? Components { get; }
 
         public new Poll? Poll { get; }
+
+        public string Link { get; }
 
         public Message(SocketMessage baseMessage, GuildTextChannel? channel = null) : base(baseMessage)
         {
@@ -56,11 +58,15 @@ namespace SimpleDiscord.Components
 
             Reactions = [.. _reactions];
 
+            Link = $"https://discord.com/channels/{GuildId}/{ChannelId}/{Id}";
+
             Channel.SafeUpdateMessage(this);
         }
 
         internal void SafeUpdateReaction(Reaction reaction)
         {
+            Reactions ??= [];
+
             Reaction instance = Reactions.FirstOrDefault(r => r.Emoji.Encode() == reaction.Emoji.Encode());
             if (instance is null)
                 Reactions.Add(reaction);
@@ -81,7 +87,7 @@ namespace SimpleDiscord.Components
         public Task Unpin(string reason = null) => Client.RestHttp.UnpinMessage(this, reason);
 
 #nullable enable
-        public Task<SocketGuildThreadChannel>? StartThread(SocketSendPublicThread threadConfig, string? reason = null) => Channel is not GuildThreadChannel ? Client.RestHttp.StartThreadFromMessage(this, threadConfig, reason) : null;
+        public Task<GuildThreadChannel>? StartThread(SocketSendPublicThread threadConfig, string? reason = null) => Channel is not GuildThreadChannel ? Client.RestHttp.StartThreadFromMessage(this, threadConfig, reason) : null;
 #nullable disable
 
         public Task React(Emoji emoji) => Client.RestHttp.AddOwnReaction(this, emoji);

@@ -25,6 +25,8 @@ namespace SimpleDiscord.Components
 
         public List<GuildThreadChannel> Threads { get; } = [];
 
+        public string Link { get; }
+
         public GuildTextChannel(SocketGuildTextChannel socketChannel, bool pushUpdate = false) : base(socketChannel)
         {
             Topic = socketChannel.Topic;
@@ -32,6 +34,8 @@ namespace SimpleDiscord.Components
             LastMessageId = socketChannel.LastMessageId;
             RateLimitPerUser = socketChannel.RateLimitPerUser;
             TotalMessageSent = socketChannel.TotalMessageSent;
+
+            Link = $"https://discord.com/channels/{GuildId}/{Id}";
 
             if (pushUpdate)
                 Guild.SafeUpdateChannel(this);
@@ -89,5 +93,20 @@ namespace SimpleDiscord.Components
         public async Task<Message> GetMessage(long id) => await Guild.Client.RestHttp.GetMessage(this, id);
 
         public async Task<SocketMessage[]> GetMessages(int? limit = 50, long? around = null, long? before = null, long? after = null) => await Guild.Client.RestHttp.GetMessages(this, limit, around, before, after);
+
+        public async Task<GuildThreadChannel[]> GetPublicArchivedThreads(int? limit = null) => await Guild.Client.RestHttp.GetChannelArchivedThreads(this, true, limit);
+
+        public async Task<GuildThreadChannel[]> GetPrivateArchivedThreads(int? limit = null) => await Guild.Client.RestHttp.GetChannelArchivedThreads(this, false, limit);
+
+        public async Task FetchThreads()
+        {
+            Threads.Clear();
+            
+            foreach (GuildThreadChannel thread in (await Guild.GetThreads()).Where(trh => trh.ParentId == Id))
+                SafeUpdateThread(thread);
+
+            foreach (GuildThreadChannel thread in await GetPublicArchivedThreads())
+                SafeUpdateThread(thread);
+        }
     }
 }

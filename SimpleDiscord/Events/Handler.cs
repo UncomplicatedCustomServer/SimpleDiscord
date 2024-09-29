@@ -1,6 +1,9 @@
-﻿using SimpleDiscord.Events.Attributes;
+﻿using SimpleDiscord.Components;
+using SimpleDiscord.Enums;
+using SimpleDiscord.Events.Attributes;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace SimpleDiscord.Events
@@ -9,7 +12,9 @@ namespace SimpleDiscord.Events
     {
         public Dictionary<string, HashSet<KeyValuePair<object, MethodInfo>>> List { get; } = [];
 
-        public Dictionary<string, HashSet<KeyValuePair<object, MethodInfo>>> CommandHandlers { get; } = [];
+        public Dictionary<KeyValuePair<string, string>, HashSet<KeyValuePair<object, MethodInfo>>> CommandHandlers { get; } = [];
+
+        public Dictionary<string, HashSet<KeyValuePair<object, MethodInfo>>> ComponentHandlers { get; } = [];
 
         public void RegisterEvents(Assembly assembly)
         {
@@ -42,10 +47,21 @@ namespace SimpleDiscord.Events
                     foreach (object rawAttribute2 in attribs2)
                     {
                         CommandHandler attribute = rawAttribute2 as CommandHandler;
-                        if (CommandHandlers.ContainsKey(attribute.CommandName))
-                            CommandHandlers[attribute.CommandName].Add(new(caller, method));
+                        if (CommandHandlers.ContainsKey(new(attribute.CommandName, attribute.SubCommandName)))
+                            CommandHandlers[new(attribute.CommandName, attribute.SubCommandName)].Add(new(caller, method));
                         else
-                            CommandHandlers.Add(attribute.CommandName, [new(caller, method)]);
+                            CommandHandlers.Add(new(attribute.CommandName, attribute.SubCommandName), [new(caller, method)]);
+                    }
+
+                object[] attribs3 = method.GetCustomAttributes(typeof(ComponentHandler), false);
+                if (attribs3 is not null && attribs3.Length > 0)
+                    foreach (object rawAttribute3 in attribs3)
+                    {
+                        ComponentHandler attribute = rawAttribute3 as ComponentHandler;
+                        if (ComponentHandlers.ContainsKey(attribute.ComponentId))
+                            ComponentHandlers[attribute.ComponentId].Add(new(caller, method));
+                        else
+                            ComponentHandlers.Add(attribute.ComponentId, [new(caller, method)]);
                     }
             }
         }
@@ -63,9 +79,44 @@ namespace SimpleDiscord.Events
                         method.Value.Invoke(method.Key, []);
         }
 
-        internal void InvokeCommand(string name, object args)
+        internal void InvokeCommand(string name, object args, ApplicationCommandInteractionData data = null)
         {
-            if (CommandHandlers.TryGetValue(name, out HashSet<KeyValuePair<object, MethodInfo>> list))
+            InvokeBaseCommand(name, args);
+            if (data is not null)
+                foreach (ReplyCommandOption option in data.Options.Where(o => o.Type is (int)CommandOptionType.SUB_COMMAND or (int)CommandOptionType.SUB_COMMAND_GROUP))
+                    InvokeSubCommand(name, option.Name, args, option);
+        }
+
+        internal void InvokeComponent(string name, MessageComponentInteractionData args)
+        {
+            if (ComponentHandlers.TryGetValue(name, out HashSet<KeyValuePair<object, MethodInfo>> list))
+                foreach (KeyValuePair<object, MethodInfo> method in list)
+                    if (method.Value.GetParameters().Length > 0)
+                    {
+                        if (method.Value.GetParameters()[0].ParameterType == args.GetType())
+                            method.Value.Invoke(method.Key, [args]);
+                    }
+                    else
+                        method.Value.Invoke(method.Key, []);
+                    
+        }
+
+        private void InvokeBaseCommand(string name, object args)
+        {
+            if (CommandHandlers.TryGetValue(new(name, null), out HashSet<KeyValuePair<object, MethodInfo>> list))
+                foreach (KeyValuePair<object, MethodInfo> method in list)
+                    if (method.Value.GetParameters().Length > 0)
+                    {
+                        if (method.Value.GetParameters()[0].ParameterType == args.GetType())
+                            method.Value.Invoke(method.Key, [args]);
+                    }
+                    else
+                        method.Value.Invoke(method.Key, []);
+        }
+
+        private void InvokeSubCommand(string name, string subName, object args, ReplyCommandOption data)
+        {
+            if (CommandHandlers.TryGetValue(new(name, subName), out HashSet<KeyValuePair<object, MethodInfo>> list))
                 foreach (KeyValuePair<object, MethodInfo> method in list)
                     if (method.Value.GetParameters().Length > 0)
                     {

@@ -52,9 +52,9 @@ namespace SimpleDiscord.Components
             base.Dispose();
         }
 
-        public Task<SocketGuildChannel> Update(SocketSendGuildChannel newChannel, string? reason = null) => Edit(newChannel, reason);
+        public Task<GuildChannel> Update(SocketSendGuildChannel newChannel, string? reason = null) => Edit(newChannel, reason);
 
-        public Task<SocketGuildChannel> Edit(SocketSendGuildChannel newChannel, string? reason = null) => Guild.Client.RestHttp.ChannelEdit(this, newChannel, reason);
+        public Task<GuildChannel> Edit(SocketSendGuildChannel newChannel, string? reason = null) => Guild.Client.RestHttp.ChannelEdit(this, newChannel, reason);
 
         public Task Delete(string? reason = null) => Guild.Client.RestHttp.ChannelDelete(this, reason);
 

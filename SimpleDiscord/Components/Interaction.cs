@@ -19,7 +19,7 @@ namespace SimpleDiscord.Components
 
         public new Message? Message { get; }
 
-        public new InteractionData? Data { get; }
+        public new InteractionData? Data { get; internal set; }
 
         public InteractionResponse? Response { get; private set; } = null;
 
