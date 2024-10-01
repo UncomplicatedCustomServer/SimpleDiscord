@@ -259,7 +259,7 @@ namespace SimpleDiscord
             if (DiscordClient.Config.RegisterCommands is RegisterCommandType.None)
                 return;
 
-            await Task.Delay(1500);
+            await Task.Delay(2000);
             List<SocketApplicationCommand> globalCommands = [.. (await DiscordClient.RestHttp.GetGlobalCommands())];
             foreach (SocketSendApplicationCommand cmd in DiscordClient.sendCommandsQueue)
             {
@@ -268,6 +268,7 @@ namespace SimpleDiscord
                     continue;
 
                 SocketApplicationCommand command = await DiscordClient.RestHttp.CreateGlobalCommand(cmd);
+                DiscordClient.Logger.Info($"Successfully registered command {command.Name}!");
                 globalCommands.Add(command);
                 await Task.Delay(4250);
             }

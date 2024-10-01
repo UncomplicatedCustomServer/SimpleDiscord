@@ -78,5 +78,7 @@ namespace SimpleDiscord.Components
             
             return realChannel;
         }
+
+        public override string ToString() => $"<#{Id}>";
     }
 }

@@ -24,5 +24,7 @@
         public bool Mentionable { get; } = mentionable;
 
         public int Flags { get; } = flags;
+
+        public override string ToString() => $"<@&{Id}>";
     }
 }

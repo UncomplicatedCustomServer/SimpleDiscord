@@ -127,5 +127,7 @@ namespace SimpleDiscord.Components
         }
 
         public async Task ChangeNickname(string nick) => await Guild.Client.RestHttp.ModifyGuildMember(Guild, this, MemberEditor.ChangeNickname(nick));
+
+        public override string ToString() => $"<@{User.Id}>";
     }
 }

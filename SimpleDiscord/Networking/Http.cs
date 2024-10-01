@@ -4,14 +4,9 @@ using SimpleDiscord.Components;
 using SimpleDiscord.Components.Builders;
 using SimpleDiscord.Components.DiscordComponents;
 using SimpleDiscord.Enums;
-using SimpleDiscord.Gateway.Events;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.Remoting.Channels;
-using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -49,6 +44,7 @@ namespace SimpleDiscord.Networking
                 return await Send(message, expectedResponse, disableResponseCheck, true);
             }
 
+            //discordClient.Logger.Info($"Sending HTTP content:\n{await message.Content.ReadAsStringAsync()}");
             HttpResponseMessage answer = await HttpClient.SendAsync(message);
 
             rateLimitHandler.UpdateRateLimit(message, answer.Headers); //  Async update
@@ -117,7 +113,7 @@ namespace SimpleDiscord.Networking
 
         public async Task<InteractionResponse> EditInteractionReply(Interaction interaction, InteractionResponse response)
         {
-            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod("PATCH").SetUri($"{Endpoint}/webhooks/{interaction.ApplicationId}/{interaction.Token}/messages/@original").SetJsonContent(EncodeJson(response.ToSocketInstance())));
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod("PATCH").SetUri($"{Endpoint}/webhooks/{interaction.ApplicationId}/{interaction.Token}/messages/@original").SetJsonContent(EncodeJson(response.ToSocketInstance().Data)));
 
             SocketInteractionResponse socketInteraction = JsonConvert.DeserializeObject<SocketInteractionResponse>(await answer.Content.ReadAsStringAsync());
             interaction.SafeUpdateResponse(socketInteraction);

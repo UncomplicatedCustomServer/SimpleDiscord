@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
 using SimpleDiscord.Components.Attributes;
+using System.Linq;
 
 namespace SimpleDiscord.Components
 {
+#pragma warning disable IDE0290
 #nullable enable
     [SocketInstance(typeof(SocketApplicationCommandInteractionData))]
     public class ApplicationCommandInteractionData : InteractionData
@@ -15,7 +17,7 @@ namespace SimpleDiscord.Components
 
         public ResolvedData? Resolved { get; }
 
-        public ReplyCommandOption[]? Options { get; }
+        public ReplyCommandOption[]? Options { get; internal set; }
 
         public long? TargetId { get; }
 
@@ -35,5 +37,13 @@ namespace SimpleDiscord.Components
 
         public ApplicationCommandInteractionData(SocketApplicationCommandInteractionData socketInstance) : this(socketInstance.Id, socketInstance.Name, socketInstance.Type, socketInstance.Resolved is not null ? new(socketInstance.Resolved) : null, socketInstance.Options, socketInstance.TargetId) 
         { }
+
+        public ReplyCommandOption? GetOption(string name) => Options?.FirstOrDefault(o => o.Name == name);
+
+        public bool TryGetOption(string name, out ReplyCommandOption? option)
+        {
+            option = GetOption(name);
+            return option is not null;
+        }
     }
 }

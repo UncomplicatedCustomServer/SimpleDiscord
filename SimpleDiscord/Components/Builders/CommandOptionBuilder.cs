@@ -10,14 +10,14 @@ namespace SimpleDiscord.Components.Builders
         public CommandOptionBuilder AddChoice(CommandOptionChoice choice)
         {
             Option.Choiches ??= [];
-            Option.Choiches.Append(choice);
+            Option.Choiches.Add(choice);
             return this;
         }
 
         public CommandOptionBuilder AddOption(SocketCommandOption option)
         {
             Option.Options ??= [];
-            Option.Options.Append(option);
+            Option.Options.Add(option);
             return this;
         }
 

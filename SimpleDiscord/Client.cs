@@ -70,7 +70,7 @@ namespace SimpleDiscord
             Logger = new(Config);
             ErrorHub = new(this);
             GatewatEventHandler = new();
-            EventHandler = new();
+            EventHandler = new(this);
             _discordClient = new(this);
             RestHttp = new(_discordClient.httpClient, this);
         }

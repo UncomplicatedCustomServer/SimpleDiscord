@@ -20,5 +20,7 @@
         public bool? Avaialble { get; } = available;
 
         public string Encode() => Id is null ? Name : $"{Name}:{Id}";
+
+        public override string ToString() => Id is null ? Name : $"<{Name}:{Id}>";
     }
 }
