@@ -114,9 +114,15 @@ namespace SimpleDiscord
                 WebSocketReceiveResult result = await webSocketClient.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 received.AddRange(buffer.Take(result.Count));
 
-                if (result.MessageType == WebSocketMessageType.Close)
+                if (result.MessageType is WebSocketMessageType.Close)
                 {
                     DiscordClient.Logger.Error($"Connection to the Discord Gateway has closed!\nClose code: {result.CloseStatus} - {result.CloseStatusDescription}");
+                    if (result.CloseStatus is WebSocketCloseStatus.EndpointUnavailable)
+                    {
+                        DiscordClient.Logger.Warn("Lost connection with the Discord Gateway, reconnecting in 2 seconds...");
+                        await Task.Delay(2200);
+                        await Connect();
+                    }
                     return;
                 }
 
@@ -199,7 +205,6 @@ namespace SimpleDiscord
                 if (ev is MessageUpdate messageUpdated && pollResults.Contains(messageUpdated.Message.Id))
                 {
                     DiscordClient.EventHandler.Invoke("POLL_ENDED", new PollEnded(messageUpdated.Message, messageUpdated.Message.Poll));
-                    DiscordClient.Logger.Error("POLL ENDED NO WAY NON CI CREDOO");
                     goto proceed;
                 }
 
