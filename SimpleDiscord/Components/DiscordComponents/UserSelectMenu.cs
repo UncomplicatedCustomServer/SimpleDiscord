@@ -8,7 +8,7 @@ namespace SimpleDiscord.Components.DiscordComponents
     {
         public override int Type => (int)ComponentType.UserSelect;
 
-        public SelectDefaultValue[]? DefaultValues { get; }
+        public SelectDefaultValue[]? DefaultValues { get; internal set; }
 
         [JsonConstructor]
         public UserSelectMenu(SelectDefaultValue[]? defaultValues, string customId, string placeholder, int minValues, int maxValues, bool disabled = false) : base(customId, placeholder, minValues, maxValues, disabled)

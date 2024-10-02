@@ -178,6 +178,7 @@
     <Compile Include="Enums\ReactionType.cs" />
     <Compile Include="Enums\RegisterCommandType.cs" />
     <Compile Include="Enums\RoleCreate.cs" />
+    <Compile Include="Enums\SelectMenuType.cs" />
     <Compile Include="Enums\TextInputStyle.cs" />
     <Compile Include="Enums\ThreadType.cs" />
     <Compile Include="Events\Attributes\CommandHandler.cs" />
@@ -266,7 +267,7 @@
     <Compile Include="Logger\Log.cs" />
     <Compile Include="Logger\LogEntry.cs" />
     <Compile Include="Logger\LogLevel.cs" />
-    <Compile Include="Enums\MessageComponentInteractionData.cs" />
+    <Compile Include="Components\MessageComponentInteractionData.cs" />
     <Compile Include="Networking\Endpoints.cs" />
     <Compile Include="Networking\Http.cs" />
     <Compile Include="Networking\RateLimit.cs" />

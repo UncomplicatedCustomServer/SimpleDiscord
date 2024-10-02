@@ -50,7 +50,7 @@ namespace SimpleDiscord.Components
 
         public int? Flags { get; }
 
-        public SocketActionRow[]? Components { get; }
+        public object[]? Components { get; }
 
         [JsonProperty("message_reference")]
         public MessageReference? MessageReference { get; }
@@ -60,7 +60,7 @@ namespace SimpleDiscord.Components
         public SocketPoll? Poll { get; }
 
         [JsonConstructor]
-        public SocketMessage(long id, long channelId, long? guildId, SocketUser author, string content, string timestamp, string editedTimestamp, bool tts, bool mentionEveryone, SocketUser[] mentions, Role[] mentionRoles, Attachment[] attachments, Embed[] embeds, SocketPartialReaction[] reactions, bool pinned, long? webhookId, int type, int? flags, SocketActionRow[] components, MessageReference? messageReference, SocketGuildThreadChannel? thread, SocketPoll? poll)
+        public SocketMessage(long id, long channelId, long? guildId, SocketUser author, string content, string timestamp, string editedTimestamp, bool tts, bool mentionEveryone, SocketUser[] mentions, Role[] mentionRoles, Attachment[] attachments, Embed[] embeds, SocketPartialReaction[] reactions, bool pinned, long? webhookId, int type, int? flags, object[] components, MessageReference? messageReference, SocketGuildThreadChannel? thread, SocketPoll? poll)
         {
             Id = id;
             ChannelId = channelId;

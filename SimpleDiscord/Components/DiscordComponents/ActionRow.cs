@@ -10,9 +10,9 @@ namespace SimpleDiscord.Components.DiscordComponents
     [SocketInstance(typeof(SocketActionRow))]
     public class ActionRow : SocketActionRow
     {
-        public new List<GenericComponent> Components { get; } = [];
+        public new List<GenericComponent> Components { get; internal set; } = [];
 
-        public ActionRow() : base([]) => Components = [];
+        public ActionRow() : base((int)ComponentType.ActionRow, []) => Components = [];
 
         public ActionRow(SocketActionRow actionRow) : base(actionRow)
         {
@@ -22,7 +22,7 @@ namespace SimpleDiscord.Components.DiscordComponents
                         Components.Add(Caster((ComponentType)Type, obj));
         }
 
-        public SocketActionRow ToSocketInstance() => new([..Components]);
+        public SocketActionRow ToSocketInstance() => new(this);
 
         public void BulkAdd(IEnumerable<GenericComponent> components)
         {

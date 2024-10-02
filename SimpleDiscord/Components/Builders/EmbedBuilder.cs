@@ -27,19 +27,19 @@ namespace SimpleDiscord.Components.Builders
             return this;
         }
 
-        public EmbedBuilder SetFooter(string text, string? iconUrl)
+        public EmbedBuilder SetFooter(string text, string? iconUrl = null)
         {
             Embed.Footer = new(text, iconUrl);
             return this;
         }
 
-        public EmbedBuilder SetThumbnail(string url, int? width, int? height)
+        public EmbedBuilder SetThumbnail(string url, int? width = null, int? height = null)
         {
             Embed.Thumbnail = new(url, null, height, width);
             return this;
         }
 
-        public EmbedBuilder SetImage(string url, int? width, int? height)
+        public EmbedBuilder SetImage(string url, int? width = null, int? height = null)
         {
             Embed.Image = new(url, null, height, width);
             return this;
@@ -55,7 +55,9 @@ namespace SimpleDiscord.Components.Builders
 
         public EmbedBuilder AddField(string name, string value, bool? inline = false)
         {
-            Embed.Fields.Append(new(name, value, inline));
+            Embed.Fields ??= [];
+
+            Embed.Fields.Add(new(name, value, inline));
             return this;
         }
 #nullable disable

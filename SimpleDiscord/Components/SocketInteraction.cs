@@ -29,6 +29,7 @@ namespace SimpleDiscord.Components
 
         public int Version { get; }
 
+        [JsonProperty("message")]
         public SocketMessage? Message { get; }
 
         public string? Locale { get; }

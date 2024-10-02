@@ -8,7 +8,7 @@ namespace SimpleDiscord.Components.DiscordComponents
     {
         public override int Type => (int)ComponentType.RoleSelect;
 
-        public SelectDefaultValue[]? DefaultValues { get; }
+        public SelectDefaultValue[]? DefaultValues { get; internal set; }
 
         [JsonConstructor]
         public RoleSelectMenu(SelectDefaultValue[]? defaultValues, string customId, string placeholder, int minValues, int maxValues, bool disabled = false) : base(customId, placeholder, minValues, maxValues, disabled)

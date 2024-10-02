@@ -1,5 +1,9 @@
-﻿using SimpleDiscord.Components.Attributes;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using SimpleDiscord.Components.Attributes;
 using SimpleDiscord.Components.DiscordComponents;
+using SimpleDiscord.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,7 +24,7 @@ namespace SimpleDiscord.Components
 
         public new List<Reaction>? Reactions { get; private set; }
 
-        public new List<ActionRow>? Components { get; }
+        public new List<JObject>? Components { get; }
 
         public new Poll? Poll { get; }
 
@@ -40,12 +44,15 @@ namespace SimpleDiscord.Components
             Guild = Channel.Guild;
             Member = Guild.GetMember(baseMessage.Author.Id);
 
+            Client ??= Guild.Client;
+
             Components = null;
             if (baseMessage.Components is not null && baseMessage.Components.Length > 0)
             {
                 Components = [];
-                foreach (SocketActionRow socketActionRow in baseMessage.Components)
-                    Components.Add(new(socketActionRow));
+                foreach (object socketActionRowObject in baseMessage.Components)
+                    if (socketActionRowObject is JObject obj)
+                        Components.Add(obj);
             }
 
             if (baseMessage.Poll is not null)
@@ -76,9 +83,9 @@ namespace SimpleDiscord.Components
 
         public Task<SocketMessage> Edit(SocketSendMessage message) => Client.RestHttp.EditMessage(this, message);
 
-        public Task<SocketMessage> Edit(string content, Embed[] embeds = null) => Edit(new(content, embeds, null, null, null, null, null));
+        public Task<SocketMessage> Edit(string content, List<Embed> embeds = null) => Edit(new(content, embeds, null, null, null, null, null));
 
-        public Task<SocketMessage> Reply(string content, Embed[] embeds = null) => Channel.SendMessage(new SocketSendMessage(content, embeds, null, new MessageReference(0, Id, ChannelId, GuildId), null, null, null));
+        public Task<SocketMessage> Reply(string content, List<Embed> embeds = null) => Channel.SendMessage(new SocketSendMessage(content, embeds, null, new MessageReference(0, Id, ChannelId, GuildId), null, null, null));
 
         public Task<bool> Delete(string reason = null) => Client.RestHttp.DeleteMessage(this, reason);
 

@@ -33,7 +33,7 @@ namespace SimpleDiscord.Components.Builders
             return this;
         }
 
-        public ButtonBuilder SetCallback(Action<object> callback)
+        public ButtonBuilder SetCallback(Action<Interaction, object> callback)
         {
             button.Callback = callback;
             return this;
@@ -42,6 +42,12 @@ namespace SimpleDiscord.Components.Builders
         public ButtonBuilder SetCustomId(string customId)
         {
             button.CustomId = customId;
+            return this;
+        }
+
+        public ButtonBuilder SetDisabled(bool disabled)
+        {
+            button.Disabled = disabled;
             return this;
         }
 

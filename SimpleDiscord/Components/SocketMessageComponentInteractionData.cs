@@ -12,12 +12,12 @@ namespace SimpleDiscord.Components
         [JsonProperty("component_type")]
         public int ComponentType { get; }
 
-        public SelectOption[]? Values { get; }
+        public string[]? Values { get; }
 
         public SocketResolvedData? Resolved { get; }
 
         [JsonConstructor]
-        public SocketMessageComponentInteractionData(string customId, int componentType, SelectOption[]? values, SocketResolvedData? resolved)
+        public SocketMessageComponentInteractionData(string customId, int componentType, string[]? values, SocketResolvedData? resolved)
         {
             CustomId = customId;
             ComponentType = componentType;

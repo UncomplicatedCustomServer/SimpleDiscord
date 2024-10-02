@@ -8,9 +8,9 @@ namespace SimpleDiscord.Components.DiscordComponents
     {
         public override int Type => (int)ComponentType.ChannelSelect;
 
-        public SelectDefaultValue[]? DefaultValues { get; }
+        public SelectDefaultValue[]? DefaultValues { get; internal set; }
 
-        public int[]? ChannelTypes { get; }
+        public int[]? ChannelTypes { get; internal set; }
 
         [JsonConstructor]
         public ChannelSelectMenu(SelectDefaultValue[]? defaultValues, int[]? channelTypes, string customId, string placeholder, int minValues, int maxValues, bool disabled = false) : base(customId, placeholder, minValues, maxValues, disabled)

@@ -47,7 +47,7 @@ namespace SimpleDiscord
         internal List<long> pollResults = [];
 
         // Just a Dictionary to hold every button callback (yeah we hate Modals and things like that) - Anyways the key is the CustomId while the values are the object data and the action
-        internal readonly Dictionary<string, KeyValuePair<object, Action<object>>> buttonCallbacks = [];
+        internal readonly Dictionary<string, KeyValuePair<object, Action<Interaction, object>>> buttonCallbacks = [];
 
         internal async Task AuthAsync(string token, GatewayIntents intents)
         {
@@ -106,7 +106,8 @@ namespace SimpleDiscord
             {
                 if (webSocketClient.State is not WebSocketState.Open)
                 {
-                    DiscordClient.Logger.Warn("Lost connection with the Discord Gateway, reconnecting in 2 seconds...");
+                    DiscordClient.Logger.Warn("Lost connection with the Discord Gateway, reconnecting in 2 seconds... [1]");
+                    await webSocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "CLOSED", CancellationToken.None);
                     await Task.Delay(2200);
                     await Connect();
                 }
@@ -119,7 +120,8 @@ namespace SimpleDiscord
                     DiscordClient.Logger.Error($"Connection to the Discord Gateway has closed!\nClose code: {result.CloseStatus} - {result.CloseStatusDescription}");
                     if (result.CloseStatus is WebSocketCloseStatus.EndpointUnavailable)
                     {
-                        DiscordClient.Logger.Warn("Lost connection with the Discord Gateway, reconnecting in 2 seconds...");
+                        DiscordClient.Logger.Warn("Lost connection with the Discord Gateway, reconnecting in 2 seconds... [2]");
+                        await webSocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "CLOSED", CancellationToken.None);
                         await Task.Delay(2200);
                         await Connect();
                     }
@@ -168,10 +170,10 @@ namespace SimpleDiscord
                     DiscordClient.EventHandler.InvokeCommand(data.Name, interactionCreate.Interaction, data);
                 else if (interactionCreate.Interaction.Type is InteractionType.MESSAGE_COMPONENT && interactionCreate.Interaction.Data is MessageComponentInteractionData data2)
                 {
-                    if (data2.ComponentType is (int)ComponentType.Button && buttonCallbacks.TryGetValue(data2.CustomId, out KeyValuePair<object, Action<object>> callback))
-                        callback.Value(callback.Key);
+                    if (data2.ComponentType is (int)ComponentType.Button && buttonCallbacks.TryGetValue(data2.CustomId, out KeyValuePair<object, Action<Interaction, object>> callback))
+                        callback.Value(interactionCreate.Interaction, callback.Key);
 
-                    DiscordClient.EventHandler.InvokeComponent(data2.CustomId, data2);
+                    DiscordClient.EventHandler.InvokeComponent(data2.CustomId, interactionCreate.Interaction);
                 }
             }
 
@@ -268,7 +270,7 @@ namespace SimpleDiscord
                     continue;
 
                 SocketApplicationCommand command = await DiscordClient.RestHttp.CreateGlobalCommand(cmd);
-                DiscordClient.Logger.Info($"Successfully registered command {command.Name}!");
+                //DiscordClient.Logger.Info($"Successfully registered command {command.Name}!");
                 globalCommands.Add(command);
                 await Task.Delay(4250);
             }

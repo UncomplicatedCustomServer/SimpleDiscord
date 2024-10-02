@@ -44,7 +44,7 @@ namespace SimpleDiscord.Networking
                 return await Send(message, expectedResponse, disableResponseCheck, true);
             }
 
-            //discordClient.Logger.Info($"Sending HTTP content:\n{await message.Content.ReadAsStringAsync()}");
+            //discordClient.Logger.Info($"Sending HTTP content to {message.Method.Method} {message.RequestUri.OriginalString}:\n{await message.Content.ReadAsStringAsync()}");
             HttpResponseMessage answer = await HttpClient.SendAsync(message);
 
             rateLimitHandler.UpdateRateLimit(message, answer.Headers); //  Async update
@@ -78,12 +78,12 @@ namespace SimpleDiscord.Networking
 
         public async Task<bool> DeleteMessage(SocketMessage message, string reason = null)
         {
-            HttpMessageBuilder builder = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.ChannelId}/messages/{message.Id}").SetJsonContent(EncodeJson(message));
+            HttpMessageBuilder builder = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.ChannelId}/messages/{message.Id}");
 
             if (reason is not null)
                 builder.SetHeader("X-Audit-Log-Reason", reason);
 
-            await Send(builder);
+            await Send(builder, HttpStatusCode.NoContent);
 
             return true;
         }
@@ -467,7 +467,6 @@ namespace SimpleDiscord.Networking
 
         public async Task<Member> ModifyGuildMember(Guild guild, Member member, object update)
         {
-            discordClient.Logger.Info(EncodeJson(update));
             HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod("PATCH").SetUri($"{Endpoint}/guilds/{guild.Id}/members/{member.User.Id}").SetContent(new StringContent(EncodeJson(update), Encoding.UTF8, "application/json")));
             return new(guild, JsonConvert.DeserializeObject<SocketMember>(await answer.Content.ReadAsStringAsync()));
         }

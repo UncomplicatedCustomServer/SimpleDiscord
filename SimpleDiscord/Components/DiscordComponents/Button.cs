@@ -20,7 +20,7 @@ namespace SimpleDiscord.Components.DiscordComponents
 
         public bool? Disabled { get; internal set; } = disabled;
 
-        internal Action<object>? Callback { get; set; } = null;
+        internal Action<Interaction, object>? Callback { get; set; } = null;
 
         internal object? Data { get; set; } = null;
 

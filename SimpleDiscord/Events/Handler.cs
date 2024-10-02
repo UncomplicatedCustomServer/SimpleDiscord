@@ -40,7 +40,6 @@ namespace SimpleDiscord.Events
                     foreach (object rawAttribute in attribs)
                     {
                         SocketEvent attribute = rawAttribute as SocketEvent;
-                        discordClient.Logger.Info($"Adding new listener:\n{JsonConvert.SerializeObject(attribute)}");
                         if (List.ContainsKey(attribute.Event))
                             List[attribute.Event].Add(new(caller, method));
                         else
@@ -63,11 +62,11 @@ namespace SimpleDiscord.Events
                     foreach (object rawAttribute3 in attribs3)
                     {
                         ComponentHandler attribute = rawAttribute3 as ComponentHandler;
-                        discordClient.Logger.Info($"Adding new listener:\n{JsonConvert.SerializeObject(attribute)}");
-                        if (ComponentHandlers.ContainsKey(attribute.ComponentId))
-                            ComponentHandlers[attribute.ComponentId].Add(new(caller, method));
+                        string componentId = $"{(attribute.FullMatch ? "!" : "*")}{attribute.ComponentId}";
+                        if (ComponentHandlers.ContainsKey(componentId))
+                            ComponentHandlers[componentId].Add(new(caller, method));
                         else
-                            ComponentHandlers.Add(attribute.ComponentId, [new(caller, method)]);
+                            ComponentHandlers.Add(componentId, [new(caller, method)]);
                     }
             }
         }
@@ -95,20 +94,36 @@ namespace SimpleDiscord.Events
                     InvokeSubCommand(name, option.Name, args as Interaction, option);
         }
 
-        internal void InvokeComponent(string name, MessageComponentInteractionData args)
+        internal void InvokeComponent(string name, Interaction args)
         {
-            if (ComponentHandlers.TryGetValue(name, out HashSet<KeyValuePair<object, MethodInfo>> list))
-                foreach (KeyValuePair<object, MethodInfo> method in list)
-                    if (method.Value.GetParameters().Length > 0)
-                    {
-                        if (method.Value.GetParameters()[0].ParameterType == args.GetType())
-                            Task.Run(() => method.Value.Invoke(method.Key, [args]));
-                        else
-                            discordClient.Logger.Error($"Failed to invoke dynamic event handler: wrong args!\nExpected {args.GetType().FullName}, got {method.Value.GetParameters()[0].ParameterType.FullName}");
-                    }
-                    else
-                        Task.Run(() => method.Value.Invoke(method.Key, []));
+            InvokePreciseComponent(name, args);
+            InvokeContainComponent(name, args);
+        }
 
+        private void InvokePreciseComponent(string name, Interaction args)
+        {
+            if (ComponentHandlers.TryGetValue($"!{name}", out HashSet<KeyValuePair<object, MethodInfo>> list))
+                InvokeComponentActor(list, args);
+        }
+
+        private void InvokeContainComponent(string name, Interaction args)
+        {
+            foreach (KeyValuePair<string, HashSet<KeyValuePair<object, MethodInfo>>> list in ComponentHandlers.Where(kvp => kvp.Key.Contains(name) && kvp.Key[0] is '*'))
+                InvokeComponentActor(list.Value, args);
+        }
+
+        private void InvokeComponentActor(HashSet<KeyValuePair<object, MethodInfo>> list, Interaction args)
+        {
+            foreach (KeyValuePair<object, MethodInfo> method in list)
+                if (method.Value.GetParameters().Length > 0)
+                {
+                    if (method.Value.GetParameters()[0].ParameterType == args.GetType())
+                        Task.Run(() => method.Value.Invoke(method.Key, [args]));
+                    else
+                        discordClient.Logger.Error($"Failed to invoke dynamic event handler: wrong args!\nExpected {args.GetType().FullName}, got {method.Value.GetParameters()[0].ParameterType.FullName}");
+                }
+                else
+                    Task.Run(() => method.Value.Invoke(method.Key, []));
         }
 
         private void InvokeBaseCommand(string name, object args)
