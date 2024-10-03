@@ -163,18 +163,25 @@ namespace SimpleDiscord
             if (ev is MessageUpdate messageUpdate && messageUpdate.CanShare)
                 messageUpdate.Message.SetClient(DiscordClient);
 
-            if (ev is InteractionCreate interactionCreate)
+            try
             {
-                interactionCreate.Interaction.SetClient(DiscordClient);
-                if (interactionCreate.Interaction.Type is InteractionType.APPLICATION_COMMAND && interactionCreate.Interaction.Data is ApplicationCommandInteractionData data)
-                    DiscordClient.EventHandler.InvokeCommand(data.Name, interactionCreate.Interaction, data);
-                else if (interactionCreate.Interaction.Type is InteractionType.MESSAGE_COMPONENT && interactionCreate.Interaction.Data is MessageComponentInteractionData data2)
+                if (ev is InteractionCreate interactionCreate)
                 {
-                    if (data2.ComponentType is (int)ComponentType.Button && buttonCallbacks.TryGetValue(data2.CustomId, out KeyValuePair<object, Action<Interaction, object>> callback))
-                        callback.Value(interactionCreate.Interaction, callback.Key);
+                    interactionCreate.Interaction.SetClient(DiscordClient);
+                    if (interactionCreate.Interaction.Type is InteractionType.APPLICATION_COMMAND && interactionCreate.Interaction.Data is ApplicationCommandInteractionData data)
+                        DiscordClient.EventHandler.InvokeCommand(data.Name, interactionCreate.Interaction, data);
+                    else if (interactionCreate.Interaction.Type is InteractionType.MESSAGE_COMPONENT && interactionCreate.Interaction.Data is MessageComponentInteractionData data2)
+                    {
+                        if (data2.ComponentType is (int)ComponentType.Button && buttonCallbacks.TryGetValue(data2.CustomId, out KeyValuePair<object, Action<Interaction, object>> callback))
+                            callback.Value(interactionCreate.Interaction, callback.Key);
 
-                    DiscordClient.EventHandler.InvokeComponent(data2.CustomId, interactionCreate.Interaction);
+                        DiscordClient.EventHandler.InvokeComponent(data2.CustomId, interactionCreate.Interaction);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                DiscordClient.Logger.Error(ex.ToString());
             }
 
             if (ev is Heartbeat)

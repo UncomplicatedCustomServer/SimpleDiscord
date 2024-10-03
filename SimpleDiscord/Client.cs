@@ -104,6 +104,10 @@ namespace SimpleDiscord
         public Guild? GetGuild(long id) => Guild.List.FirstOrDefault(guild => guild.Id == id);
 #nullable disable
 
+        public Task SendWebhook(long id, string token, SocketSendMessage message, long? threadId = null) => RestHttp.SendWebhook(id, token, message, threadId);
+
+        public Task SendWebhook(string url, SocketSendMessage message) => RestHttp.SendWebhook(url, message);
+
         public Task<HttpResponseMessage> ApiRequest(HttpRequestMessage message, HttpStatusCode expectedResult = HttpStatusCode.OK, bool disableResponseCheck = false) => RestHttp.Send(message, expectedResult, disableResponseCheck);
 
         internal Guild GetSafeGuild(long id) => Guild.List.FirstOrDefault(safeguild => safeguild.Id == id);

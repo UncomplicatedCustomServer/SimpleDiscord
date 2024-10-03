@@ -89,7 +89,7 @@ namespace SimpleDiscord.Events
         internal void InvokeCommand(string name, object args, ApplicationCommandInteractionData data = null)
         {
             InvokeBaseCommand(name, args);
-            if (data is not null)
+            if (data is not null && data.Options is not null)
                 foreach (ReplyCommandOption option in data.Options.Where(o => o.Type is (int)CommandOptionType.SUB_COMMAND or (int)CommandOptionType.SUB_COMMAND_GROUP))
                     InvokeSubCommand(name, option.Name, args as Interaction, option);
         }

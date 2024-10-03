@@ -4,6 +4,7 @@ using SimpleDiscord.Components;
 using SimpleDiscord.Components.Builders;
 using SimpleDiscord.Components.DiscordComponents;
 using SimpleDiscord.Enums;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -469,6 +470,21 @@ namespace SimpleDiscord.Networking
         {
             HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod("PATCH").SetUri($"{Endpoint}/guilds/{guild.Id}/members/{member.User.Id}").SetContent(new StringContent(EncodeJson(update), Encoding.UTF8, "application/json")));
             return new(guild, JsonConvert.DeserializeObject<SocketMember>(await answer.Content.ReadAsStringAsync()));
+        }
+
+        public async Task SendWebhook(long id, string token, SocketSendMessage message, long? threadId = null)
+        {
+            string uri = $"{Endpoint}/webhooks/{id}/{token}";
+
+            if (threadId is not null)
+                uri += $"?thread_id={threadId}";
+
+            await SendWebhook(uri, message);
+        }
+
+        public async Task SendWebhook(string url, SocketSendMessage message)
+        {
+            await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri(url).SetContent(new StringContent(EncodeJson(message), Encoding.UTF8, "application/json")));
         }
 
         internal static T Sync<T>(Task<T> task)
