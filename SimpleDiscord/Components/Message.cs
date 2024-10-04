@@ -128,5 +128,7 @@ namespace SimpleDiscord.Components
 
             return [.. chunks];
         }
+
+        public override bool Equals(object obj) => obj is Message message ? Id == message.Id : base.Equals(obj);
     }
 }

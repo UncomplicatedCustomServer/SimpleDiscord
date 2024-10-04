@@ -80,5 +80,7 @@ namespace SimpleDiscord.Components
         }
 
         public override string ToString() => $"<#{Id}>";
+
+        public override bool Equals(object obj) => obj is GuildChannel channel ? Id == channel.Id : base.Equals(obj);
     }
 }

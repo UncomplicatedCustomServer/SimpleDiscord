@@ -253,5 +253,7 @@ namespace SimpleDiscord.Components
         public Task<GuildThreadChannel[]> GetThreads() => Client.RestHttp.GetGuildThreads(this);
 
         public Task<Member> FetchMember(long id) => Client.RestHttp.GetGuildMember(this, id);
+
+        public override bool Equals(object obj) => obj is Guild guild ? Id == guild.Id : base.Equals(obj);
     }
 }
