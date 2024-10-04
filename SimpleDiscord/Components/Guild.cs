@@ -255,5 +255,7 @@ namespace SimpleDiscord.Components
         public Task<Member> FetchMember(long id) => Client.RestHttp.GetGuildMember(this, id);
 
         public override bool Equals(object obj) => obj is Guild guild ? Id == guild.Id : base.Equals(obj);
+
+        public override int GetHashCode() => base.GetHashCode();
     }
 }

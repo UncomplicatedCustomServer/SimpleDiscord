@@ -28,5 +28,7 @@
         public override string ToString() => $"<@&{Id}>";
 
         public override bool Equals(object obj) => obj is Role role ? Id == role.Id : base.Equals(obj);
+
+        public override int GetHashCode() => base.GetHashCode();
     }
 }
