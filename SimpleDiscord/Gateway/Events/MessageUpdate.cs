@@ -2,6 +2,7 @@
 using SimpleDiscord.Components;
 using SimpleDiscord.Gateway.Events.Attributes;
 using SimpleDiscord.Gateway.Messages;
+using System;
 using System.Linq;
 
 namespace SimpleDiscord.Gateway.Events

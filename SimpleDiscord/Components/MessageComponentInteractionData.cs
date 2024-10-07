@@ -11,11 +11,11 @@ namespace SimpleDiscord.Components
 
         public int ComponentType { get; }
 
-        public SelectOption[]? Values { get; }
+        public string[]? Values { get; }
 
         public ResolvedData? Resolved { get; }
 
-        public MessageComponentInteractionData(string customId, int componentType, SelectOption[]? values, ResolvedData? resolved)
+        public MessageComponentInteractionData(string customId, int componentType, string[]? values, ResolvedData? resolved)
         {
             CustomId = customId;
             ComponentType = componentType;

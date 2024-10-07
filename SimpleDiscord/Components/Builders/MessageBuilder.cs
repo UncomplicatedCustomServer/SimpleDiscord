@@ -1,5 +1,6 @@
 ﻿using SimpleDiscord.Components.DiscordComponents;
 using SimpleDiscord.Enums;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SimpleDiscord.Components.Builders
@@ -19,8 +20,14 @@ namespace SimpleDiscord.Components.Builders
             if (Message.Embeds is null)
                 Message.Embeds = [embed];
             else
-                Message.Embeds.Append(embed);
+                Message.Embeds.Add(embed);
 
+            return this;
+        }
+
+        public MessageBuilder SetEmbeds(List<Embed> embeds)
+        {
+            Message.Embeds = embeds;
             return this;
         }
 
@@ -29,8 +36,30 @@ namespace SimpleDiscord.Components.Builders
             if (Message.Components is null)
                 Message.Components = [actionRow];
             else
-                Message.Components.Append(actionRow);
+                Message.Components.Add(actionRow);
 
+            return this;
+        }
+
+        public MessageBuilder SetComponents(List<SocketActionRow> actionRows)
+        {
+            Message.Components = actionRows;
+            return this;
+        }
+
+        public MessageBuilder AddAttachment(Attachment attachment)
+        {
+            if (Message.Attachments is null)
+                Message.Attachments = [attachment];
+            else
+                Message.Attachments.Add(attachment);
+
+            return this;
+        }
+
+        public MessageBuilder SetAttachments(List<Attachment> attachments)
+        {
+            Message.Attachments = attachments;
             return this;
         }
 

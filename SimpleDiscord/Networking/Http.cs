@@ -4,8 +4,11 @@ using SimpleDiscord.Components;
 using SimpleDiscord.Components.Builders;
 using SimpleDiscord.Components.DiscordComponents;
 using SimpleDiscord.Enums;
+using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SimpleDiscord.Networking
@@ -42,6 +45,7 @@ namespace SimpleDiscord.Networking
                 return await Send(message, expectedResponse, disableResponseCheck, true);
             }
 
+            //discordClient.Logger.Info($"Sending HTTP content to {message.Method.Method} {message.RequestUri.OriginalString}:\n{await message.Content.ReadAsStringAsync()}");
             HttpResponseMessage answer = await HttpClient.SendAsync(message);
 
             rateLimitHandler.UpdateRateLimit(message, answer.Headers); //  Async update
@@ -54,6 +58,13 @@ namespace SimpleDiscord.Networking
 
         public async Task<SocketMessage> SendMessage(GuildTextChannel channel, SocketSendMessage message)
         {
+            if (message.Components is not null)
+                foreach (SocketActionRow actionRow in message.Components)
+                    foreach (object button in actionRow.Components)
+                        if (button is not null && button is Button buttonComponent)
+                            if (buttonComponent.Callback is not null)
+                                discordClient._discordClient.buttonCallbacks.Add(buttonComponent.CustomId, new(buttonComponent.Data, buttonComponent.Callback));
+
             HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/channels/{channel.Id}/messages").SetJsonContent(EncodeJson(message)));
 
             return JsonConvert.DeserializeObject<SocketMessage>(await answer.Content.ReadAsStringAsync());
@@ -68,12 +79,12 @@ namespace SimpleDiscord.Networking
 
         public async Task<bool> DeleteMessage(SocketMessage message, string reason = null)
         {
-            HttpMessageBuilder builder = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.ChannelId}/messages/{message.Id}").SetJsonContent(EncodeJson(message));
+            HttpMessageBuilder builder = HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.ChannelId}/messages/{message.Id}");
 
             if (reason is not null)
                 builder.SetHeader("X-Audit-Log-Reason", reason);
 
-            await Send(builder);
+            await Send(builder, HttpStatusCode.NoContent);
 
             return true;
         }
@@ -103,7 +114,7 @@ namespace SimpleDiscord.Networking
 
         public async Task<InteractionResponse> EditInteractionReply(Interaction interaction, InteractionResponse response)
         {
-            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod("PATCH").SetUri($"{Endpoint}/webhooks/{interaction.ApplicationId}/{interaction.Token}/messages/@original").SetJsonContent(EncodeJson(response.ToSocketInstance())));
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod("PATCH").SetUri($"{Endpoint}/webhooks/{interaction.ApplicationId}/{interaction.Token}/messages/@original").SetJsonContent(EncodeJson(response.ToSocketInstance().Data)));
 
             SocketInteractionResponse socketInteraction = JsonConvert.DeserializeObject<SocketInteractionResponse>(await answer.Content.ReadAsStringAsync());
             interaction.SafeUpdateResponse(socketInteraction);
@@ -266,7 +277,7 @@ namespace SimpleDiscord.Networking
             await Send(message, HttpStatusCode.NoContent);
         }
 
-        public async Task<SocketGuildChannel> GuildCreateChannel(Guild guild, SocketSendGuildChannel channel, string reason = null)
+        public async Task<GuildChannel> GuildCreateChannel(Guild guild, SocketSendGuildChannel channel, string reason = null)
         {
             HttpMessageBuilder message = HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/guilds/{guild.Id}/channels").SetJsonContent(EncodeJson(channel));
 
@@ -274,10 +285,10 @@ namespace SimpleDiscord.Networking
                 message.SetHeader("X-Audit-Log-Reason", reason);
 
             HttpResponseMessage answer = await Send(message);
-            return JsonConvert.DeserializeObject<SocketGuildChannel>(await answer.Content.ReadAsStringAsync());
+            return new(JsonConvert.DeserializeObject<SocketGuildChannel>(await answer.Content.ReadAsStringAsync()), false);
         }
 
-        public async Task<SocketGuildChannel> ChannelEdit(GuildChannel channel, SocketSendGuildChannel newChannel, string reason = null)
+        public async Task<GuildChannel> ChannelEdit(GuildChannel channel, SocketSendGuildChannel newChannel, string reason = null)
         {
             if ((int)channel.Type != newChannel.Type)
                 discordClient.ErrorHub.Throw("The two given channels are not the same type!\nYeah ik that you should be able to convert announcement channels to text ones and vice-versa but nuh uh", true);
@@ -288,7 +299,7 @@ namespace SimpleDiscord.Networking
                 message.SetHeader("X-Audit-Log-Reason", reason);
 
             HttpResponseMessage answer = await Send(message);
-            return JsonConvert.DeserializeObject<SocketGuildChannel>(await answer.Content.ReadAsStringAsync());
+            return new(JsonConvert.DeserializeObject<SocketGuildChannel>(await answer.Content.ReadAsStringAsync()), false);
         }
 
         public async Task ChannelDelete(GuildChannel channel, string reason = null)
@@ -321,7 +332,7 @@ namespace SimpleDiscord.Networking
             await Send(request, HttpStatusCode.NoContent);
         }
 
-        public async Task<SocketGuildThreadChannel> StartThreadFromMessage(Message message, SocketSendPublicThread thread ,string reason = null)
+        public async Task<GuildThreadChannel> StartThreadFromMessage(Message message, SocketSendPublicThread thread ,string reason = null)
         {
             HttpMessageBuilder request = HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/threads").SetJsonContent(EncodeJson(thread));
 
@@ -330,12 +341,10 @@ namespace SimpleDiscord.Networking
 
             HttpResponseMessage answer = await Send(request, HttpStatusCode.Created, true);
 
-            string answ = await answer.Content.ReadAsStringAsync();
-
-            return JsonConvert.DeserializeObject<SocketGuildThreadChannel>(await answer.Content.ReadAsStringAsync());
+            return new(JsonConvert.DeserializeObject<SocketGuildThreadChannel>(await answer.Content.ReadAsStringAsync()), false);
         }
 
-        public async Task<SocketGuildThreadChannel> StartThread(GuildTextChannel channel, SocketSendPublicThread thread, string reason = null)
+        public async Task<GuildThreadChannel> StartThread(GuildTextChannel channel, SocketSendPublicThread thread, string reason = null)
         {
             HttpMessageBuilder request = HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/channels/{channel.Id}/threads").SetJsonContent(EncodeJson(thread));
 
@@ -344,7 +353,7 @@ namespace SimpleDiscord.Networking
 
             HttpResponseMessage answer = await Send(request, HttpStatusCode.Created);
 
-            return JsonConvert.DeserializeObject<SocketGuildThreadChannel>(await answer.Content.ReadAsStringAsync());
+            return new(JsonConvert.DeserializeObject<SocketGuildThreadChannel>(await answer.Content.ReadAsStringAsync()), false);
         }
 
         public async Task JoinThread(GuildThreadChannel thread) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Put).SetUri($"{Endpoint}/channels/{thread.Id}/thread-members/@me"), HttpStatusCode.NoContent);
@@ -371,7 +380,7 @@ namespace SimpleDiscord.Networking
 
         public async Task DeleteAllReactions(Message message) => await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Delete).SetUri($"{Endpoint}/channels/{message.Channel.Id}/messages/{message.Id}/reactions"), HttpStatusCode.NoContent);
 
-        public async Task<SocketMessage[]> GetMessages(GuildTextChannel channel, int? limit = 50, long? around = null, long? before = null, long? after = null)
+        public async Task<Message[]> GetMessages(GuildTextChannel channel, int? limit = 50, long? around = null, long? before = null, long? after = null)
         {
             string q = string.Empty;
 
@@ -386,14 +395,19 @@ namespace SimpleDiscord.Networking
 
             HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Get).SetUri($"{Endpoint}/channels/{channel.Id}/messages?limit={limit}{q}"));
 
-            return JsonConvert.DeserializeObject<SocketMessage[]>(await answer.Content.ReadAsStringAsync());
+            List<Message> messages = [];
+
+            foreach (SocketMessage message in JsonConvert.DeserializeObject<SocketMessage[]>(await answer.Content.ReadAsStringAsync()))
+                messages.Add(new(message, channel));
+
+            return [.. messages];
         }
-        public async Task<SocketMessage> EndPoll(Poll poll)
+        public async Task<Message> EndPoll(Poll poll)
         {
             HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri($"{Endpoint}/channels/{poll.Message.Channel.Id}/polls/{poll.Message.Id}/expire"));
             SocketMessage message = JsonConvert.DeserializeObject<SocketMessage>(await answer.Content.ReadAsStringAsync());
             discordClient._discordClient.pollResults.Add(poll.Message.Id);
-            return message;
+            return new(message);
         }
 
         public async Task<Message> GetMessage(GuildTextChannel channel, long id)
@@ -403,7 +417,81 @@ namespace SimpleDiscord.Networking
             return new(message);
         }
 
-        public async void Sync(Task task) => await task;
+        public async Task<GuildThreadChannel[]> GetGuildThreads(Guild guild)
+        {
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Get).SetUri($"{Endpoint}/guilds/{guild.Id}/threads/active"));
+            SocketThreadList message = JsonConvert.DeserializeObject<SocketThreadList>(await answer.Content.ReadAsStringAsync());
+
+            List<GuildThreadChannel> threads = [];
+
+            foreach (SocketGuildThreadChannel thread in message.Threads)
+                threads.Add(new(thread));
+
+            return [..threads];
+        }
+
+        public async Task<GuildThreadChannel[]> GetChannelArchivedThreads(GuildTextChannel channel, bool @public = true, int? limit = null)
+        {
+            string uri = $"{Endpoint}/channels/{channel.Id}/threads/archived/{(@public ? "public" : "private")}";
+
+            if (limit is not null)
+                uri += $"?limit={limit}";
+
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Get).SetUri(uri));
+            SocketThreadList message = JsonConvert.DeserializeObject<SocketThreadList>(await answer.Content.ReadAsStringAsync());
+
+            List<GuildThreadChannel> threads = [];
+
+            foreach (SocketGuildThreadChannel thread in message.Threads)
+                threads.Add(new(thread));
+
+            return [.. threads];
+        }
+
+        public async Task<VoiceState> GetMemberVoiceState(Member member)
+        {
+            string uri = $"{Endpoint}/guilds/{member.Guild.Id}/voice-states/";
+            if (member.User.Id == discordClient.CurrentUser.Id)
+                uri += "@me";
+            else
+                uri += member.User.Id.ToString();
+
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Get).SetUri(uri));
+            return new(JsonConvert.DeserializeObject<SocketVoiceState>(await answer.Content.ReadAsStringAsync()));
+        }
+
+        public async Task<Member> GetGuildMember(Guild guild, long userId)
+        {
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Get).SetUri($"{Endpoint}/guilds/{guild.Id}/members/{userId}"));
+            return new(guild, JsonConvert.DeserializeObject<SocketMember>(await answer.Content.ReadAsStringAsync()));
+        }
+
+        public async Task<Member> ModifyGuildMember(Guild guild, Member member, object update)
+        {
+            HttpResponseMessage answer = await Send(HttpMessageBuilder.New().SetMethod("PATCH").SetUri($"{Endpoint}/guilds/{guild.Id}/members/{member.User.Id}").SetContent(new StringContent(EncodeJson(update), Encoding.UTF8, "application/json")));
+            return new(guild, JsonConvert.DeserializeObject<SocketMember>(await answer.Content.ReadAsStringAsync()));
+        }
+
+        public async Task SendWebhook(long id, string token, SocketSendMessage message, long? threadId = null)
+        {
+            string uri = $"{Endpoint}/webhooks/{id}/{token}";
+
+            if (threadId is not null)
+                uri += $"?thread_id={threadId}";
+
+            await SendWebhook(uri, message);
+        }
+
+        public async Task SendWebhook(string url, SocketSendMessage message)
+        {
+            await Send(HttpMessageBuilder.New().SetMethod(HttpMethod.Post).SetUri(url).SetContent(new StringContent(EncodeJson(message), Encoding.UTF8, "application/json")));
+        }
+
+        internal static T Sync<T>(Task<T> task)
+        {
+            task.Wait();
+            return task.Result;
+        }
 
         private string EncodeJson(object data)
         {

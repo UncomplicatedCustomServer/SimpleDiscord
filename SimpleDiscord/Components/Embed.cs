@@ -1,7 +1,9 @@
-﻿namespace SimpleDiscord.Components
+﻿using System.Collections.Generic;
+
+namespace SimpleDiscord.Components
 {
 #nullable enable
-    public class Embed(string? title, string? type, string? description, string? url, string? timestamp, int? color, EmbedFooter? footer, EmbedResource? image, EmbedResource? thumbnail, EmbedResource? video, EmbedAuthor? author, EmbedField[]? fields)
+    public class Embed(string? title, string? type, string? description, string? url, string? timestamp, int? color, EmbedFooter? footer, EmbedResource? image, EmbedResource? thumbnail, EmbedResource? video, EmbedAuthor? author, List<EmbedField>? fields)
     {
         public string? Title { get; internal set; } = title ?? string.Empty;
 
@@ -25,10 +27,10 @@
 
         public EmbedAuthor? Author { get; internal set; } = author;
 
-        public EmbedField[]? Fields { get; internal set; } = fields;
+        public List<EmbedField>? Fields { get; internal set; } = fields;
 
         internal Embed() : this(null, null, null, null, null, null, null, null, null, null, null, null) { }
 
-        public static Embed Build(string title, string description, string? url = null, int? color = null, EmbedField[]? fields = null) => new(title, "rich", description, url, null, color, null, null, null, null, null, fields);
+        public static Embed Build(string title, string description, string? url = null, int? color = null, List<EmbedField>? fields = null) => new(title, "rich", description, url, null, color, null, null, null, null, null, fields);
     }
 }

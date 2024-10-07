@@ -56,6 +56,7 @@
     <Compile Include="Components\Builders\ActionRowBuilder.cs" />
     <Compile Include="Components\Builders\ActivityBuilder.cs" />
     <Compile Include="Components\Builders\ApplicationCommandBuilder.cs" />
+    <Compile Include="Components\Builders\ButtonBuilder.cs" />
     <Compile Include="Components\Builders\CommandOptionBuilder.cs" />
     <Compile Include="Components\Builders\EmbedBuilder.cs" />
     <Compile Include="Components\Builders\HttpMessageBuilder.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="Components\ClientChild.cs" />
     <Compile Include="Components\CommandOptionChoice.cs" />
     <Compile Include="Components\DisposableElement.cs" />
+    <Compile Include="Components\Helpers\MemberEditor.cs" />
     <Compile Include="Components\Member.cs" />
     <Compile Include="Components\PartialApplication.cs" />
     <Compile Include="Components\Poll.cs" />
@@ -148,11 +150,14 @@
     <Compile Include="Components\SocketSendRole.cs" />
     <Compile Include="Components\SocketSendGuildTextChannel.cs" />
     <Compile Include="Components\SocketStageInstance.cs" />
+    <Compile Include="Components\SocketThreadList.cs" />
     <Compile Include="Components\SocketUser.cs" />
+    <Compile Include="Components\SocketVoiceState.cs" />
     <Compile Include="Components\ThreadMember.cs" />
     <Compile Include="Components\ThreadMetadata.cs" />
     <Compile Include="Components\UnavailableGuild.cs" />
     <Compile Include="Components\UserActivity.cs" />
+    <Compile Include="Components\VoiceState.cs" />
     <Compile Include="Discord.cs" />
     <Compile Include="Enums\ActivityType.cs" />
     <Compile Include="Enums\ApplicationCommandOptionType.cs" />
@@ -173,9 +178,11 @@
     <Compile Include="Enums\ReactionType.cs" />
     <Compile Include="Enums\RegisterCommandType.cs" />
     <Compile Include="Enums\RoleCreate.cs" />
+    <Compile Include="Enums\SelectMenuType.cs" />
     <Compile Include="Enums\TextInputStyle.cs" />
     <Compile Include="Enums\ThreadType.cs" />
     <Compile Include="Events\Attributes\CommandHandler.cs" />
+    <Compile Include="Events\Attributes\ComponentHandler.cs" />
     <Compile Include="Events\Attributes\SocketEvent.cs" />
     <Compile Include="Events\Handler.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
@@ -249,6 +256,7 @@
     <Compile Include="Gateway\Events\ThreadMembersUpdate.cs" />
     <Compile Include="Gateway\Events\ThreadUpdate.cs" />
     <Compile Include="Gateway\Events\UserUpdate.cs" />
+    <Compile Include="Gateway\Events\VoiceStateUpdate.cs" />
     <Compile Include="Gateway\GatewatEventHandler.cs" />
     <Compile Include="Gateway\Gateway.cs" />
     <Compile Include="Gateway\GatewayMessage.cs" />
@@ -259,7 +267,7 @@
     <Compile Include="Logger\Log.cs" />
     <Compile Include="Logger\LogEntry.cs" />
     <Compile Include="Logger\LogLevel.cs" />
-    <Compile Include="Enums\MessageComponentInteractionData.cs" />
+    <Compile Include="Components\MessageComponentInteractionData.cs" />
     <Compile Include="Networking\Endpoints.cs" />
     <Compile Include="Networking\Http.cs" />
     <Compile Include="Networking\RateLimit.cs" />

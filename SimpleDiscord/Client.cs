@@ -20,9 +20,11 @@ namespace SimpleDiscord
 
         public readonly Handler EventHandler;
 
-        public static Version Version { get; } = new(0, 9, 0);
+        public static Version Version { get; } = new(1, 0, 0);
 
         public SocketUser Bot { get; internal set; }
+
+        public SocketUser CurrentUser => Bot;
 
         public PartialApplication Application { get; internal set; }
 
@@ -68,7 +70,7 @@ namespace SimpleDiscord
             Logger = new(Config);
             ErrorHub = new(this);
             GatewatEventHandler = new();
-            EventHandler = new();
+            EventHandler = new(this);
             _discordClient = new(this);
             RestHttp = new(_discordClient.httpClient, this);
         }
@@ -101,6 +103,10 @@ namespace SimpleDiscord
 #nullable enable
         public Guild? GetGuild(long id) => Guild.List.FirstOrDefault(guild => guild.Id == id);
 #nullable disable
+
+        public Task SendWebhook(long id, string token, SocketSendMessage message, long? threadId = null) => RestHttp.SendWebhook(id, token, message, threadId);
+
+        public Task SendWebhook(string url, SocketSendMessage message) => RestHttp.SendWebhook(url, message);
 
         public Task<HttpResponseMessage> ApiRequest(HttpRequestMessage message, HttpStatusCode expectedResult = HttpStatusCode.OK, bool disableResponseCheck = false) => RestHttp.Send(message, expectedResult, disableResponseCheck);
 

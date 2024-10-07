@@ -7,7 +7,7 @@ namespace SimpleDiscord.Components.DiscordComponents
     {
         public override int Type => (int)ComponentType.StringSelect;
 
-        public SelectOption[] Options { get; }
+        public SelectOption[] Options { get; internal set; }
 
         [JsonConstructor]
         public TextSelectMenu(SelectOption[] options, string customId, string placeholder, int minValues, int maxValues, bool disabled = false) : base(customId, placeholder, minValues, maxValues, disabled)

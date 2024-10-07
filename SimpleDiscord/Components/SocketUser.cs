@@ -39,5 +39,7 @@ namespace SimpleDiscord.Components
             else
                 List.Add(this);
         }
+
+        public override string ToString() => $"<@{Id}>";
     }
 }

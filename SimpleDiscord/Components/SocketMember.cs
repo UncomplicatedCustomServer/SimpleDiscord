@@ -64,5 +64,7 @@ namespace SimpleDiscord.Components
             Permissions = self.Permissions;
             CommunicationDisabledUntil = self.CommunicationDisabledUntil;
         }
+
+        public override string ToString() => $"<@{User?.Id}>";
     }
 }
