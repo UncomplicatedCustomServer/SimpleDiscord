@@ -43,8 +43,6 @@ namespace SimpleDiscord.Components
             Message = null;
             if (socketInteraction.Message is not null)
                 Message = new(socketInteraction.Message, Channel as GuildTextChannel);
-            else
-                Guild.Client.Logger.Warn("SocketMessage seems to be null!");
 
             Data = null;
             if (socketInteraction.Data is not null && socketInteraction.Data is JObject obj)

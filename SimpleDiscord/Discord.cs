@@ -88,9 +88,11 @@ namespace SimpleDiscord
             if (endpoint == null || endpoint == string.Empty)
                 DiscordClient.ErrorHub.Throw($"Cannot connect to the given endpoint as it seems to be invalid!\nEndpoint: {endpoint}");
 
+            DiscordClient.Logger.Silent("Connecting to the Discord Gateway...");
+
             await webSocketClient.ConnectAsync(new(endpoint), CancellationToken.None);
 
-            DiscordClient.Logger.Silent($"Successfully enstabilished connection with the Discord Gateway, authenticating...");
+            DiscordClient.Logger.Silent("Successfully enstabilished connection with the Discord Gateway, authenticating...");
 
             connectionStatus = ConnectionStatus.Connecting;
 
@@ -108,7 +110,8 @@ namespace SimpleDiscord
                 {
                     DiscordClient.Logger.Warn("Lost connection with the Discord Gateway, reconnecting in 2 seconds... [1]");
                     await webSocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "CLOSED", CancellationToken.None);
-                    await Task.Delay(2200);
+                    webSocketClient.Dispose();
+                    await Task.Delay(1500);
                     await Connect();
                 }
                 byte[] buffer = new byte[2048];
@@ -122,7 +125,8 @@ namespace SimpleDiscord
                     {
                         DiscordClient.Logger.Warn("Lost connection with the Discord Gateway, reconnecting in 2 seconds... [2]");
                         await webSocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "CLOSED", CancellationToken.None);
-                        await Task.Delay(2200);
+                        webSocketClient.Dispose();
+                        await Task.Delay(1500);
                         await Connect();
                     }
                     return;
