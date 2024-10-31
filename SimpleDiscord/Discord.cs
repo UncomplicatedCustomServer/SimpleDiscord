@@ -112,7 +112,7 @@ namespace SimpleDiscord
                     await webSocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "CLOSED", CancellationToken.None);
                     webSocketClient.Dispose();
                     await Task.Delay(1500);
-                    await Connect();
+                    Task.Run(Connect);
                 }
                 byte[] buffer = new byte[2048];
                 WebSocketReceiveResult result = await webSocketClient.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -127,7 +127,7 @@ namespace SimpleDiscord
                         await webSocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "CLOSED", CancellationToken.None);
                         webSocketClient.Dispose();
                         await Task.Delay(1500);
-                        await Connect();
+                        Task.Run(Connect);
                     }
                     return;
                 }
