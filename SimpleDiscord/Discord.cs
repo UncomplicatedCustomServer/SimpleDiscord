@@ -106,6 +106,7 @@ namespace SimpleDiscord
                 Disconnect();
                 webSocketClient.Dispose();
                 await Task.Delay(1500);
+                webSocketClient = new();
                 await RetriveEndpoint();
                 await Connect();
             }
