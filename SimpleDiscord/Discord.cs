@@ -99,6 +99,22 @@ namespace SimpleDiscord
             MessageReceiver();
         }
 
+        private async void Reconnect()
+        {
+            try
+            {
+                Disconnect();
+                webSocketClient.Dispose();
+                await Task.Delay(1500);
+                await RetriveEndpoint();
+                await Connect();
+            }
+            catch (Exception e)
+            {
+                DiscordClient.ErrorHub.Throw(e.ToString());
+            }
+        }
+
         internal async void Disconnect() => await webSocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
 
         internal async void MessageReceiver()
@@ -109,10 +125,7 @@ namespace SimpleDiscord
                 if (webSocketClient.State is not WebSocketState.Open)
                 {
                     DiscordClient.Logger.Warn("Lost connection with the Discord Gateway, reconnecting in 2 seconds... [1]");
-                    await webSocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "CLOSED", CancellationToken.None);
-                    webSocketClient.Dispose();
-                    await Task.Delay(1500);
-                    Task.Run(Connect);
+                    Reconnect();
                 }
                 byte[] buffer = new byte[2048];
                 WebSocketReceiveResult result = await webSocketClient.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -124,10 +137,7 @@ namespace SimpleDiscord
                     if (result.CloseStatus is WebSocketCloseStatus.EndpointUnavailable)
                     {
                         DiscordClient.Logger.Warn("Lost connection with the Discord Gateway, reconnecting in 2 seconds... [2]");
-                        await webSocketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, "CLOSED", CancellationToken.None);
-                        webSocketClient.Dispose();
-                        await Task.Delay(1500);
-                        Task.Run(Connect);
+                        Reconnect();
                     }
                     return;
                 }

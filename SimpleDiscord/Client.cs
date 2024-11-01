@@ -72,6 +72,7 @@ namespace SimpleDiscord
             GatewatEventHandler = new();
             EventHandler = new(this);
             _discordClient = new(this);
+            _discordClient.httpClient.Timeout = TimeSpan.FromSeconds(25);
             RestHttp = new(_discordClient.httpClient, this);
         }
 
