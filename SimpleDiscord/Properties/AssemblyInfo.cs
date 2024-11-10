@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 // set di attributi. Modificare i valori di questi attributi per modificare le informazioni
 // associate a un assembly.
 [assembly: AssemblyTitle("SimpleDiscord")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Lightweight - fast - easy-to-use - mono-friendly library to host a Discord bot inside a gameserver like SCP:SL")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("UncomplicatedCustomServer Collective")]
 [assembly: AssemblyProduct("SimpleDiscord")]
 [assembly: AssemblyCopyright("Copyright ©  2024")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyTrademark("UCSC")]
 [assembly: AssemblyCulture("")]
 
 // Se si imposta ComVisible su false, i tipi in questo assembly non saranno visibili
