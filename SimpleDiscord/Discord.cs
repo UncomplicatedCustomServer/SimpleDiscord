@@ -105,9 +105,9 @@ namespace SimpleDiscord
             {
                 Disconnect();
                 webSocketClient.Dispose();
-                await Task.Delay(1500);
+                await Task.Delay(1000);
                 webSocketClient = new();
-                await RetriveEndpoint();
+                //await RetriveEndpoint();
                 await Connect();
             }
             catch (Exception e)
@@ -126,7 +126,8 @@ namespace SimpleDiscord
                 if (webSocketClient.State is not WebSocketState.Open)
                 {
                     DiscordClient.Logger.Warn("Lost connection with the Discord Gateway, reconnecting in 2 seconds... [1]");
-                    Reconnect();
+                    Task.Run(Reconnect);
+                    return;
                 }
                 byte[] buffer = new byte[2048];
                 WebSocketReceiveResult result = await webSocketClient.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -138,7 +139,7 @@ namespace SimpleDiscord
                     if (result.CloseStatus is WebSocketCloseStatus.EndpointUnavailable)
                     {
                         DiscordClient.Logger.Warn("Lost connection with the Discord Gateway, reconnecting in 2 seconds... [2]");
-                        Reconnect();
+                        Task.Run(Reconnect);
                     }
                     return;
                 }
