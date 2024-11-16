@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>SimpleDiscord</id>
+    <title>SimpleDiscord</title>
+    <icon>logo.png</icon>
+    <version>1.0.0</version>
+    <authors>FoxWorn3365 and UncomplicatedCustomServer Collective</authors>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <license type="expression">AGPL-3.0-or-later</license>
+    <!-- <icon>icon.png</icon> -->
+    <projectUrl>https://ucserver.it/?r=ng.sd</projectUrl>
+    <readme>nuget-README.md</readme>
+    <description>Lightweight fast easy-to-use mono-friendly library to host a Discord bot inside a gameserver like SCP:SL</description>
+    <releaseNotes>Added the support to forums, voice channel and threads!</releaseNotes>
+    <copyright>2024 FoxWorn3365 and UCSC</copyright>
+    <tags>Discord Mono DiscordBot SimpleDiscord UCR UCI UDI UCS UCSC UncomplicatedCustomServer UncomplicatedDiscordIntegration</tags>
+    <dependencies>
+      <dependency id="Newtonsoft.Json" version="13.0.3" />
+    </dependencies>
+    <repository type="git" url="https://github.com/UncomplicatedCustomServer/SimpleDiscord.git" branch="main" commit="770473b5ccae00a334da8b23c04609f21e64528d" />
+  </metadata>
+  <files>
+    <file src="./logo.png" />
+    <file src="./nuget-README.md" />
+  </files>
+</package>

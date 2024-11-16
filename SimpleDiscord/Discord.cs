@@ -85,6 +85,8 @@ namespace SimpleDiscord
 
         internal async Task Connect()
         {
+            DiscordClient.Logger.Silent($"Connecting to '{endpoint}'...");
+
             if (endpoint == null || endpoint == string.Empty)
                 DiscordClient.ErrorHub.Throw($"Cannot connect to the given endpoint as it seems to be invalid!\nEndpoint: {endpoint}");
 
